@@ -1,0 +1,9 @@
+*.o
+*.a
+*.so*
+.buildflags
+.cproject
+.objdeps.mk
+.project
+*.kdev4
+
