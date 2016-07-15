@@ -18,6 +18,10 @@
 
 # build options
 DEBUG=1
+PCAP=0
+WEXT=0
+LIBNL=3.0
+OSX=0
 
 NAME=libuwifi
 OBJS=	util/average.o				\
@@ -29,9 +33,43 @@ OBJS=	util/average.o				\
 	core/ieee80211_util.o			\
 	linux/raw_parser.o			\
 	linux/capture.o				\
+	linux/ifctrl-ioctl.o			\
+	
 
 LIBS=-lm -lradiotap
 CFLAGS+=-std=gnu99 -Wall -Wextra -g -I. -fPIC
+
+ifeq ($(OSX),1)
+    PCAP=1
+    WEXT=0
+    LIBNL=0
+    LIBS+=-framework CoreWLAN -framework CoreData -framework Foundation
+    OBJS += ifctrl-osx.o
+endif
+
+ifeq ($(PCAP),1)
+  CFLAGS+=-DPCAP
+  LIBS+=-lpcap
+  OBJS+=osx/capture-pcap.o
+endif
+
+ifeq ($(WEXT),1)
+  OBJS += linux/ifctrl-wext.o
+else
+  ifeq ($(LIBNL),0)
+    ifeq ($(OSX),0)
+        OBJS += core/ifctrl-dummy.o
+    endif
+  else
+    OBJS += linux/ifctrl-nl80211.o
+    CFLAGS += $(shell pkg-config --cflags libnl-$(LIBNL))
+    ifeq ($(LIBNL),tiny)
+      LIBS+=-lnl-tiny
+    else
+      LIBS+=-lnl-3 -lnl-genl-3
+    endif
+  endif
+endif
 
 .PHONY: all check clean force
 
@@ -39,6 +77,9 @@ all: $(NAME)
 
 .objdeps.mk: $(OBJS:%.o=%.c)
 	gcc -MM -I. $^ >$@
+ifeq ($(OSX),1)
+	gcc -MM -I. ifctrl-osx.m >>$@
+endif
 
 -include .objdeps.mk
 
