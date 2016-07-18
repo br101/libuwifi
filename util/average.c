@@ -35,7 +35,7 @@
 void ewma_init(struct ewma *avg, unsigned long factor, unsigned long weight)
 {
 	if(!is_power_of_2(weight) || !is_power_of_2(factor))
-		printlog(1, "weight and factor have to be a power of two!");
+		printlog("weight and factor have to be a power of two!");
 
 	avg->weight = ilog2(weight);
 	avg->factor = ilog2(factor);

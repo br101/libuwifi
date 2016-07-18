@@ -253,7 +253,7 @@ char* channel_get_string(int idx)
 {
 	static char buf[32];
 	struct chan_freq* c = &channels.chan[idx];
-	snprintf(buf, sizeof(buf), "%-3d: %d HT40%s%s", c->chan, c->freq,
+	sprintf(buf, "%-3d: %d HT40%s%s", c->chan, c->freq,
 			get_center_freq_ht40(c->freq, true) ? "+" : "",
 			get_center_freq_ht40(c->freq, false) ? "-" : "");
 	return buf;
@@ -265,16 +265,16 @@ bool channel_init(void)
 	ifctrl_iwget_freqlist(conf.if_phy, &channels);
 	conf.channel_initialized = 1;
 
-	printf("Got %d Bands, %d Channels:\n", channels.num_bands, channels.num_channels);
+	printlog("Got %d Bands, %d Channels:\n", channels.num_bands, channels.num_channels);
 	for (int i = 0; i < channels.num_channels && i < MAX_CHANNELS; i++)
-		printf("%s\n", channel_get_string(i));
+		printlog("%s\n", channel_get_string(i));
 
 	if (channels.num_bands <= 0 || channels.num_channels <= 0)
 		return false;
 
 	if (conf.channel_set_num > 0) {
 		/* configured values */
-		printf("Setting configured channel %d\n", conf.channel_set_num);
+		printlog("Setting configured channel %d\n", conf.channel_set_num);
 		int ini_idx = channel_find_index_from_chan(conf.channel_set_num);
 		if (!channel_change(ini_idx, conf.channel_set_width, conf.channel_set_ht40plus))
 			return false;
@@ -283,7 +283,7 @@ bool channel_init(void)
 			/* this happens when we have not been able to change
 			 * the original interface to monitor mode and we added
 			 * an additional monitor (horstX) interface */
-			printf("Could not get current channel of interface\n");
+			printlog("Could not get current channel of interface\n");
 			conf.max_phy_rate = get_phy_thruput(channels.band[0].max_chan_width,
 							    channels.band[0].streams_rx);
 			return true; // not failure

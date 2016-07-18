@@ -11,6 +11,7 @@
 #include <string.h>	// memcpy
 #include <stdlib.h>	// malloc, free
 #include <math.h>	// pow
+#include <stdio.h>	// printf...
 
 void __attribute__ ((format (printf, 1, 2)))
 printlog(const char *fmt, ...);
