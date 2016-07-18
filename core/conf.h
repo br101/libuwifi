@@ -13,8 +13,8 @@ struct config {
 	char			ifname[IF_NAMESIZE + 1];
 	int			port;
 	int			quiet;
-	int			node_timeout;
-	int			channel_time;
+	uint32_t		node_timeout;		// in seconds
+	int			channel_time;		// in usec
 	int			channel_max;
 	int			channel_set_num;	/* value we want to set */
 	enum chan_width		channel_set_width;	/* value we want to set */

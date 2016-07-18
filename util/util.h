@@ -112,6 +112,9 @@
 
 #define DIV_ROUND_UP(n,d) (((n) + (d) - 1) / (d))
 
+#define MAC_FMT "%02x:%02x:%02x:%02x:%02x:%02x"
+#define MAC_PAR(x) x[0], x[1], x[2], x[3], x[4], x[5]
+
 void dump_packet(const unsigned char* buf, int len);
 const char* ether_sprintf(const unsigned char *mac);
 const char* ether_sprintf_short(const unsigned char *mac);

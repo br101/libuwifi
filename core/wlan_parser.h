@@ -23,7 +23,7 @@ struct packet_info {
 	unsigned int		pkt_types;	/* bitmask of packet types */
 
 	/* wlan phy (from radiotap) */
-	int			phy_signal;	/* signal strength (usually dBm) */
+	int			phy_signal;	/* signal strength (usually dBm) */		// X
 	unsigned int		phy_rate;	/* physical rate * 10 (=in 100kbps) */
 	unsigned char		phy_rate_idx;	/* MCS index */
 	unsigned char		phy_rate_flags;	/* MCS flags */
@@ -32,15 +32,15 @@ struct packet_info {
 
 	/* wlan mac */
 	unsigned int		wlan_len;	/* packet length */
-	uint16_t		wlan_type;	/* frame control field */
-	unsigned char		wlan_src[MAC_LEN]; /* transmitter (TA) */
+	uint16_t		wlan_type;	/* frame control field */			// X
+	unsigned char		wlan_src[MAC_LEN]; /* transmitter (TA) */			// X
 	unsigned char		wlan_dst[MAC_LEN]; /* receiver (RA) */
-	unsigned char		wlan_bssid[MAC_LEN];
+	unsigned char		wlan_bssid[MAC_LEN];						// X?
 	char			wlan_essid[WLAN_MAX_SSID_LEN];
 	uint64_t		wlan_tsf;	/* timestamp from beacon */
 	unsigned int		wlan_bintval;	/* beacon interval */
-	unsigned int		wlan_mode;	/* AP, STA or IBSS */
-	unsigned char		wlan_channel;	/* channel from beacon, probe */
+	unsigned int		wlan_mode;	/* AP, STA or IBSS */				// X
+	unsigned char		wlan_channel;	/* channel from beacon, probe */		// X
 	enum chan_width		wlan_chan_width;
 	unsigned char		wlan_tx_streams;
 	unsigned char		wlan_rx_streams;

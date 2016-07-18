@@ -29,11 +29,11 @@
 
 struct node_info {
 	/* housekeeping */
-	struct list_node	list;
+	struct list_node	list;								// X
 	struct list_node	essid_nodes;
 	struct list_head	on_channels;	/* channels this node was seen on */
 	unsigned int		num_on_channels;
-	time_t			last_seen;	/* timestamp */
+	uint32_t		last_seen;	/* timestamp */					// X uint32
 
 	/* general packet info */
 	unsigned int		pkt_types;	/* bitmask of packet types we've seen */
@@ -42,21 +42,21 @@ struct node_info {
 	/* wlan phy (from radiotap) */
 	int			phy_sig_max;
 	struct ewma		phy_sig_avg;
-	unsigned long		phy_sig_sum;
-	int			phy_sig_count;
+	unsigned long		phy_sig_sum;							// X
+	int			phy_sig_count;							// X
 
 	/* wlan mac */
-	unsigned char		wlan_src[MAC_LEN];	/* Sender MAC address (ID) */
+	unsigned char		wlan_src[MAC_LEN];	/* Sender MAC address (ID) */		// X
 	unsigned char		wlan_bssid[MAC_LEN];
-	unsigned int		wlan_channel;	/* channel from beacon, probe frames */
-	unsigned int		wlan_mode;	/* AP, STA or IBSS */
+	unsigned int		wlan_channel;	/* channel from beacon, probe frames */		// X
+	unsigned int		wlan_mode;	/* AP, STA or IBSS */				// X
 	uint64_t		wlan_tsf;
 	unsigned int		wlan_bintval;
 	unsigned int		wlan_retries_all;
 	unsigned int		wlan_retries_last;
 	unsigned int		wlan_seqno;
 	struct essid_info*	essid;
-	struct node_info*	wlan_ap_node;
+	struct node_info*	wlan_ap_node;							// X
 	enum chan_width		wlan_chan_width;
 	unsigned char		wlan_tx_streams;
 	unsigned char		wlan_rx_streams;

@@ -34,6 +34,7 @@ OBJS=	util/average.o				\
 	linux/raw_parser.o			\
 	linux/capture.o				\
 	linux/ifctrl-ioctl.o			\
+	linux/platform.o			\
 	
 
 LIBS=-lm -lradiotap

@@ -22,7 +22,7 @@
 #include "node.h"
 #include "platform.h"
 
-static struct timespec last_nodetimeout;
+static uint32_t last_nodetimeout;
 
 static void copy_nodeinfo(struct node_info* n, struct packet_info* p)
 {
@@ -30,8 +30,7 @@ static void copy_nodeinfo(struct node_info* n, struct packet_info* p)
 
 	memcpy(n->wlan_src, p->wlan_src, MAC_LEN);
 	memcpy(&n->last_pkt, p, sizeof(struct packet_info));
-	// update timestamp
-	n->last_seen = time(NULL);
+	n->last_seen = plat_time_usec();
 	n->pkt_count++;
 	n->pkt_types |= p->pkt_types;
 	if (p->ip_src)
@@ -163,12 +162,13 @@ void node_timeout(void)
 {
 	struct node_info *n, *m, *n2, *m2;
 //	struct chan_node *cn, *cn2;
+	uint32_t the_time = plat_time_usec();
 
-	if ((the_time.tv_sec - last_nodetimeout.tv_sec) < conf.node_timeout )
+	if ((the_time - last_nodetimeout) < conf.node_timeout * 1000000)
 		return;
 
 	list_for_each_safe(&nodes, n, m, list) {
-		if (n->last_seen < (the_time.tv_sec - conf.node_timeout)) {
+		if (the_time - n->last_seen > conf.node_timeout * 1000000) {
 			list_del(&n->list);
 //			if (n->essid != NULL)
 //				remove_node_from_essid(n);

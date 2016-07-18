@@ -1,3 +1,6 @@
+
+#include <stdint.h>
+
 #ifdef __linux__
 
 // directly included:
@@ -6,8 +9,6 @@
 //#include <stddef.h>	// size_t
 
 #include <string.h>	// memcpy
-#include <time.h>	// time_t
-//#include <sys/time.h>
 #include <stdlib.h>	// malloc, free
 #include <math.h>	// pow
 
@@ -20,8 +21,8 @@ printlog(const char *fmt, ...);
 #define DEBUG(...)
 #endif
 
-extern struct timespec the_time;
-
 #else
 
 #endif
+
+uint32_t plat_time_usec(void);	// return monotonic time in usec

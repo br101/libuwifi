@@ -25,7 +25,7 @@
 #include "conf.h"
 #include "platform.h"
 
-static struct timespec last_channelchange;
+static uint32_t last_channelchange;
 static struct channel_list channels;
 
 uint32_t channel_get_remaining_dwell_time(void)
@@ -33,9 +33,7 @@ uint32_t channel_get_remaining_dwell_time(void)
 	if (!conf.do_change_channel)
 		return UINT32_MAX;
 
-	int64_t ret = (int64_t)conf.channel_time
-		- (the_time.tv_sec -  last_channelchange.tv_sec) * 1000000
-		- (the_time.tv_nsec - last_channelchange.tv_nsec) / 1000;
+	int64_t ret = (int64_t)conf.channel_time - (plat_time_usec() - last_channelchange);
 
 	if (ret < 0)
 		return 0;
@@ -168,6 +166,8 @@ bool channel_change(int idx, enum chan_width width, bool ht40plus)
 	if (center1 == 0 && !(width == CHAN_WIDTH_20_NOHT || width == CHAN_WIDTH_20))
 		return false;
 
+	uint32_t the_time = plat_time_usec();
+
 	if (!ifctrl_iwset_freq(conf.ifname, channels.chan[idx].freq, width, center1)) {
 		printlog("ERROR: Failed to set CH %d (%d MHz) %s center %d",
 			channels.chan[idx].chan, channels.chan[idx].freq,
@@ -176,11 +176,10 @@ bool channel_change(int idx, enum chan_width width, bool ht40plus)
 		return false;
 	}
 
-	printlog("Set CH %d (%d MHz) %s center %d after %ldms",
+	printlog("Set CH %d (%d MHz) %s center %d after %dms",
 		channels.chan[idx].chan, channels.chan[idx].freq,
 		channel_width_string(width, ht40plus),
-		 center1, (the_time.tv_sec - last_channelchange.tv_sec) * 1000
-		 + (the_time.tv_nsec - last_channelchange.tv_nsec) / 1000000);
+		 center1, (the_time - last_channelchange) / 1000);
 
 	conf.channel_idx = idx;
 	conf.channel_width = width;
