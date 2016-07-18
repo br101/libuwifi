@@ -1,4 +1,4 @@
-// LINUX
+#ifdef __linux__
 
 // directly included:
 //#include <stdbool.h>	// bool
@@ -11,10 +11,6 @@
 #include <stdlib.h>	// malloc, free
 #include <math.h>	// pow
 
-#if 0
-#define memcpy
-#endif
-
 void __attribute__ ((format (printf, 1, 2)))
 printlog(const char *fmt, ...);
 
@@ -25,3 +21,7 @@ printlog(const char *fmt, ...);
 #endif
 
 extern struct timespec the_time;
+
+#else
+
+#endif
