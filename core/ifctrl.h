@@ -22,6 +22,7 @@
 #define IFCTRL_H
 
 #include <stdbool.h>
+
 #include "channel.h"
 
 bool ifctrl_init();

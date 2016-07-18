@@ -17,15 +17,10 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-
 #include "../util/util.h"
 #include "wlan80211.h"
 #include "node.h"
 #include "platform.h"
-
 
 static struct timespec last_nodetimeout;
 

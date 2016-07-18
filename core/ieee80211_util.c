@@ -14,9 +14,7 @@
  * utilities for mac80211
  */
 
-#include <stddef.h>
-#include <string.h>
-#include <math.h>
+#include <stdbool.h>
 
 #include "ieee80211_util.h"
 #include "wlan80211.h"

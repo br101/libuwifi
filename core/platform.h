@@ -1,7 +1,15 @@
 // LINUX
 
-#include <string.h>
-#include <sys/time.h>
+// directly included:
+//#include <stdbool.h>	// bool
+//#include <stdint.h>	// int types
+//#include <stddef.h>	// size_t
+
+#include <string.h>	// memcpy
+#include <time.h>	// time_t
+//#include <sys/time.h>
+#include <stdlib.h>	// malloc, free
+#include <math.h>	// pow
 
 #if 0
 #define memcpy

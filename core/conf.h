@@ -1,13 +1,13 @@
 #ifndef _UWIFI_CONF_H_
 #define _UWIFI_CONF_H_
 
-#define IF_NAMESIZE	16
+#include "wlan80211.h"
+#include "platform.h"
 
+#define IF_NAMESIZE		16
 #define MAX_CONF_VALUE_STRLEN	200
 #define MAX_CONF_NAME_STRLEN	32
 #define MAX_FILTERMAC		9
-
-#include "wlan80211.h"
 
 struct config {
 	char			ifname[IF_NAMESIZE + 1];

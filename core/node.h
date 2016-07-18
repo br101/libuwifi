@@ -20,6 +20,7 @@
 #ifndef _NODE_H_
 #define _NODE_H_
 
+#include "platform.h"
 #include "wlan_parser.h"
 #include "ccan/list/list.h"
 #include "util/average.h"

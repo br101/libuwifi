@@ -18,7 +18,6 @@
  */
 
 #include "ifctrl.h"
-#include "main.h"
 
 bool ifctrl_init(void)
 {
