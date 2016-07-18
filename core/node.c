@@ -17,10 +17,11 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "platform.h"
 #include "../util/util.h"
 #include "wlan80211.h"
 #include "node.h"
-#include "platform.h"
+
 
 static uint32_t last_nodetimeout;
 
@@ -145,7 +146,7 @@ struct node_info* node_update(struct packet_info* p)
 	/* not found */
 	if (&n->list == &nodes.n) {
 		DEBUG("node adding\n");
-		n = malloc(sizeof(struct node_info));
+		n = (struct node_info*)malloc(sizeof(struct node_info));
 		memset(n, 0, sizeof(struct node_info));
 		n->essid = NULL;
 		ewma_init(&n->phy_sig_avg, 1024, 8);

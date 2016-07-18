@@ -5,8 +5,8 @@
  * Version 2.  See the file COPYING for more details.
  */
 
-#include <err.h>
 #include "average.h"
+#include "core/platform.h"
 #include "util.h"
 
 /**
@@ -35,7 +35,7 @@
 void ewma_init(struct ewma *avg, unsigned long factor, unsigned long weight)
 {
 	if(!is_power_of_2(weight) || !is_power_of_2(factor))
-		err(1, "weight and factor have to be a power of two!");
+		printlog(1, "weight and factor have to be a power of two!");
 
 	avg->weight = ilog2(weight);
 	avg->factor = ilog2(factor);

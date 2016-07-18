@@ -55,7 +55,7 @@ struct node_info {
 	unsigned int		wlan_retries_all;
 	unsigned int		wlan_retries_last;
 	unsigned int		wlan_seqno;
-	struct essid_info*	essid;
+	struct essid_info*	essid;								// TODO!!!
 	struct node_info*	wlan_ap_node;							// X
 	enum chan_width		wlan_chan_width;
 	unsigned char		wlan_tx_streams;

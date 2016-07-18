@@ -17,10 +17,10 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "platform.h"
 #include "wlan80211.h"
 #include "../util/util.h"
 #include "channel.h"
-#include "platform.h"
 #include "wlan_util.h"
 #include "wlan_parser.h"
 

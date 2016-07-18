@@ -17,6 +17,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "platform.h"
 #include "../util/util.h"
 #include "wlan80211.h"
 #include "wlan_util.h"
@@ -250,7 +251,7 @@ enum chan_width chan_width_from_vht_capab(uint32_t vht)
 		case WLAN_IE_VHT_CAPAB_INFO_CHAN_WIDTH_80: return CHAN_WIDTH_80;
 		case WLAN_IE_VHT_CAPAB_INFO_CHAN_WIDTH_160: return CHAN_WIDTH_160;
 		case WLAN_IE_VHT_CAPAB_INFO_CHAN_WIDTH_BOTH: return CHAN_WIDTH_8080;
-		default: printf("(reserved)\n"); return CHAN_WIDTH_UNSPEC;
+		default: printlog("(reserved)\n"); return CHAN_WIDTH_UNSPEC;
 	}
 }
 
