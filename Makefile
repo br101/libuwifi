@@ -18,10 +18,7 @@
 
 # build options
 DEBUG=1
-PCAP=0
-WEXT=0
-LIBNL=3.0
-OSX=0
+PLATFORM=linux
 
 NAME=libuwifi
 OBJS=	util/average.o				\
@@ -31,62 +28,22 @@ OBJS=	util/average.o				\
 	core/node.o				\
 	core/channel.o				\
 	core/ieee80211_util.o			\
-	linux/raw_parser.o			\
-	linux/capture.o				\
-	linux/ifctrl-ioctl.o			\
-	linux/platform.o			\
-	
 
-LIBS=-lm -lradiotap
-CFLAGS+=-std=gnu99 -Wall -Wextra -g -I. -I./linux -fPIC
+CFLAGS+=-std=gnu99 -Wall -Wextra -g -I. -I./$(PLATFORM)
 
-ifeq ($(OSX),1)
-    PCAP=1
-    WEXT=0
-    LIBNL=0
-    LIBS+=-framework CoreWLAN -framework CoreData -framework Foundation
-    OBJS += ifctrl-osx.o
-endif
+include $(PLATFORM)/platform.mk
 
-ifeq ($(PCAP),1)
-  CFLAGS+=-DPCAP
-  LIBS+=-lpcap
-  OBJS+=osx/capture-pcap.o
-endif
-
-ifeq ($(WEXT),1)
-  OBJS += linux/ifctrl-wext.o
-else
-  ifeq ($(LIBNL),0)
-    ifeq ($(OSX),0)
-        OBJS += core/ifctrl-dummy.o
-    endif
-  else
-    OBJS += linux/ifctrl-nl80211.o
-    CFLAGS += $(shell pkg-config --cflags libnl-$(LIBNL))
-    ifeq ($(LIBNL),tiny)
-      LIBS+=-lnl-tiny
-    else
-      LIBS+=-lnl-3 -lnl-genl-3
-    endif
-  endif
-endif
-
-.PHONY: all check clean force
+.PHONY: all check clean force plat
 
 all: $(NAME)
 
 .objdeps.mk: $(OBJS:%.o=%.c)
-	gcc -MM -I. -I./linux $^ >$@
-ifeq ($(OSX),1)
-	gcc -MM -I. ifctrl-osx.m >>$@
-endif
+	gcc -MM -I. -I./$(PLATFORM) $^ >$@
 
 -include .objdeps.mk
 
-$(NAME): $(OBJS)
-	$(CC) $(LDFLAGS) -shared -Wl,-soname,$@.so.1 -o $@.so $(OBJS) $(LIBS)
-	$(AR) rcs $@.a $(OBJS)
+$(NAME).a: $(OBJS)
+	$(AR) rcs $@ $(OBJS)
 
 $(OBJS): .buildflags
 
@@ -94,7 +51,7 @@ check: $(OBJS:%.o=%.c)
 	sparse $(CFLAGS) $^
 
 clean:
-	-rm -f core/*.o linux/*.o osx/*.o util/*.o *~
+	-rm -f core/*.o util/*.o linux/*.o osx/*.o esp8266/*.o *~
 	-rm -f $(NAME).so*
 	-rm -f $(NAME).a*
 	-rm -f .buildflags
