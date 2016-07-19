@@ -18,6 +18,7 @@
  */
 
 #include "ifctrl.h"
+#include "platform.h"
 
 bool ifctrl_init(void)
 {
