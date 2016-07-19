@@ -16,3 +16,9 @@
 #define plat_time_usec		system_get_time
 
 #define printlog		os_printf
+
+#if DO_DEBUG
+#define DEBUG(...) do { if (conf.debug) os_printf(__VA_ARGS__); } while (0)
+#else
+#define DEBUG(...)
+#endif

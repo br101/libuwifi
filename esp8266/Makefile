@@ -49,8 +49,7 @@ check: $(OBJS:%.o=%.c)
 	sparse $(CFLAGS) $^
 
 clean:
-	-rm -f core/*.o linux/*.o osx/*.o util/*.o *~
-	-rm -f $(NAME).so*
+	-rm -f ../core/*.o ../util/*.o *.o *~
 	-rm -f $(NAME).a*
 	-rm -f .buildflags
 	-rm -f .objdeps.mk
