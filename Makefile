@@ -29,7 +29,7 @@ OBJS=	util/average.o				\
 	core/channel.o				\
 	core/ieee80211_util.o			\
 
-CFLAGS+=-std=gnu99 -Wall -Wextra -g -I. -I./$(PLATFORM)
+CFLAGS+=-std=gnu99 -Wall -Wextra -I. -I./$(PLATFORM)
 
 include $(PLATFORM)/platform.mk
 
