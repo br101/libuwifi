@@ -62,7 +62,9 @@ else
   endif
 endif
 
-all: $(NAME).so.1 $(NAME).a
+all: $(NAME).so $(NAME).a
 
-$(NAME).so.1: $(OBJS)
-	$(CC) $(LDFLAGS) -shared -Wl,-soname,$(NAME).so.1 -o $(NAME).so.1 $(OBJS) $(LIBS)
+$(NAME).so: $(OBJS)
+	$(CC) $(LDFLAGS) -shared -Wl,-soname,$(NAME).so.1 -o $(NAME).so $(OBJS) $(LIBS)
+	ldconfig -n .
+
