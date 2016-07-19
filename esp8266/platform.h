@@ -3,6 +3,7 @@
 #include <os_type.h>
 #include <user_interface.h>
 #include <mem.h>
+#include <math.h>
 
 #define malloc(x)		os_malloc(x)
 #define free(x)			os_free(x)
