@@ -33,9 +33,7 @@ CFLAGS+=-std=gnu99 -Wall -Wextra -g -I. -I./$(PLATFORM)
 
 include $(PLATFORM)/platform.mk
 
-.PHONY: all check clean force plat
-
-all: $(NAME)
+.PHONY: all check clean force
 
 .objdeps.mk: $(OBJS:%.o=%.c)
 	gcc -MM -I. -I./$(PLATFORM) $^ >$@

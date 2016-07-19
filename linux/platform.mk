@@ -62,5 +62,7 @@ else
   endif
 endif
 
-plat: $(OBJS)
-	$(CC) $(LDFLAGS) -shared -Wl,-soname,$(NAME).so.1 -o $(NAME).so $(OBJS) $(LIBS)
+all: $(NAME).so.1 $(NAME).a
+
+$(NAME).so.1: $(OBJS)
+	$(CC) $(LDFLAGS) -shared -Wl,-soname,$(NAME).so.1 -o $(NAME).so.1 $(OBJS) $(LIBS)
