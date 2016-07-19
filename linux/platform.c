@@ -1,6 +1,6 @@
-#include "core/platform.h"
-
 #include <time.h>
+
+#include "platform.h"
 
 // return monotonic time in microseconds
 uint32_t plat_time_usec(void) {

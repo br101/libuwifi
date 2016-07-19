@@ -6,7 +6,7 @@
  */
 
 #include "average.h"
-#include "core/platform.h"
+#include "platform.h"
 #include "util.h"
 
 /**

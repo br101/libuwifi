@@ -5,7 +5,7 @@
 #include "../core/wlan_util.h"
 #include "../util/util.h"
 #include "../core/wlan_parser.h"
-#include "../core/platform.h"
+#include "platform.h"
 #include "../core/phy_info.h"
 #include "../core/conf.h"
 #include "raw_parser.h"

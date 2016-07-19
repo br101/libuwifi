@@ -31,7 +31,7 @@
 
 #include "capture.h"
 #include "../util/util.h"
-#include "../core/platform.h"
+#include "platform.h"
 
 
 /*

@@ -26,7 +26,7 @@
 #include <linux/wireless.h>
 
 #include "../util/util.h"
-#include "../core/platform.h"
+#include "platform.h"
 #include "../core/channel.h"
 #include "../core/conf.h"
 

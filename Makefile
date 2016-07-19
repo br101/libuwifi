@@ -38,7 +38,7 @@ OBJS=	util/average.o				\
 	
 
 LIBS=-lm -lradiotap
-CFLAGS+=-std=gnu99 -Wall -Wextra -g -I. -fPIC
+CFLAGS+=-std=gnu99 -Wall -Wextra -g -I. -I./linux -fPIC
 
 ifeq ($(OSX),1)
     PCAP=1
@@ -77,7 +77,7 @@ endif
 all: $(NAME)
 
 .objdeps.mk: $(OBJS:%.o=%.c)
-	gcc -MM -I. $^ >$@
+	gcc -MM -I. -I./linux $^ >$@
 ifeq ($(OSX),1)
 	gcc -MM -I. ifctrl-osx.m >>$@
 endif

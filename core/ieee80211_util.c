@@ -20,7 +20,7 @@
 #include "wlan80211.h"
 #include "phy_info.h"
 #include "../util/util.h"
-#include "core/platform.h"
+#include "platform.h"
 
 /* from mac80211/ieee80211_i.c, slightly modified */
 
