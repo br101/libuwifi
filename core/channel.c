@@ -17,13 +17,13 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "platform.h"
 #include "../util/util.h"
 #include "ifctrl.h"
 #include "channel.h"
 #include "ieee80211_util.h"
 #include "wlan_util.h"
 #include "conf.h"
-#include "platform.h"
 
 static uint32_t last_channelchange;
 static struct channel_list channels;

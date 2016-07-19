@@ -16,11 +16,11 @@
 
 #include <stdbool.h>
 
+#include "platform.h"
 #include "ieee80211_util.h"
 #include "wlan80211.h"
 #include "phy_info.h"
 #include "../util/util.h"
-#include "platform.h"
 
 /* from mac80211/ieee80211_i.c, slightly modified */
 
