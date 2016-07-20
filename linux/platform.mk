@@ -67,3 +67,12 @@ all: $(NAME).so $(NAME).a
 $(NAME).so: $(OBJS)
 	$(CC) $(LDFLAGS) -shared -Wl,-soname,$(NAME).so.1 -o $(NAME).so $(OBJS) $(LIBS)
 	ln -s $(NAME).so $(NAME).so.1
+
+install:
+	-mkdir $(INST_PATH)/include/uwifi
+	-mkdir $(INST_PATH)/lib
+	cp ./core/*.h $(INST_PATH)/include/uwifi
+	cp ./util/*.h $(INST_PATH)/include/uwifi
+	cp ./linux/*.h $(INST_PATH)/include/uwifi
+	cp -r ./ccan $(INST_PATH)/include/
+	cp libuwifi.{a,so*} $(INST_PATH)/lib/

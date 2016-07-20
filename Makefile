@@ -57,14 +57,5 @@ clean:
 	-rm -f .buildflags
 	-rm -f .objdeps.mk
 
-install:
-	-mkdir $(INST_PATH)/include/uwifi
-	-mkdir $(INST_PATH)/lib
-	cp ./core/*.h $(INST_PATH)/include/uwifi
-	cp ./util/*.h $(INST_PATH)/include/uwifi
-	cp ./linux/*.h $(INST_PATH)/include/uwifi
-	cp -r ./ccan $(INST_PATH)/include/
-	cp libuwifi.{a,so*} $(INST_PATH)/lib/
-
 .buildflags: force
 	echo '$(CFLAGS)' | cmp -s - $@ || echo '$(CFLAGS)' > $@
