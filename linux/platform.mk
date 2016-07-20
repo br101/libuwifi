@@ -66,5 +66,4 @@ all: $(NAME).so $(NAME).a
 
 $(NAME).so: $(OBJS)
 	$(CC) $(LDFLAGS) -shared -Wl,-soname,$(NAME).so.1 -o $(NAME).so $(OBJS) $(LIBS)
-	ldconfig -n .
-
+	ln -s $(NAME).so $(NAME).so.1
