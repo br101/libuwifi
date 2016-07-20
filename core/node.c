@@ -24,7 +24,7 @@
 
 static uint32_t last_nodetimeout;
 
-static void copy_nodeinfo(struct node_info* n, struct packet_info* p)
+static void copy_nodeinfo(struct node_info* n, struct packet_info* p, struct list_head* nodes)
 {
 	struct node_info* ap;
 
@@ -60,7 +60,7 @@ static void copy_nodeinfo(struct node_info* n, struct packet_info* p)
 
 		if ((n->wlan_mode & WLAN_MODE_STA) && n->wlan_ap_node == NULL) {
 			/* find AP node for this BSSID */
-			list_for_each(&nodes, ap, list) {
+			list_for_each(nodes, ap, list) {
 				if (memcmp(p->wlan_bssid, ap->wlan_src, MAC_LEN) == 0) {
 					DEBUG("AP node found %p\n", ap);
 					DEBUG("AP node ESSID %s\n",
@@ -122,7 +122,7 @@ static void copy_nodeinfo(struct node_info* n, struct packet_info* p)
 		n->wlan_chan_width = p->wlan_chan_width;
 }
 
-struct node_info* node_update(struct packet_info* p)
+struct node_info* node_update(struct packet_info* p, struct list_head* nodes)
 {
 	struct node_info* n;
 
@@ -135,7 +135,7 @@ struct node_info* node_update(struct packet_info* p)
 		return NULL;
 
 	/* find node by wlan source address */
-	list_for_each(&nodes, n, list) {
+	list_for_each(nodes, n, list) {
 		if (memcmp(p->wlan_src, n->wlan_src, MAC_LEN) == 0) {
 			DEBUG("node found %p\n", n);
 			break;
@@ -143,22 +143,22 @@ struct node_info* node_update(struct packet_info* p)
 	}
 
 	/* not found */
-	if (&n->list == &nodes.n) {
+	if (&n->list == &nodes->n) {
 		DEBUG("node adding\n");
 		n = (struct node_info*)malloc(sizeof(struct node_info));
 		memset(n, 0, sizeof(struct node_info));
 		n->essid = NULL;
 		ewma_init(&n->phy_sig_avg, 1024, 8);
 		list_head_init(&n->on_channels);
-		list_add_tail(&nodes, &n->list);
+		list_add_tail(nodes, &n->list);
 	}
 
-	copy_nodeinfo(n, p);
+	copy_nodeinfo(n, p, nodes);
 
 	return n;
 }
 
-void node_timeout(void)
+void node_timeout(struct list_head* nodes)
 {
 	struct node_info *n, *m, *n2, *m2;
 //	struct chan_node *cn, *cn2;
@@ -167,7 +167,7 @@ void node_timeout(void)
 	if ((the_time - last_nodetimeout) < conf.node_timeout * 1000000)
 		return;
 
-	list_for_each_safe(&nodes, n, m, list) {
+	list_for_each_safe(nodes, n, m, list) {
 		if (the_time - n->last_seen > conf.node_timeout * 1000000) {
 			list_del(&n->list);
 //			if (n->essid != NULL)
@@ -179,7 +179,7 @@ void node_timeout(void)
 //				free(cn);
 //			}
 			/* remove AP pointers to this node */
-			list_for_each_safe(&nodes, n2, m2, list) {
+			list_for_each_safe(nodes, n2, m2, list) {
 				if (n2->wlan_ap_node == n) {
 					DEBUG("remove AP ref\n");
 					n->wlan_ap_node = NULL;

@@ -80,9 +80,7 @@ struct node_info {
 	struct packet_info	last_pkt;
 };
 
-extern struct list_head nodes;
-
-struct node_info* node_update(struct packet_info* p);
-void node_timeout(void);
+struct node_info* node_update(struct packet_info* p, struct list_head* nodes);
+void node_timeout(struct list_head* nodes);
 
 #endif
