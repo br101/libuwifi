@@ -31,6 +31,8 @@ OBJS=	util/average.o				\
 INCLUDES=-I. -I./core -I./util -I./$(PLATFORM)
 CFLAGS+=-std=gnu99 -Wall -Wextra $(INCLUDES)
 
+INST_PATH=/usr/local
+
 include $(PLATFORM)/platform.mk
 
 .PHONY: all check clean force
@@ -54,6 +56,15 @@ clean:
 	-rm -f $(NAME).a*
 	-rm -f .buildflags
 	-rm -f .objdeps.mk
+
+install:
+	-mkdir $(INST_PATH)/include/uwifi
+	-mkdir $(INST_PATH)/lib
+	cp ./core/*.h $(INST_PATH)/include/uwifi
+	cp ./util/*.h $(INST_PATH)/include/uwifi
+	cp ./linux/*.h $(INST_PATH)/include/uwifi
+	cp -r ./ccan $(INST_PATH)/include/
+	cp libuwifi.{a,so*} $(INST_PATH)/lib/
 
 .buildflags: force
 	echo '$(CFLAGS)' | cmp -s - $@ || echo '$(CFLAGS)' > $@
