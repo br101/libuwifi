@@ -25,10 +25,10 @@
 #include <sys/socket.h>
 #include <linux/wireless.h>
 
-#include "../util/util.h"
+#include "util.h"
 #include "platform.h"
-#include "../core/channel.h"
-#include "../core/conf.h"
+#include "channel.h"
+#include "conf.h"
 
 extern int mon; /* monitoring socket */
 

@@ -19,7 +19,7 @@
 
 #include "platform.h"
 #include "wlan80211.h"
-#include "../util/util.h"
+#include "util.h"
 #include "channel.h"
 #include "wlan_util.h"
 #include "wlan_parser.h"

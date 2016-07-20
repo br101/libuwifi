@@ -30,7 +30,7 @@
 #include <err.h>
 
 #include "capture.h"
-#include "../util/util.h"
+#include "util.h"
 #include "platform.h"
 
 

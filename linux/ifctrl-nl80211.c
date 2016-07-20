@@ -32,9 +32,9 @@
 
 #include <linux/nl80211.h>
 
-#include "../core/ifctrl.h"
-#include "../core/wlan_util.h"
-#include "../core/conf.h"
+#include "ifctrl.h"
+#include "wlan_util.h"
+#include "conf.h"
 
 #ifndef NL80211_GENL_NAME
 #define NL80211_GENL_NAME "nl80211"

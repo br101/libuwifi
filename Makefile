@@ -28,14 +28,15 @@ OBJS=	util/average.o				\
 	core/node.o				\
 	core/channel.o				\
 
-CFLAGS+=-std=gnu99 -Wall -Wextra -I. -I./$(PLATFORM)
+INCLUDES=-I. -I./core -I./util -I./$(PLATFORM)
+CFLAGS+=-std=gnu99 -Wall -Wextra $(INCLUDES)
 
 include $(PLATFORM)/platform.mk
 
 .PHONY: all check clean force
 
 .objdeps.mk: $(OBJS:%.o=%.c)
-	gcc -MM -I. -I./$(PLATFORM) $^ >$@
+	gcc -MM $(INCLUDES) $^ >$@
 
 -include .objdeps.mk
 

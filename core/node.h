@@ -23,8 +23,8 @@
 #include "platform.h"
 #include "wlan_parser.h"
 #include "ccan/list/list.h"
-#include "util/average.h"
-#include "core/phy_info.h"
+#include "average.h"
+#include "phy_info.h"
 #include "conf.h"
 
 struct node_info {

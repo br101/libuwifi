@@ -18,10 +18,9 @@
  */
 
 #include "platform.h"
-#include "../util/util.h"
+#include "util.h"
 #include "wlan80211.h"
 #include "node.h"
-
 
 static uint32_t last_nodetimeout;
 

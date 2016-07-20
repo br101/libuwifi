@@ -2,7 +2,7 @@
 #define _RAW_PARSE_H_
 
 #include <stddef.h>
-#include "../core/wlan_parser.h"
+#include "wlan_parser.h"
 
 #ifndef ARPHRD_IEEE80211_RADIOTAP
 #define ARPHRD_IEEE80211_RADIOTAP 803    /* IEEE 802.11 + radiotap header */

@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <err.h>
 
-#include "../core/ifctrl.h"
+#include "ifctrl.h"
 
 bool ifctrl_flags(const char *const interface, bool up, bool promisc)
 {

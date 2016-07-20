@@ -7,7 +7,7 @@
 
 #include "wlan80211.h"
 #include "channel.h"
-#include "util/util.h"
+#include "util.h"
 
 #define MAC_LEN			6
 

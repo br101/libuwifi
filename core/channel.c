@@ -18,7 +18,7 @@
  */
 
 #include "platform.h"
-#include "../util/util.h"
+#include "util.h"
 #include "ifctrl.h"
 #include "channel.h"
 #include "wlan_util.h"
