@@ -332,3 +332,19 @@ int get_phy_thruput(enum chan_width width, unsigned char streams_rx)
 	}
 	return 0;
 }
+
+int frequency2channel(int freq)
+{
+	if (freq == 2484)
+		return 14;
+	else if (freq < 2484)
+		return (freq - 2407) / 5;
+	else if (freq >= 4910 && freq <= 4980)
+		return (freq - 4000) / 5;
+	else if (freq <= 45000)
+		return (freq - 5000) / 5;
+	else if (freq >= 58320 && freq <= 64800)
+		return (freq - 56160) / 2160;
+	else
+		return 0;
+}

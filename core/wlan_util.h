@@ -52,5 +52,6 @@ void ht_streams_from_mcs_set(unsigned char* mcs, unsigned char* rx, unsigned cha
 void vht_streams_from_mcs_set(unsigned char* mcs, unsigned char* rx, unsigned char* tx);
 const char* get_80211std(enum chan_width width, int chan);
 int get_phy_thruput(enum chan_width width, unsigned char streams_rx);
+int frequency2channel(int freq);
 
 #endif

@@ -348,7 +348,7 @@ bool channel_list_add(int freq)
 	if (channels.num_channels >=  MAX_CHANNELS)
 		return false;
 
-	channels.chan[channels.num_channels].chan = ieee80211_freq2channel(freq);
+	channels.chan[channels.num_channels].chan = frequency2channel(freq);
 	channels.chan[channels.num_channels].freq = freq;
 	channels.num_channels++;
 	return true;
