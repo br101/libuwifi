@@ -21,7 +21,6 @@
 #include "../util/util.h"
 #include "ifctrl.h"
 #include "channel.h"
-#include "ieee80211_util.h"
 #include "wlan_util.h"
 #include "conf.h"
 

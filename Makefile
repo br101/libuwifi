@@ -1,4 +1,4 @@
-# horst - Highly Optimized Radio Scanning Tool
+# libuwifi
 #
 # Copyright (C) 2005-2015 Bruno Randolf (br1@einfach.org)
 #
@@ -27,7 +27,6 @@ OBJS=	util/average.o				\
 	core/wlan_util.o			\
 	core/node.o				\
 	core/channel.o				\
-	core/ieee80211_util.o			\
 
 CFLAGS+=-std=gnu99 -Wall -Wextra -I. -I./$(PLATFORM)
 

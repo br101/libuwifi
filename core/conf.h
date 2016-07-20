@@ -2,6 +2,7 @@
 #define _UWIFI_CONF_H_
 
 #include "wlan80211.h"
+#include "channel.h"
 #include "platform.h"
 
 #define IF_NAMESIZE		16
