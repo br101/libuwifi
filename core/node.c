@@ -158,17 +158,17 @@ struct node_info* node_update(struct packet_info* p, struct list_head* nodes)
 	return n;
 }
 
-void node_timeout(struct list_head* nodes)
+void node_timeout(struct list_head* nodes, unsigned int timeout_sec)
 {
 	struct node_info *n, *m, *n2, *m2;
 //	struct chan_node *cn, *cn2;
 	uint32_t the_time = plat_time_usec();
 
-	if ((the_time - last_nodetimeout) < conf.node_timeout * 1000000)
+	if ((the_time - last_nodetimeout) < timeout_sec * 1000000)
 		return;
 
 	list_for_each_safe(nodes, n, m, list) {
-		if (the_time - n->last_seen > conf.node_timeout * 1000000) {
+		if (the_time - n->last_seen > timeout_sec * 1000000) {
 			list_del(&n->list);
 //			if (n->essid != NULL)
 //				remove_node_from_essid(n);

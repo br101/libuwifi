@@ -240,14 +240,14 @@ int parse_radiotap_header(unsigned char* buf, size_t len, struct packet_info* p)
 }
 
 /* return rest of packet length (may be 0) or negative value on error */
-int wlan_parse_packet(unsigned char* buf, size_t len, struct packet_info* p)
+int wlan_parse_packet(unsigned char* buf, size_t len, struct packet_info* p, int arphdr)
 {
 	int ret;
-	if (conf.arphrd == ARPHRD_IEEE80211_PRISM) {
+	if (arphdr == ARPHRD_IEEE80211_PRISM) {
 		ret = parse_prism_header(buf, len, p);
 		if (ret <= 0)
 			return -1;
-	} else if (conf.arphrd == ARPHRD_IEEE80211_RADIOTAP) {
+	} else if (arphdr == ARPHRD_IEEE80211_RADIOTAP) {
 		ret = parse_radiotap_header(buf, len, p);
 		if (ret <= 0) /* 0: Bad FCS, allow packet but stop parsing */
 			return 0;

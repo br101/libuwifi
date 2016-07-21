@@ -357,7 +357,7 @@ static int nl80211_get_interface_info_cb(struct nl_msg *msg, void *arg)
 	}
 
 	if (tb[NL80211_ATTR_IFTYPE])
-		conf.if_type = nla_get_u32(tb[NL80211_ATTR_IFTYPE]);
+		intf->if_type = nla_get_u32(tb[NL80211_ATTR_IFTYPE]);
 
 	if (tb[NL80211_ATTR_WIPHY])
 		intf->if_phy = nla_get_u32(tb[NL80211_ATTR_WIPHY]);
@@ -365,15 +365,15 @@ static int nl80211_get_interface_info_cb(struct nl_msg *msg, void *arg)
 	return NL_SKIP;
 }
 
-bool ifctrl_iwget_interface_info(const char *const interface)
+bool ifctrl_iwget_interface_info(struct wlan_interface* intf)
 {
 	struct nl_msg *msg;
 	bool ret;
 
-	if (!nl80211_msg_prepare(&msg, NL80211_CMD_GET_INTERFACE, interface))
+	if (!nl80211_msg_prepare(&msg, NL80211_CMD_GET_INTERFACE, intf->ifname))
 		return false;
 
-	ret = nl80211_send_recv(sock, msg, nl80211_get_interface_info_cb, &conf.intf); /* frees msg */
+	ret = nl80211_send_recv(sock, msg, nl80211_get_interface_info_cb, intf); /* frees msg */
 	if (!ret)
 		fprintf(stderr, "failed to get interface info\n");
 	return ret;
@@ -470,7 +470,7 @@ nla_put_failure:
 	return false;
 }
 
-bool ifctrl_is_monitor(void)
+bool ifctrl_is_monitor(struct wlan_interface* intf)
 {
-	return conf.if_type == NL80211_IFTYPE_MONITOR;
+	return intf->if_type == NL80211_IFTYPE_MONITOR;
 }

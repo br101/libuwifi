@@ -81,6 +81,6 @@ struct node_info {
 };
 
 struct node_info* node_update(struct packet_info* p, struct list_head* nodes);
-void node_timeout(struct list_head* nodes);
+void node_timeout(struct list_head* nodes, unsigned int timeout_sec);
 
 #endif
