@@ -24,15 +24,12 @@
 #include "wlan_util.h"
 #include "conf.h"
 
-static uint32_t last_channelchange;
-static struct channel_list channels;
-
-uint32_t channel_get_remaining_dwell_time(void)
+uint32_t channel_get_remaining_dwell_time(struct wlan_interface* intf)
 {
-	if (!conf.do_change_channel)
+	if (!intf->channel_scan)
 		return UINT32_MAX;
 
-	int64_t ret = (int64_t)conf.channel_time - (plat_time_usec() - last_channelchange);
+	int64_t ret = (int64_t)intf->channel_time - (plat_time_usec() - intf->last_channelchange);
 
 	if (ret < 0)
 		return 0;
@@ -43,14 +40,14 @@ uint32_t channel_get_remaining_dwell_time(void)
 }
 
 
-static struct band_info channel_get_band_from_idx(int idx)
+static struct band_info channel_get_band_from_idx(struct channel_list* channels, int idx)
 {
-	int b = idx - channels.band[0].num_channels < 0 ? 0 : 1;
-	return channels.band[b];
+	int b = idx - channels->band[0].num_channels < 0 ? 0 : 1;
+	return channels->band[b];
 }
 
 
-static int get_center_freq_ht40(unsigned int freq, bool upper)
+static int get_center_freq_ht40(struct channel_list* channels, unsigned int freq, bool upper)
 {
 	unsigned int center = 0;
 	/*
@@ -58,9 +55,9 @@ static int get_center_freq_ht40(unsigned int freq, bool upper)
 	 * center frequency is in the middle: +/- 10 MHz, depending
 	 * on HT40+ or HT40- and whether the channel exists
 	 */
-	if (upper && channel_find_index_from_freq(freq + 20) != -1)
+	if (upper && channel_find_index_from_freq(channels, freq + 20) != -1)
 		center = freq + 10;
-	else if (!upper && channel_find_index_from_freq(freq - 20) != -1)
+	else if (!upper && channel_find_index_from_freq(channels, freq - 20) != -1)
 		center = freq - 10;
 	return center;
 }
@@ -137,23 +134,23 @@ const char* channel_width_string_short(enum chan_width w, int ht40p)
 
 /* Note: ht40plus is only used for HT40 channel width, to distinguish between
  * HT40+ and HT40- */
-bool channel_change(int idx, enum chan_width width, bool ht40plus)
+bool channel_change(struct wlan_interface* intf, int idx, enum chan_width width, bool ht40plus)
 {
 	unsigned int center1 = 0;
 
 	if (width == CHAN_WIDTH_UNSPEC)
-		width = channel_get_band_from_idx(idx).max_chan_width;
+		width = channel_get_band_from_idx(&intf->channels, idx).max_chan_width;
 
 	switch (width) {
 		case CHAN_WIDTH_20_NOHT:
 		case CHAN_WIDTH_20:
 			break;
 		case CHAN_WIDTH_40:
-			center1 = get_center_freq_ht40(channels.chan[idx].freq, ht40plus);
+			center1 = get_center_freq_ht40(&intf->channels, intf->channels.chan[idx].freq, ht40plus);
 			break;
 		case CHAN_WIDTH_80:
 		case CHAN_WIDTH_160:
-			center1 = get_center_freq_vht(channels.chan[idx].freq, width);
+			center1 = get_center_freq_vht(intf->channels.chan[idx].freq, width);
 			break;
 		default:
 			printlog("%s not implemented", channel_width_string(width, -1));
@@ -167,34 +164,34 @@ bool channel_change(int idx, enum chan_width width, bool ht40plus)
 
 	uint32_t the_time = plat_time_usec();
 
-	if (!ifctrl_iwset_freq(conf.ifname, channels.chan[idx].freq, width, center1)) {
+	if (!ifctrl_iwset_freq(intf->ifname, intf->channels.chan[idx].freq, width, center1)) {
 		printlog("ERROR: Failed to set CH %d (%d MHz) %s center %d",
-			channels.chan[idx].chan, channels.chan[idx].freq,
+			intf->channels.chan[idx].chan, intf->channels.chan[idx].freq,
 			channel_width_string(width, ht40plus),
 			center1);
 		return false;
 	}
 
 	printlog("Set CH %d (%d MHz) %s center %d after %dms",
-		channels.chan[idx].chan, channels.chan[idx].freq,
+		intf->channels.chan[idx].chan, intf->channels.chan[idx].freq,
 		channel_width_string(width, ht40plus),
-		 center1, (the_time - last_channelchange) / 1000);
+		 center1, (the_time - intf->last_channelchange) / 1000);
 
-	conf.channel_idx = idx;
-	conf.channel_width = width;
-	conf.channel_ht40plus = ht40plus;
-	conf.max_phy_rate = get_phy_thruput(width, channel_get_band_from_idx(idx).streams_rx);
-	last_channelchange = the_time;
+	intf->channel_idx = idx;
+	intf->channel_width = width;
+	intf->channel_ht40plus = ht40plus;
+	intf->max_phy_rate = get_phy_thruput(width, channel_get_band_from_idx(&intf->channels, idx).streams_rx);
+	intf->last_channelchange = the_time;
 	return true;
 }
 
-bool channel_auto_change(void)
+bool channel_auto_change(struct wlan_interface* intf)
 {
 	int new_idx;
 	bool ret = true;
 	int start_idx;
 
-	if (conf.channel_idx == -1)
+	if (intf->channel_idx == -1)
 		return false; /* The current channel is still unknown for some
 			   * reason (mac80211 bug, busy physical interface,
 			   * etc.), it will be fixed when the first packet
@@ -208,36 +205,36 @@ bool channel_auto_change(void)
 			   * channels as long as the channel module is not
 			   * initialized properly. */
 
-	if (channel_get_remaining_dwell_time() > 0)
+	if (channel_get_remaining_dwell_time(intf) > 0)
 		return false; /* too early */
 
-	if (conf.do_change_channel) {
-		start_idx = new_idx = conf.channel_idx;
+	if (intf->channel_scan) {
+		start_idx = new_idx = intf->channel_idx;
 		do {
-			enum chan_width max_width = channel_get_band_from_idx(new_idx).max_chan_width;
+			enum chan_width max_width = channel_get_band_from_idx(&intf->channels, new_idx).max_chan_width;
 			/*
 			 * For HT40 we visit the same channel twice, once with HT40+
 			 * and once with HT40-. This is necessary to see the HT40+/-
 			 * data packets
 			 */
 			if (max_width == CHAN_WIDTH_40) {
-				if (conf.channel_ht40plus)
+				if (intf->channel_ht40plus)
 					new_idx++;
-				conf.channel_ht40plus = !conf.channel_ht40plus; // toggle
+				intf->channel_ht40plus = !intf->channel_ht40plus; // toggle
 			} else {
 				new_idx++;
 			}
 
-			if (new_idx >= channels.num_channels ||
+			if (new_idx >= intf->channels.num_channels ||
 			    new_idx >= MAX_CHANNELS ||
-			    (conf.channel_max &&
-			     channel_get_chan(new_idx) > conf.channel_max)) {
+			    (intf->channel_max &&
+			     channel_get_chan(&intf->channels, new_idx) > intf->channel_max)) {
 				new_idx = 0;
-				max_width = channel_get_band_from_idx(new_idx).max_chan_width;
-				conf.channel_ht40plus = true;
+				max_width = channel_get_band_from_idx(&intf->channels, new_idx).max_chan_width;
+				intf->channel_ht40plus = true;
 			}
 
-			ret = channel_change(new_idx, max_width, conf.channel_ht40plus);
+			ret = channel_change(intf, new_idx, max_width, intf->channel_ht40plus);
 
 		/* try setting different channels in case we get errors only
 		 * on some channels (e.g. ipw2200 reports channel 14 but cannot
@@ -248,153 +245,154 @@ bool channel_auto_change(void)
 	return ret;
 }
 
-char* channel_get_string(int idx)
+char* channel_get_string(struct channel_list* channels, int idx)
 {
 	static char buf[32];
-	struct chan_freq* c = &channels.chan[idx];
+	struct chan_freq* c = &channels->chan[idx];
 	sprintf(buf, "%-3d: %d HT40%s%s", c->chan, c->freq,
-			get_center_freq_ht40(c->freq, true) ? "+" : "",
-			get_center_freq_ht40(c->freq, false) ? "-" : "");
+			get_center_freq_ht40(channels, c->freq, true) ? "+" : "",
+			get_center_freq_ht40(channels, c->freq, false) ? "-" : "");
 	return buf;
 }
 
-bool channel_init(void)
+bool channel_init(struct wlan_interface* intf)
 {
 	/* get available channels */
-	ifctrl_iwget_freqlist(conf.if_phy, &channels);
-	conf.channel_initialized = 1;
+	ifctrl_iwget_freqlist(intf->if_phy, &intf->channels);
+	intf->channel_initialized = 1;
 
-	printlog("Got %d Bands, %d Channels:\n", channels.num_bands, channels.num_channels);
-	for (int i = 0; i < channels.num_channels && i < MAX_CHANNELS; i++)
-		printlog("%s\n", channel_get_string(i));
+	printlog("Got %d Bands, %d Channels:\n", intf->channels.num_bands, intf->channels.num_channels);
+	for (int i = 0; i < intf->channels.num_channels && i < MAX_CHANNELS; i++)
+		printlog("%s\n", channel_get_string(&intf->channels, i));
 
-	if (channels.num_bands <= 0 || channels.num_channels <= 0)
+	if (intf->channels.num_bands <= 0 || intf->channels.num_channels <= 0)
 		return false;
 
-	if (conf.channel_set_num > 0) {
+	if (intf->channel_set_num > 0) {
 		/* configured values */
-		printlog("Setting configured channel %d\n", conf.channel_set_num);
-		int ini_idx = channel_find_index_from_chan(conf.channel_set_num);
-		if (!channel_change(ini_idx, conf.channel_set_width, conf.channel_set_ht40plus))
+		printlog("Setting configured channel %d\n", intf->channel_set_num);
+		int ini_idx = channel_find_index_from_chan(&intf->channels, intf->channel_set_num);
+		if (!channel_change(intf, ini_idx, intf->channel_set_width, intf->channel_set_ht40plus))
 			return false;
 	} else {
-		if (conf.if_freq <= 0) {
+		if (intf->if_freq <= 0) {
 			/* this happens when we have not been able to change
 			 * the original interface to monitor mode and we added
 			 * an additional monitor (horstX) interface */
 			printlog("Could not get current channel of interface\n");
-			conf.max_phy_rate = get_phy_thruput(channels.band[0].max_chan_width,
-							    channels.band[0].streams_rx);
+			intf->max_phy_rate = get_phy_thruput(intf->channels.band[0].max_chan_width,
+							    intf->channels.band[0].streams_rx);
 			return true; // not failure
 
 		}
-		conf.channel_idx = channel_find_index_from_freq(conf.if_freq);
-		conf.channel_set_num = channel_get_chan(conf.channel_idx);
+		intf->channel_idx = channel_find_index_from_freq(&intf->channels, intf->if_freq);
+		intf->channel_set_num = channel_get_chan(&intf->channels, intf->channel_idx);
 
 		/* try to set max width */
-		struct band_info b = channel_get_band_from_idx(conf.channel_idx);
-		if (conf.channel_width != b.max_chan_width) {
+		struct band_info b = channel_get_band_from_idx(&intf->channels, intf->channel_idx);
+		if (intf->channel_width != b.max_chan_width) {
 			printlog("Try to set max channel width %s",
 				channel_width_string(b.max_chan_width, -1));
 			// try both HT40+ and HT40- if necessary
-			if (!channel_change(conf.channel_idx, b.max_chan_width, true) &&
-			    !channel_change(conf.channel_idx, b.max_chan_width, false))
+			if (!channel_change(intf, intf->channel_idx, b.max_chan_width, true) &&
+			    !channel_change(intf, intf->channel_idx, b.max_chan_width, false))
 				return false;
 		} else {
-			conf.channel_set_width = conf.channel_width;
-			conf.channel_set_ht40plus = conf.channel_ht40plus;
-			conf.max_phy_rate = get_phy_thruput(conf.channel_width, b.streams_rx);
+			intf->channel_set_width = intf->channel_width;
+			intf->channel_set_ht40plus = intf->channel_ht40plus;
+			intf->max_phy_rate = get_phy_thruput(intf->channel_width, b.streams_rx);
 		}
 	}
 	return true;
 }
 
-int channel_find_index_from_chan(int c)
+int channel_find_index_from_chan(struct channel_list* channels, int c)
 {
 	int i = -1;
-	for (i = 0; i < channels.num_channels && i < MAX_CHANNELS; i++)
-		if (channels.chan[i].chan == c)
+	for (i = 0; i < channels->num_channels && i < MAX_CHANNELS; i++)
+		if (channels->chan[i].chan == c)
 			return i;
 	return -1;
 }
 
-int channel_find_index_from_freq(unsigned int f)
+int channel_find_index_from_freq(struct channel_list* channels, unsigned int f)
 {
 	int i = -1;
-	for (i = 0; i < channels.num_channels && i < MAX_CHANNELS; i++)
-		if (channels.chan[i].freq == f)
+	for (i = 0; i < channels->num_channels && i < MAX_CHANNELS; i++)
+		if (channels->chan[i].freq == f)
 			return i;
 	return -1;
 }
 
-int channel_get_chan(int i)
+int channel_get_chan(struct channel_list* channels, int i)
 {
-	if (i >= 0 && i < channels.num_channels && i < MAX_CHANNELS)
-		return channels.chan[i].chan;
+	if (i >= 0 && i < channels->num_channels && i < MAX_CHANNELS)
+		return channels->chan[i].chan;
 	else
 		return -1;
 }
 
-int channel_get_freq(int idx)
+int channel_get_freq(struct channel_list* channels, int idx)
 {
-	if (idx >= 0 && idx < channels.num_channels && idx < MAX_CHANNELS)
-		return channels.chan[idx].freq;
+	if (idx >= 0 && idx < channels->num_channels && idx < MAX_CHANNELS)
+		return channels->chan[idx].freq;
 	else
 		return -1;
 }
 
-bool channel_list_add(int freq)
+bool channel_list_add(struct channel_list* channels, int freq)
 {
-	if (channels.num_channels >=  MAX_CHANNELS)
+	if (channels->num_channels >=  MAX_CHANNELS)
 		return false;
 
-	channels.chan[channels.num_channels].chan = frequency2channel(freq);
-	channels.chan[channels.num_channels].freq = freq;
-	channels.num_channels++;
+	channels->chan[channels->num_channels].chan = frequency2channel(freq);
+	channels->chan[channels->num_channels].freq = freq;
+	channels->num_channels++;
 	return true;
 }
 
-int channel_get_num_channels(void)
+int channel_get_num_channels(struct channel_list* channels)
 {
-	return channels.num_channels;
+	return channels->num_channels;
 }
 
-int channel_get_num_bands(void)
+int channel_get_num_bands(struct channel_list* channels)
 {
-	return channels.num_bands;
+	return channels->num_bands;
 }
 
-int channel_get_idx_from_band_idx(int band, int idx)
+int channel_get_idx_from_band_idx(struct channel_list* channels, int band, int idx)
 {
-	if (band < 0 || band >= channels.num_bands)
+	if (band < 0 || band >= channels->num_bands)
 		return -1;
 
-	if (idx < 0 || idx >= channels.band[band].num_channels)
+	if (idx < 0 || idx >= channels->band[band].num_channels)
 		return -1;
 
 	if (band > 0)
-		idx = idx + channels.band[0].num_channels;
+		idx = idx + channels->band[0].num_channels;
 
 	return idx;
 }
 
-const struct band_info* channel_get_band(int b)
+const struct band_info* channel_get_band(struct channel_list* channels, int b)
 {
-	if (b < 0 || b > channels.num_bands)
+	if (b < 0 || b > channels->num_bands)
 		return NULL;
-	return &channels.band[b];
+	return &channels->band[b];
 }
 
-bool channel_band_add(int num_channels, enum chan_width max_chan_width,
+bool channel_band_add(struct channel_list* channels, int num_channels,
+		      enum chan_width max_chan_width,
 		      unsigned char streams_rx, unsigned char streams_tx)
 {
-	if (channels.num_bands >= MAX_BANDS)
+	if (channels->num_bands >= MAX_BANDS)
 		return false;
 
-	channels.band[channels.num_bands].num_channels = num_channels;
-	channels.band[channels.num_bands].max_chan_width = max_chan_width;
-	channels.band[channels.num_bands].streams_rx = streams_rx;
-	channels.band[channels.num_bands].streams_tx = streams_tx;
-	channels.num_bands++;
+	channels->band[channels->num_bands].num_channels = num_channels;
+	channels->band[channels->num_bands].max_chan_width = max_chan_width;
+	channels->band[channels->num_bands].streams_rx = streams_rx;
+	channels->band[channels->num_bands].streams_tx = streams_tx;
+	channels->num_bands++;
 	return true;
 }

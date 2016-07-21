@@ -56,25 +56,27 @@ struct channel_list {
 	int num_bands;
 };
 
-bool channel_change(int idx, enum chan_width width, bool ht40plus);
-bool channel_auto_change(void);
-int channel_find_index_from_chan(int c);
-int channel_find_index_from_freq(unsigned int f);
-int channel_get_chan(int idx);
-int channel_get_freq(int idx);
-int channel_get_num_channels();
-bool channel_init(void);
-bool channel_list_add(int freq);
-uint32_t channel_get_remaining_dwell_time(void);
-char* channel_get_string(int idx);
+struct wlan_interface;
+
+bool channel_change(struct wlan_interface* intf, int idx, enum chan_width width, bool ht40plus);
+bool channel_auto_change(struct wlan_interface* intf);
+int channel_find_index_from_chan(struct channel_list* channels, int c);
+int channel_find_index_from_freq(struct channel_list* channels, unsigned int f);
+int channel_get_chan(struct channel_list* channels, int idx);
+int channel_get_freq(struct channel_list* channels, int idx);
+int channel_get_num_channels(struct channel_list* channels);
+bool channel_init(struct wlan_interface* intf);
+bool channel_list_add(struct channel_list* channels, int freq);
+uint32_t channel_get_remaining_dwell_time(struct wlan_interface* intf);
+char* channel_get_string(struct channel_list* channels, int idx);
 /* Note: ht40p is used only for HT40 channels. If it should not be shown use -1 */
 const char* channel_width_string(enum chan_width w, int ht40p);
 /* Note: ht40p is used only for HT40 channels. If it should not be shown use -1 */
 const char* channel_width_string_short(enum chan_width w, int ht40p);
-int channel_get_num_bands();
-int channel_get_idx_from_band_idx(int band, int idx);
-const struct band_info* channel_get_band(int b);
-bool channel_band_add(int num_channels, enum chan_width max_chan_width,
+int channel_get_num_bands(struct channel_list* channels);
+int channel_get_idx_from_band_idx(struct channel_list* channels, int band, int idx);
+const struct band_info* channel_get_band(struct channel_list* channels, int b);
+bool channel_band_add(struct channel_list* channels, int num_channels, enum chan_width max_chan_width,
 		      unsigned char streams_rx, unsigned char streams_tx);
 
 #endif

@@ -323,44 +323,44 @@ nla_put_failure:
 	return false;
 }
 
-static int nl80211_get_interface_info_cb(struct nl_msg *msg,
-					 __attribute__((unused)) void *arg)
+static int nl80211_get_interface_info_cb(struct nl_msg *msg, void *arg)
 {
+	struct wlan_interface* intf = arg;
 	struct nlattr **tb = nl80211_parse(msg);
 
 	if (tb[NL80211_ATTR_WIPHY_FREQ])
-		conf.if_freq = nla_get_u32(tb[NL80211_ATTR_WIPHY_FREQ]);
+		intf->if_freq = nla_get_u32(tb[NL80211_ATTR_WIPHY_FREQ]);
 
 	if (tb[NL80211_ATTR_CHANNEL_WIDTH]) {
 		int nlw = nla_get_u32(tb[NL80211_ATTR_CHANNEL_WIDTH]);
 		switch (nlw) {
 			case NL80211_CHAN_WIDTH_20_NOHT:
-				conf.channel_width = CHAN_WIDTH_20_NOHT; break;
+				intf->channel_width = CHAN_WIDTH_20_NOHT; break;
 			case NL80211_CHAN_WIDTH_20:
-				conf.channel_width = CHAN_WIDTH_20; break;
+				intf->channel_width = CHAN_WIDTH_20; break;
 			case NL80211_CHAN_WIDTH_40:
-				conf.channel_width = CHAN_WIDTH_40; break;
+				intf->channel_width = CHAN_WIDTH_40; break;
 			case NL80211_CHAN_WIDTH_80:
-				conf.channel_width = CHAN_WIDTH_80; break;
+				intf->channel_width = CHAN_WIDTH_80; break;
 			case NL80211_CHAN_WIDTH_160:
-				conf.channel_width = CHAN_WIDTH_160; break;
+				intf->channel_width = CHAN_WIDTH_160; break;
 			case NL80211_CHAN_WIDTH_80P80:
-				conf.channel_width = CHAN_WIDTH_8080; break;
+				intf->channel_width = CHAN_WIDTH_8080; break;
 			default:
-				conf.channel_width = CHAN_WIDTH_UNSPEC; break;
+				intf->channel_width = CHAN_WIDTH_UNSPEC; break;
 		}
 	}
 
-	if (conf.channel_width == CHAN_WIDTH_40 && tb[NL80211_ATTR_CENTER_FREQ1]) {
+	if (intf->channel_width == CHAN_WIDTH_40 && tb[NL80211_ATTR_CENTER_FREQ1]) {
 		unsigned int center1 = nla_get_u32(tb[NL80211_ATTR_CENTER_FREQ1]);
-		conf.channel_ht40plus = center1 > conf.if_freq;
+		intf->channel_ht40plus = center1 > intf->if_freq;
 	}
 
 	if (tb[NL80211_ATTR_IFTYPE])
 		conf.if_type = nla_get_u32(tb[NL80211_ATTR_IFTYPE]);
 
 	if (tb[NL80211_ATTR_WIPHY])
-		conf.if_phy = nla_get_u32(tb[NL80211_ATTR_WIPHY]);
+		intf->if_phy = nla_get_u32(tb[NL80211_ATTR_WIPHY]);
 
 	return NL_SKIP;
 }
@@ -373,7 +373,7 @@ bool ifctrl_iwget_interface_info(const char *const interface)
 	if (!nl80211_msg_prepare(&msg, NL80211_CMD_GET_INTERFACE, interface))
 		return false;
 
-	ret = nl80211_send_recv(sock, msg, nl80211_get_interface_info_cb, NULL); /* frees msg */
+	ret = nl80211_send_recv(sock, msg, nl80211_get_interface_info_cb, &conf.intf); /* frees msg */
 	if (!ret)
 		fprintf(stderr, "failed to get interface info\n");
 	return ret;
@@ -431,7 +431,7 @@ static int nl80211_get_freqlist_cb(struct nl_msg *msg, void *arg)
 			    freqs[NL80211_FREQUENCY_ATTR_DISABLED])
 				continue;
 
-			channel_list_add(nla_get_u32(freqs[NL80211_FREQUENCY_ATTR_FREQ]));
+			channel_list_add(list, nla_get_u32(freqs[NL80211_FREQUENCY_ATTR_FREQ]));
 
 			if (++i >= MAX_CHANNELS)
 				goto end;
