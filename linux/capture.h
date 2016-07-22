@@ -28,6 +28,7 @@ int recv_packet(int fd, unsigned char* buffer, size_t bufsize);
 
 void close_packet_socket(int fd);
 
-int device_get_hwinfo(int fd, char* ifname, unsigned char* mac);
+int device_get_hwinfo(int fd, char* ifname);
+int get_mac_address(char* ifname, unsigned char* mac);
 
 #endif // _CAPTURE_H_

@@ -263,3 +263,30 @@ int wlan_parse_packet(unsigned char* buf, size_t len, struct packet_info* p, int
 	DEBUG("before parse 80211 len: %zd\n", len - ret);
 	return parse_80211_header(buf + ret, len - ret, p);
 }
+
+void fixup_packet_channel(struct packet_info* p, struct wlan_interface* intf)
+{
+	int i = -1;
+
+	/* get channel index for packet */
+	if (p->phy_freq) {
+		i = channel_find_index_from_freq(&intf->channels, p->phy_freq);
+	}
+
+	/* if not found from pkt, best guess from config but it might be
+	 * unknown (-1) too */
+	if (i < 0)
+		p->pkt_chan_idx = intf->channel_idx;
+	else
+		p->pkt_chan_idx = i;
+
+	/* wlan_channel is only known for beacons and probe response,
+	 * otherwise we set it from the physical channel */
+	if (p->wlan_channel == 0 && p->pkt_chan_idx >= 0)
+		p->wlan_channel = channel_get_chan(&intf->channels, p->pkt_chan_idx);
+
+	/* if current channel is unknown (this is a mac80211 bug), guess it from
+	 * the packet */
+	if (intf->channel_idx < 0 && p->pkt_chan_idx >= 0)
+		intf->channel_idx = p->pkt_chan_idx;
+}

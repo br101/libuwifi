@@ -37,20 +37,40 @@
 /*
  *  Get the hardware type of the given interface as ARPHRD_xxx constant.
  */
-int device_get_hwinfo(int fd, char* ifname, unsigned char* mac)
+int device_get_hwinfo(int fd, char* ifname)
 {
 	struct ifreq ifr;
 
 	memset(&ifr, 0, sizeof(ifr));
-	strncpy(ifr.ifr_name, ifname, IFNAMSIZ - 1);
-	ifr.ifr_name[IFNAMSIZ - 1] = '\0';
+	strncpy(ifr.ifr_name, ifname, sizeof(ifr.ifr_name));
 
-	if (ioctl(fd, SIOCGIFHWADDR, &ifr) < 0)
-		err(1, "Could not get arptype");
+	if (ioctl(fd, SIOCGIFHWADDR, &ifr) < 0) {
+		printlog("Could not get arptype for '%s'", ifname);
+		return -1;
+	}
 	DEBUG("ARPTYPE %d\n", ifr.ifr_hwaddr.sa_family);
-	memcpy(mac, ifr.ifr_hwaddr.sa_data, 6);
-	DEBUG("MY MAC %s\n", ether_sprintf(mac));
 	return ifr.ifr_hwaddr.sa_family;
+}
+
+int get_mac_address(char* ifname, unsigned char* mac)
+{
+	struct ifreq ifr;
+	int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
+	if (sock == -1) {
+		printlog("MAC addr socket failed");
+		return 0;
+	}
+
+	strcpy(ifr.ifr_name, ifname);
+	if (ioctl(sock, SIOCGIFHWADDR, &ifr) == -1) {
+		printlog("MAC addr ioctl failed for '%s'", ifname);
+		close(sock);
+		return 0;
+	}
+
+	memcpy(mac, ifr.ifr_hwaddr.sa_data, 6);
+	close(sock);
+	return 1;
 }
 
 static void set_receive_buffer(int fd, int sockbufsize)
