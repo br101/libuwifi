@@ -120,6 +120,9 @@ static void copy_nodeinfo(struct node_info* n, struct packet_info* p, struct lis
 
 	if (p->wlan_chan_width > n->wlan_chan_width)
 		n->wlan_chan_width = p->wlan_chan_width;
+
+	/* set packet retries from node sum */
+	p->wlan_retries = n->wlan_retries_last;
 }
 
 struct node_info* node_update(struct packet_info* p, struct list_head* nodes)
