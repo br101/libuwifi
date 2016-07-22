@@ -1,4 +1,4 @@
-# libuwifi
+# horst - Highly Optimized Radio Scanning Tool
 #
 # Copyright (C) 2005-2015 Bruno Randolf (br1@einfach.org)
 #
@@ -16,45 +16,30 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-NAME=libuwifi
+INST_PATH=/usr/local
 
-# build options
-DEBUG=1
-PLATFORM=linux
+OBJS+=	linux/capture.o			\
+	linux/ifctrl-ioctl.o		\
+	linux/platform.o		\
+	linux/raw_parser.o		\
+	osx/capture-pcap.o		\
+	osx/ifctrl-osx.o		\
 
-OBJS=	core/channel.o			\
-	core/node.o			\
-	core/wlan_parser.o		\
-	core/wlan_util.o		\
-	util/average.o			\
-	util/util.o			\
+LIBS=-lpcap -framework CoreWLAN -framework CoreData -framework Foundation
+CFLAGS+=-fPIC
 
-INCLUDES=-I. -I./core -I./util -I./$(PLATFORM)
-CFLAGS+=-std=gnu99 -Wall -Wextra $(INCLUDES)
+all: $(NAME).so $(NAME).a
 
-include $(PLATFORM)/platform.mk
+$(NAME).so: $(OBJS)
+	$(CC) $(LDFLAGS) -shared -Wl,-soname,$(NAME).so.1 -o $(NAME).so $(OBJS) $(LIBS)
+	ln -s $(NAME).so $(NAME).so.1
 
-.PHONY: all check clean force
-
-.objdeps.mk: $(OBJS:%.o=%.c)
-	gcc -MM $(INCLUDES) $^ >$@
-
--include .objdeps.mk
-
-$(NAME).a: $(OBJS)
-	$(AR) rcs $@ $(OBJS)
-
-$(OBJS): .buildflags
-
-check: $(OBJS:%.o=%.c)
-	sparse $(CFLAGS) $^
-
-clean:
-	-rm -f core/*.o util/*.o linux/*.o osx/*.o esp8266/*.o *~
-	-rm -f $(NAME).so*
-	-rm -f $(NAME).a*
-	-rm -f .buildflags
-	-rm -f .objdeps.mk
-
-.buildflags: force
-	echo '$(CFLAGS)' | cmp -s - $@ || echo '$(CFLAGS)' > $@
+install:
+	-mkdir $(INST_PATH)/include/uwifi
+	-mkdir $(INST_PATH)/lib
+	cp ./core/*.h $(INST_PATH)/include/uwifi
+	cp ./util/*.h $(INST_PATH)/include/uwifi
+	cp ./linux/*.h $(INST_PATH)/include/uwifi
+	cp -r ./ccan $(INST_PATH)/include/
+	cp ./libuwifi.a $(INST_PATH)/lib/
+	cp ./libuwifi.so* $(INST_PATH)/lib/

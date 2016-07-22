@@ -16,41 +16,26 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+INST_PATH=/usr/local
+
 # build options
-PCAP=0
 WEXT=0
 LIBNL=3.0
-OSX=0
+#PCAP=0 #TODO revive
 
-OBJS+=	linux/raw_parser.o			\
-	linux/capture.o				\
-	linux/ifctrl-ioctl.o			\
-	linux/platform.o			\
+OBJS+=	linux/capture.o			\
+	linux/ifctrl-ioctl.o		\
+	linux/platform.o		\
+	linux/raw_parser.o		\
 
-LIBS=-lm -lradiotap
+LIBS=-lradiotap
 CFLAGS+=-fPIC
-
-ifeq ($(OSX),1)
-    PCAP=1
-    WEXT=0
-    LIBNL=0
-    LIBS+=-framework CoreWLAN -framework CoreData -framework Foundation
-    OBJS += ifctrl-osx.o
-endif
-
-ifeq ($(PCAP),1)
-  CFLAGS+=-DPCAP
-  LIBS+=-lpcap
-  OBJS+=osx/capture-pcap.o
-endif
 
 ifeq ($(WEXT),1)
   OBJS += linux/ifctrl-wext.o
 else
   ifeq ($(LIBNL),0)
-    ifeq ($(OSX),0)
-        OBJS += core/ifctrl-dummy.o
-    endif
+    OBJS += core/ifctrl-dummy.o
   else
     OBJS += linux/ifctrl-nl80211.o
     CFLAGS += $(shell pkg-config --cflags libnl-$(LIBNL))
@@ -75,4 +60,5 @@ install:
 	cp ./util/*.h $(INST_PATH)/include/uwifi
 	cp ./linux/*.h $(INST_PATH)/include/uwifi
 	cp -r ./ccan $(INST_PATH)/include/
-	cp libuwifi.{a,so*} $(INST_PATH)/lib/
+	cp ./libuwifi.a $(INST_PATH)/lib/
+	cp ./libuwifi.so* $(INST_PATH)/lib/
