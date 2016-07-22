@@ -7,9 +7,6 @@
 #include "platform.h"
 
 #define IF_NAMESIZE		16
-#define MAX_CONF_VALUE_STRLEN	200
-#define MAX_CONF_NAME_STRLEN	32
-#define MAX_FILTERMAC		9
 
 struct wlan_interface {
 	int			sock;
