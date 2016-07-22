@@ -193,3 +193,18 @@ void node_timeout(struct list_head* nodes, unsigned int timeout_sec)
 	}
 	last_nodetimeout = the_time;
 }
+
+void nodes_free(struct list_head* nodes)
+{
+	struct node_info *ni, *mi;
+
+	/* protect against uninitialized lists */
+	if (nodes->n.next == NULL)
+		return;
+
+	list_for_each_safe(nodes, ni, mi, list) {
+		DEBUG("free node %s\n", ether_sprintf(ni->wlan_src));
+		list_del(&ni->list);
+		free(ni);
+	}
+}
