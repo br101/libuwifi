@@ -11,7 +11,7 @@
 #include "raw_parser.h"
 
 /* return consumed length or -1 on error */
-int parse_prism_header(unsigned char* buf, int len, struct packet_info* p)
+int parse_prism_header(unsigned char* buf, int len, struct uwifi_packet* p)
 {
 	wlan_ng_prism2_header* ph;
 
@@ -68,7 +68,7 @@ int parse_prism_header(unsigned char* buf, int len, struct packet_info* p)
 	return sizeof(wlan_ng_prism2_header);
 }
 
-static void get_radiotap_info(struct ieee80211_radiotap_iterator *iter, struct packet_info* p)
+static void get_radiotap_info(struct ieee80211_radiotap_iterator *iter, struct uwifi_packet* p)
 {
 	uint16_t x;
 	signed char c;
@@ -186,7 +186,7 @@ static void get_radiotap_info(struct ieee80211_radiotap_iterator *iter, struct p
 }
 
 /* return consumed length, 0 for bad FCS, -1 on error */
-int parse_radiotap_header(unsigned char* buf, size_t len, struct packet_info* p)
+int parse_radiotap_header(unsigned char* buf, size_t len, struct uwifi_packet* p)
 {
 	struct ieee80211_radiotap_header* rh;
 	struct ieee80211_radiotap_iterator iter;
@@ -240,7 +240,7 @@ int parse_radiotap_header(unsigned char* buf, size_t len, struct packet_info* p)
 }
 
 /* return rest of packet length (may be 0) or negative value on error */
-int wlan_parse_packet(unsigned char* buf, size_t len, struct packet_info* p, int arphdr)
+int wlan_parse_packet(unsigned char* buf, size_t len, struct uwifi_packet* p, int arphdr)
 {
 	int ret;
 	if (arphdr == ARPHRD_IEEE80211_PRISM) {
@@ -261,10 +261,10 @@ int wlan_parse_packet(unsigned char* buf, size_t len, struct packet_info* p, int
 	}
 
 	DEBUG("before parse 80211 len: %zd\n", len - ret);
-	return parse_80211_header(buf + ret, len - ret, p);
+	return uwifi_parse_80211_header(buf + ret, len - ret, p);
 }
 
-void fixup_packet_channel(struct packet_info* p, struct wlan_interface* intf)
+void fixup_packet_channel(struct uwifi_packet* p, struct wlan_interface* intf)
 {
 	int i = -1;
 

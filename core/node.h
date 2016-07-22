@@ -77,10 +77,10 @@ struct uwifi_node {
 	unsigned int		olsr_neigh;	/* number if OLSR neighbours */
 	unsigned int		olsr_tc;	/* unused */
 
-	struct packet_info	last_pkt;
+	struct uwifi_packet	last_pkt;
 };
 
-struct uwifi_node* uwifi_node_update(struct packet_info* p, struct list_head* nodes);
+struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct list_head* nodes);
 void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec);
 void uwifi_nodes_free(struct list_head* nodes);
 

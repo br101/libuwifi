@@ -24,12 +24,12 @@
 
 static uint32_t last_nodetimeout;
 
-static void copy_nodeinfo(struct uwifi_node* n, struct packet_info* p, struct list_head* nodes)
+static void copy_nodeinfo(struct uwifi_node* n, struct uwifi_packet* p, struct list_head* nodes)
 {
 	struct uwifi_node* ap;
 
 	memcpy(n->wlan_src, p->wlan_src, MAC_LEN);
-	memcpy(&n->last_pkt, p, sizeof(struct packet_info));
+	memcpy(&n->last_pkt, p, sizeof(struct uwifi_packet));
 	n->last_seen = plat_time_usec();
 	n->pkt_count++;
 	n->pkt_types |= p->pkt_types;
@@ -125,7 +125,7 @@ static void copy_nodeinfo(struct uwifi_node* n, struct packet_info* p, struct li
 	p->wlan_retries = n->wlan_retries_last;
 }
 
-struct uwifi_node* uwifi_node_update(struct packet_info* p, struct list_head* nodes)
+struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct list_head* nodes)
 {
 	struct uwifi_node* n;
 

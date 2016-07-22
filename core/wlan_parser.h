@@ -20,7 +20,7 @@
 
 #define WLAN_MODE_ALL		(WLAN_MODE_AP | WLAN_MODE_IBSS | WLAN_MODE_STA | WLAN_MODE_PROBE | WLAN_MODE_4ADDR | WLAN_MODE_UNKNOWN)
 
-struct packet_info {
+struct uwifi_packet {
 	/* general */
 	unsigned int		pkt_types;	/* bitmask of packet types */
 
@@ -76,7 +76,7 @@ struct packet_info {
 	int			wlan_retries;	/* retry count for this frame */
 };
 
-int parse_80211_header(unsigned char* buf, size_t len, struct packet_info* p);
-void wlan_parse_information_elements(unsigned char* buf, size_t bufLen, struct packet_info *p);
+int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet* p);
+void uwifi_parse_information_elements(unsigned char* buf, size_t bufLen, struct uwifi_packet *p);
 
 #endif

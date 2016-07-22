@@ -24,7 +24,7 @@
 #include "wlan_util.h"
 #include "wlan_parser.h"
 
-void wlan_parse_information_elements(unsigned char* buf, size_t bufLen, struct packet_info *p)
+void uwifi_parse_information_elements(unsigned char* buf, size_t bufLen, struct uwifi_packet *p)
 {
 	int len = bufLen;
 	while (len > 2) {
@@ -106,7 +106,7 @@ void wlan_parse_information_elements(unsigned char* buf, size_t bufLen, struct p
 }
 
 /* return consumed length, 0 for stop parsing, or -1 on error */
-int parse_80211_header(unsigned char* buf, size_t len, struct packet_info* p)
+int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet* p)
 {
 	struct wlan_frame* wh;
 	size_t hdrlen;
@@ -275,7 +275,7 @@ int parse_80211_header(unsigned char* buf, size_t len, struct packet_info* p)
 			p->wlan_bintval = le16toh(bc->bintval);
 			//DEBUG("TSF %u\n BINTVAL %u", p->wlan_tsf, p->wlan_bintval);
 
-			wlan_parse_information_elements(bc->ie,
+			uwifi_parse_information_elements(bc->ie,
 				len - hdrlen - sizeof(struct wlan_frame_beacon) - 4 /* FCS */, p);
 			DEBUG("ESSID %s \n", p->wlan_essid );
 			DEBUG("CHAN %d \n", p->wlan_channel );
@@ -289,7 +289,7 @@ int parse_80211_header(unsigned char* buf, size_t len, struct packet_info* p)
 			break;
 
 		case WLAN_FRAME_PROBE_REQ:
-			wlan_parse_information_elements(buf + hdrlen,
+			uwifi_parse_information_elements(buf + hdrlen,
 				len - hdrlen - 4 /* FCS */, p);
 			p->wlan_mode = WLAN_MODE_PROBE;
 			break;
@@ -331,5 +331,3 @@ int parse_80211_header(unsigned char* buf, size_t len, struct packet_info* p)
 	}
 	return 0;
 }
-
-
