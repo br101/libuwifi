@@ -12,7 +12,7 @@
 #define ARPHRD_IEEE80211_PRISM 802      /* IEEE 802.11 + Prism2 header  */
 #endif
 
-int wlan_parse_packet(unsigned char* buf, size_t len, struct uwifi_packet* p, int arphdr);
-void fixup_packet_channel(struct uwifi_packet* p, struct uwifi_interface* intf);
+int uwifi_parse_raw(unsigned char* buf, size_t len, struct uwifi_packet* p, int arphdr);
+void uwifi_fixup_packet_channel(struct uwifi_packet* p, struct uwifi_interface* intf);
 
 #endif

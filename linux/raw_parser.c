@@ -240,7 +240,7 @@ int parse_radiotap_header(unsigned char* buf, size_t len, struct uwifi_packet* p
 }
 
 /* return rest of packet length (may be 0) or negative value on error */
-int wlan_parse_packet(unsigned char* buf, size_t len, struct uwifi_packet* p, int arphdr)
+int uwifi_parse_raw(unsigned char* buf, size_t len, struct uwifi_packet* p, int arphdr)
 {
 	int ret;
 	if (arphdr == ARPHRD_IEEE80211_PRISM) {
@@ -264,7 +264,7 @@ int wlan_parse_packet(unsigned char* buf, size_t len, struct uwifi_packet* p, in
 	return uwifi_parse_80211_header(buf + ret, len - ret, p);
 }
 
-void fixup_packet_channel(struct uwifi_packet* p, struct uwifi_interface* intf)
+void uwifi_fixup_packet_channel(struct uwifi_packet* p, struct uwifi_interface* intf)
 {
 	int i = -1;
 
