@@ -313,15 +313,15 @@ int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet
 	}
 
 	if (ta != NULL) {
-		memcpy(p->wlan_src, ta, MAC_LEN);
+		memcpy(p->wlan_src, ta, WLAN_MAC_LEN);
 		DEBUG("TA    %s\n", ether_sprintf(ta));
 	}
 	if (ra != NULL) {
-		memcpy(p->wlan_dst, ra, MAC_LEN);
+		memcpy(p->wlan_dst, ra, WLAN_MAC_LEN);
 		DEBUG("RA    %s\n", ether_sprintf(ra));
 	}
 	if (bssid != NULL) {
-		memcpy(p->wlan_bssid, bssid, MAC_LEN);
+		memcpy(p->wlan_bssid, bssid, WLAN_MAC_LEN);
 		DEBUG("BSSID %s\n", ether_sprintf(bssid));
 	}
 

@@ -199,6 +199,6 @@ struct information_element {
 
 #define WLAN_MAX_SSID_LEN	34
 
-#define MAC_LEN			6	//TODO rename
+#define WLAN_MAC_LEN		6
 
 #endif

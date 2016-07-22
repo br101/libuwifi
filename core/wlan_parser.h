@@ -9,8 +9,6 @@
 #include "channel.h"
 #include "util.h"
 
-#define MAC_LEN			6
-
 #define WLAN_MODE_AP		BIT(0)
 #define WLAN_MODE_IBSS		BIT(1)
 #define WLAN_MODE_STA		BIT(2)
@@ -35,9 +33,9 @@ struct uwifi_packet {
 	/* wlan mac */
 	unsigned int		wlan_len;	/* packet length */
 	uint16_t		wlan_type;	/* frame control field */			// X
-	unsigned char		wlan_src[MAC_LEN]; /* transmitter (TA) */			// X
-	unsigned char		wlan_dst[MAC_LEN]; /* receiver (RA) */
-	unsigned char		wlan_bssid[MAC_LEN];						// X?
+	unsigned char		wlan_src[WLAN_MAC_LEN]; /* transmitter (TA) */			// X
+	unsigned char		wlan_dst[WLAN_MAC_LEN]; /* receiver (RA) */
+	unsigned char		wlan_bssid[WLAN_MAC_LEN];						// X?
 	char			wlan_essid[WLAN_MAX_SSID_LEN];
 	uint64_t		wlan_tsf;	/* timestamp from beacon */
 	unsigned int		wlan_bintval;	/* beacon interval */

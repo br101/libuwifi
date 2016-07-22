@@ -28,7 +28,7 @@ static void copy_nodeinfo(struct uwifi_node* n, struct uwifi_packet* p, struct l
 {
 	struct uwifi_node* ap;
 
-	memcpy(n->wlan_src, p->wlan_src, MAC_LEN);
+	memcpy(n->wlan_src, p->wlan_src, WLAN_MAC_LEN);
 	memcpy(&n->last_pkt, p, sizeof(struct uwifi_packet));
 	n->last_seen = plat_time_usec();
 	n->pkt_count++;
@@ -56,12 +56,12 @@ static void copy_nodeinfo(struct uwifi_node* n, struct uwifi_packet* p, struct l
 	    !(p->wlan_bssid[0] == 0 && p->wlan_bssid[1] == 0 &&
 	      p->wlan_bssid[2] == 0 && p->wlan_bssid[3] == 0 &&
 	      p->wlan_bssid[4] == 0 && p->wlan_bssid[5] == 0)) {
-		memcpy(n->wlan_bssid, p->wlan_bssid, MAC_LEN);
+		memcpy(n->wlan_bssid, p->wlan_bssid, WLAN_MAC_LEN);
 
 		if ((n->wlan_mode & WLAN_MODE_STA) && n->wlan_ap_node == NULL) {
 			/* find AP node for this BSSID */
 			list_for_each(nodes, ap, list) {
-				if (memcmp(p->wlan_bssid, ap->wlan_src, MAC_LEN) == 0) {
+				if (memcmp(p->wlan_bssid, ap->wlan_src, WLAN_MAC_LEN) == 0) {
 					DEBUG("AP node found %p\n", ap);
 					DEBUG("AP node ESSID %s\n",
 					      ap->essid != NULL ? ap->essid->essid : "unknown");
@@ -139,7 +139,7 @@ struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct list_head* n
 
 	/* find node by wlan source address */
 	list_for_each(nodes, n, list) {
-		if (memcmp(p->wlan_src, n->wlan_src, MAC_LEN) == 0) {
+		if (memcmp(p->wlan_src, n->wlan_src, WLAN_MAC_LEN) == 0) {
 			DEBUG("node found %p\n", n);
 			break;
 		}

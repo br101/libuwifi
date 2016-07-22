@@ -46,8 +46,8 @@ struct uwifi_node {
 	int			phy_sig_count;							// X
 
 	/* wlan mac */
-	unsigned char		wlan_src[MAC_LEN];	/* Sender MAC address (ID) */		// X
-	unsigned char		wlan_bssid[MAC_LEN];
+	unsigned char		wlan_src[WLAN_MAC_LEN];	/* Sender MAC address (ID) */		// X
+	unsigned char		wlan_bssid[WLAN_MAC_LEN];
 	unsigned int		wlan_channel;	/* channel from beacon, probe frames */		// X
 	unsigned int		wlan_mode;	/* AP, STA or IBSS */				// X
 	uint64_t		wlan_tsf;
