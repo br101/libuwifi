@@ -24,9 +24,9 @@
 
 static uint32_t last_nodetimeout;
 
-static void copy_nodeinfo(struct node_info* n, struct packet_info* p, struct list_head* nodes)
+static void copy_nodeinfo(struct uwifi_node* n, struct packet_info* p, struct list_head* nodes)
 {
-	struct node_info* ap;
+	struct uwifi_node* ap;
 
 	memcpy(n->wlan_src, p->wlan_src, MAC_LEN);
 	memcpy(&n->last_pkt, p, sizeof(struct packet_info));
@@ -125,9 +125,9 @@ static void copy_nodeinfo(struct node_info* n, struct packet_info* p, struct lis
 	p->wlan_retries = n->wlan_retries_last;
 }
 
-struct node_info* node_update(struct packet_info* p, struct list_head* nodes)
+struct uwifi_node* uwifi_node_update(struct packet_info* p, struct list_head* nodes)
 {
-	struct node_info* n;
+	struct uwifi_node* n;
 
 	if (p->phy_flags & PHY_FLAG_BADFCS)
 		return NULL;
@@ -148,8 +148,8 @@ struct node_info* node_update(struct packet_info* p, struct list_head* nodes)
 	/* not found */
 	if (&n->list == &nodes->n) {
 		DEBUG("node adding\n");
-		n = (struct node_info*)malloc(sizeof(struct node_info));
-		memset(n, 0, sizeof(struct node_info));
+		n = (struct uwifi_node*)malloc(sizeof(struct uwifi_node));
+		memset(n, 0, sizeof(struct uwifi_node));
 		n->essid = NULL;
 		ewma_init(&n->phy_sig_avg, 1024, 8);
 		list_head_init(&n->on_channels);
@@ -161,9 +161,9 @@ struct node_info* node_update(struct packet_info* p, struct list_head* nodes)
 	return n;
 }
 
-void node_timeout(struct list_head* nodes, unsigned int timeout_sec)
+void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec)
 {
-	struct node_info *n, *m, *n2, *m2;
+	struct uwifi_node *n, *m, *n2, *m2;
 //	struct chan_node *cn, *cn2;
 	uint32_t the_time = plat_time_usec();
 
@@ -194,9 +194,9 @@ void node_timeout(struct list_head* nodes, unsigned int timeout_sec)
 	last_nodetimeout = the_time;
 }
 
-void nodes_free(struct list_head* nodes)
+void uwifi_nodes_free(struct list_head* nodes)
 {
-	struct node_info *ni, *mi;
+	struct uwifi_node *ni, *mi;
 
 	/* protect against uninitialized lists */
 	if (nodes->n.next == NULL)

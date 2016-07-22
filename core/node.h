@@ -27,7 +27,7 @@
 #include "phy_info.h"
 #include "conf.h"
 
-struct node_info {
+struct uwifi_node {
 	/* housekeeping */
 	struct list_node	list;								// X
 	struct list_node	essid_nodes;
@@ -56,7 +56,7 @@ struct node_info {
 	unsigned int		wlan_retries_last;
 	unsigned int		wlan_seqno;
 	struct essid_info*	essid;								// TODO!!!
-	struct node_info*	wlan_ap_node;							// X
+	struct uwifi_node*	wlan_ap_node;							// X
 	enum chan_width		wlan_chan_width;
 	unsigned char		wlan_tx_streams;
 	unsigned char		wlan_rx_streams;
@@ -80,8 +80,8 @@ struct node_info {
 	struct packet_info	last_pkt;
 };
 
-struct node_info* node_update(struct packet_info* p, struct list_head* nodes);
-void node_timeout(struct list_head* nodes, unsigned int timeout_sec);
-void nodes_free(struct list_head* nodes);
+struct uwifi_node* uwifi_node_update(struct packet_info* p, struct list_head* nodes);
+void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec);
+void uwifi_nodes_free(struct list_head* nodes);
 
 #endif
