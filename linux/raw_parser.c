@@ -264,7 +264,7 @@ int wlan_parse_packet(unsigned char* buf, size_t len, struct uwifi_packet* p, in
 	return uwifi_parse_80211_header(buf + ret, len - ret, p);
 }
 
-void fixup_packet_channel(struct uwifi_packet* p, struct wlan_interface* intf)
+void fixup_packet_channel(struct uwifi_packet* p, struct uwifi_interface* intf)
 {
 	int i = -1;
 

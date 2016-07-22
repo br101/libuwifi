@@ -13,6 +13,6 @@
 #endif
 
 int wlan_parse_packet(unsigned char* buf, size_t len, struct uwifi_packet* p, int arphdr);
-void fixup_packet_channel(struct uwifi_packet* p, struct wlan_interface* intf);
+void fixup_packet_channel(struct uwifi_packet* p, struct uwifi_interface* intf);
 
 #endif

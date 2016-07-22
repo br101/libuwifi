@@ -8,7 +8,7 @@
 
 #define IF_NAMESIZE		16
 
-struct wlan_interface {
+struct uwifi_interface {
 	int			sock;
 	char			ifname[IF_NAMESIZE + 1];
 	int			channel_time;	/* dwell time in usec */

@@ -325,7 +325,7 @@ nla_put_failure:
 
 static int nl80211_get_interface_info_cb(struct nl_msg *msg, void *arg)
 {
-	struct wlan_interface* intf = arg;
+	struct uwifi_interface* intf = arg;
 	struct nlattr **tb = nl80211_parse(msg);
 
 	if (tb[NL80211_ATTR_WIPHY_FREQ])
@@ -365,7 +365,7 @@ static int nl80211_get_interface_info_cb(struct nl_msg *msg, void *arg)
 	return NL_SKIP;
 }
 
-bool ifctrl_iwget_interface_info(struct wlan_interface* intf)
+bool ifctrl_iwget_interface_info(struct uwifi_interface* intf)
 {
 	struct nl_msg *msg;
 	bool ret;
@@ -470,7 +470,7 @@ nla_put_failure:
 	return false;
 }
 
-bool ifctrl_is_monitor(struct wlan_interface* intf)
+bool ifctrl_is_monitor(struct uwifi_interface* intf)
 {
 	return intf->if_type == NL80211_IFTYPE_MONITOR;
 }

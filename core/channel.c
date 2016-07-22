@@ -24,7 +24,7 @@
 #include "wlan_util.h"
 #include "conf.h"
 
-uint32_t channel_get_remaining_dwell_time(struct wlan_interface* intf)
+uint32_t channel_get_remaining_dwell_time(struct uwifi_interface* intf)
 {
 	if (!intf->channel_scan)
 		return UINT32_MAX;
@@ -134,7 +134,7 @@ const char* channel_width_string_short(enum chan_width w, int ht40p)
 
 /* Note: ht40plus is only used for HT40 channel width, to distinguish between
  * HT40+ and HT40- */
-bool channel_change(struct wlan_interface* intf, int idx, enum chan_width width, bool ht40plus)
+bool channel_change(struct uwifi_interface* intf, int idx, enum chan_width width, bool ht40plus)
 {
 	unsigned int center1 = 0;
 
@@ -185,7 +185,7 @@ bool channel_change(struct wlan_interface* intf, int idx, enum chan_width width,
 	return true;
 }
 
-bool channel_auto_change(struct wlan_interface* intf)
+bool channel_auto_change(struct uwifi_interface* intf)
 {
 	int new_idx;
 	bool ret = true;
@@ -255,7 +255,7 @@ char* channel_get_string(struct channel_list* channels, int idx)
 	return buf;
 }
 
-bool channel_init(struct wlan_interface* intf)
+bool channel_init(struct uwifi_interface* intf)
 {
 	/* get available channels */
 	ifctrl_iwget_freqlist(intf->if_phy, &intf->channels);
