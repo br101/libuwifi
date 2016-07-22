@@ -73,7 +73,7 @@ int get_mac_address(char* ifname, unsigned char* mac)
 	return 1;
 }
 
-static void set_receive_buffer(int fd, int sockbufsize)
+void set_receive_buffer(int fd, int sockbufsize)
 {
 	int ret;
 
@@ -96,7 +96,7 @@ static void set_receive_buffer(int fd, int sockbufsize)
 #endif
 }
 
-int open_packet_socket(char* devname, int recv_buffer_size)
+int open_packet_socket(char* devname)
 {
 	int ret;
 	int mon_fd;
@@ -111,6 +111,8 @@ int open_packet_socket(char* devname, int recv_buffer_size)
 
 	/* bind only to one interface */
 	ifindex = if_nametoindex(devname);
+	if (ifindex < 0)
+		return -1;
 
 	memset(&sall, 0, sizeof(struct sockaddr_ll));
 	sall.sll_ifindex = ifindex;
@@ -120,9 +122,6 @@ int open_packet_socket(char* devname, int recv_buffer_size)
 	ret = bind(mon_fd, (struct sockaddr*)&sall, sizeof(sall));
 	if (ret != 0)
 		err(1, "bind failed");
-
-	if (recv_buffer_size)
-		set_receive_buffer(mon_fd, recv_buffer_size);
 
 	return mon_fd;
 }

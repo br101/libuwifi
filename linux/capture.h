@@ -22,7 +22,7 @@
 
 #include <stddef.h>
 
-int open_packet_socket(char* devname, int recv_buffer_size);
+int open_packet_socket(char* devname);
 
 int recv_packet(int fd, unsigned char* buffer, size_t bufsize);
 
@@ -30,5 +30,6 @@ void close_packet_socket(int fd);
 
 int device_get_hwinfo(int fd, char* ifname);
 int get_mac_address(char* ifname, unsigned char* mac);
+void set_receive_buffer(int fd, int sockbufsize);
 
 #endif // _CAPTURE_H_
