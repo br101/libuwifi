@@ -67,7 +67,7 @@ static int wext_get_freq(int fd, const char* devname)
 }
 
 static int wext_get_channels(int fd, const char* devname,
-		      struct channel_list* channels)
+		      struct uwifi_channels* channels)
 {
 	struct iwreq iwr;
 	struct iw_range range;
@@ -151,7 +151,7 @@ bool ifctrl_iwset_monitor(__attribute__((unused)) const char *interface)
 
 bool ifctrl_iwset_freq(const char *const interface,
 		       unsigned int freq,
-		       __attribute__((unused)) enum chan_width width,
+		       __attribute__((unused)) enum uwifi_chan_width width,
 		       __attribute__((unused)) unsigned int center1)
 {
 	if (wext_set_freq(mon, interface, freq))
@@ -167,7 +167,7 @@ bool ifctrl_iwget_interface_info(const char *interface)
 	return true;
 }
 
-bool ifctrl_iwget_freqlist(__attribute__((unused)) int phy, struct channel_list* channels)
+bool ifctrl_iwget_freqlist(__attribute__((unused)) int phy, struct uwifi_channels* channels)
 {
 	if (wext_get_channels(mon, conf.ifname, channels))
 		return true;

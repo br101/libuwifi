@@ -270,7 +270,7 @@ void uwifi_fixup_packet_channel(struct uwifi_packet* p, struct uwifi_interface* 
 
 	/* get channel index for packet */
 	if (p->phy_freq) {
-		i = channel_find_index_from_freq(&intf->channels, p->phy_freq);
+		i = uwifi_channel_idx_from_freq(&intf->channels, p->phy_freq);
 	}
 
 	/* if not found from pkt, best guess from config but it might be
@@ -283,7 +283,7 @@ void uwifi_fixup_packet_channel(struct uwifi_packet* p, struct uwifi_interface* 
 	/* wlan_channel is only known for beacons and probe response,
 	 * otherwise we set it from the physical channel */
 	if (p->wlan_channel == 0 && p->pkt_chan_idx >= 0)
-		p->wlan_channel = channel_get_chan(&intf->channels, p->pkt_chan_idx);
+		p->wlan_channel = uwifi_channel_get_chan(&intf->channels, p->pkt_chan_idx);
 
 	/* if current channel is unknown (this is a mac80211 bug), guess it from
 	 * the packet */

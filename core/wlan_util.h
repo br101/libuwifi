@@ -25,7 +25,7 @@
 
 #include "wlan80211.h"
 
-enum chan_width;
+enum uwifi_chan_width;
 
 struct pkt_name {
 	const char c;
@@ -46,12 +46,12 @@ const char* get_packet_type_name(uint16_t type);
 int rate_to_index(int rate);
 int rate_index_to_rate(int idx);
 int mcs_index_to_rate(int mcs, bool ht20, bool lgi);
-int vht_mcs_index_to_rate(enum chan_width width, int streams, int mcs, bool sgi);
-enum chan_width chan_width_from_vht_capab(uint32_t vht);
+int vht_mcs_index_to_rate(enum uwifi_chan_width width, int streams, int mcs, bool sgi);
+enum uwifi_chan_width chan_width_from_vht_capab(uint32_t vht);
 void ht_streams_from_mcs_set(unsigned char* mcs, unsigned char* rx, unsigned char* tx);
 void vht_streams_from_mcs_set(unsigned char* mcs, unsigned char* rx, unsigned char* tx);
-const char* get_80211std(enum chan_width width, int chan);
-int get_phy_thruput(enum chan_width width, unsigned char streams_rx);
+const char* get_80211std(enum uwifi_chan_width width, int chan);
+int get_phy_thruput(enum uwifi_chan_width width, unsigned char streams_rx);
 int frequency2channel(int freq);
 
 #endif

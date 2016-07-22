@@ -68,11 +68,11 @@ bool ifctrl_flags(const char *interface, bool up, bool promisc);
 bool ifctrl_iwset_monitor(const char *interface);
 
 bool ifctrl_iwset_freq(const char *const interface, unsigned int freq,
-		       enum chan_width width, unsigned int center1);
+		       enum uwifi_chan_width width, unsigned int center1);
 
 bool ifctrl_iwget_interface_info(struct uwifi_interface* intf);
 
-bool ifctrl_iwget_freqlist(int phy, struct channel_list* channels);
+bool ifctrl_iwget_freqlist(int phy, struct uwifi_channels* channels);
 
 bool ifctrl_is_monitor(struct uwifi_interface* intf);
 

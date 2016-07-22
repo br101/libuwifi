@@ -192,7 +192,7 @@ int mcs_index_to_rate(int mcs, bool ht20, bool lgi)
  * Formula from http://equicom.hu/uploads/file/fluke/pros/how_fast_80211ac_poster.PDF
  * may not be 100% exact, but good enough
  */
-int vht_mcs_index_to_rate(enum chan_width width, int streams, int mcs, bool sgi)
+int vht_mcs_index_to_rate(enum uwifi_chan_width width, int streams, int mcs, bool sgi)
 {
 	int wf;
 	float mf;
@@ -245,7 +245,7 @@ int vht_mcs_index_to_rate(enum chan_width width, int streams, int mcs, bool sgi)
 	return 10.0 /* kpbs */ * streams * wf * mf / (sgi ? 3.6 : 4.0);
 }
 
-enum chan_width chan_width_from_vht_capab(uint32_t vht)
+enum uwifi_chan_width chan_width_from_vht_capab(uint32_t vht)
 {
 	switch (((vht & WLAN_IE_VHT_CAPAB_INFO_CHAN_WIDTH) >> 2)) {
 		case WLAN_IE_VHT_CAPAB_INFO_CHAN_WIDTH_80: return CHAN_WIDTH_80;
@@ -296,7 +296,7 @@ void vht_streams_from_mcs_set(unsigned char* mcs, unsigned char* rx, unsigned ch
 	*tx = i;
 }
 
-const char* get_80211std(enum chan_width width, int chan)
+const char* get_80211std(enum uwifi_chan_width width, int chan)
 {
 	switch (width) {
 		case CHAN_WIDTH_UNSPEC:
@@ -315,7 +315,7 @@ const char* get_80211std(enum chan_width width, int chan)
 }
 
 /* in 100kbps or -1 when unsupported */
-int get_phy_thruput(enum chan_width width, unsigned char streams_rx)
+int get_phy_thruput(enum uwifi_chan_width width, unsigned char streams_rx)
 {
 	switch (width) {
 		case CHAN_WIDTH_UNSPEC:

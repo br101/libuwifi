@@ -27,12 +27,12 @@
 #define MAX_CHANNELS		64
 
 /* channel to frequency mapping */
-struct chan_freq {
+struct uwifi_chan_freq {
 	int chan;
 	unsigned int freq;
 };
 
-enum chan_width {
+enum uwifi_chan_width {
 	CHAN_WIDTH_UNSPEC,
 	CHAN_WIDTH_20_NOHT,
 	CHAN_WIDTH_20,
@@ -42,41 +42,41 @@ enum chan_width {
 	CHAN_WIDTH_8080,
 };
 
-struct band_info {
+struct uwifi_band {
 	int num_channels;
-	enum chan_width max_chan_width;
+	enum uwifi_chan_width max_chan_width;
 	unsigned char streams_rx;
 	unsigned char streams_tx;
 };
 
-struct channel_list {
-	struct chan_freq chan[MAX_CHANNELS];
+struct uwifi_channels {
+	struct uwifi_chan_freq chan[MAX_CHANNELS];
 	int num_channels;
-	struct band_info band[MAX_BANDS];
+	struct uwifi_band band[MAX_BANDS];
 	int num_bands;
 };
 
 struct uwifi_interface;
 
-bool channel_change(struct uwifi_interface* intf, int idx, enum chan_width width, bool ht40plus);
-bool channel_auto_change(struct uwifi_interface* intf);
-int channel_find_index_from_chan(struct channel_list* channels, int c);
-int channel_find_index_from_freq(struct channel_list* channels, unsigned int f);
-int channel_get_chan(struct channel_list* channels, int idx);
-int channel_get_freq(struct channel_list* channels, int idx);
-int channel_get_num_channels(struct channel_list* channels);
-bool channel_init(struct uwifi_interface* intf);
-bool channel_list_add(struct channel_list* channels, int freq);
-uint32_t channel_get_remaining_dwell_time(struct uwifi_interface* intf);
-char* channel_get_string(struct channel_list* channels, int idx);
+bool uwifi_channel_change(struct uwifi_interface* intf, int idx, enum uwifi_chan_width width, bool ht40plus);
+bool uwifi_channel_auto_change(struct uwifi_interface* intf);
+int uwifi_channel_idx_from_chan(struct uwifi_channels* channels, int c);
+int uwifi_channel_idx_from_freq(struct uwifi_channels* channels, unsigned int f);
+int uwifi_channel_get_chan(struct uwifi_channels* channels, int idx);
+int uwifi_channel_get_freq(struct uwifi_channels* channels, int idx);
+int uwifi_channel_get_num_channels(struct uwifi_channels* channels);
+bool uwifi_channel_init(struct uwifi_interface* intf);
+bool uwifi_channel_list_add(struct uwifi_channels* channels, int freq);
+uint32_t uwifi_channel_get_remaining_dwell_time(struct uwifi_interface* intf);
+char* uwifi_channel_get_string(struct uwifi_channels* channels, int idx);
 /* Note: ht40p is used only for HT40 channels. If it should not be shown use -1 */
-const char* channel_width_string(enum chan_width w, int ht40p);
+const char* uwifi_channel_width_string(enum uwifi_chan_width w, int ht40p);
 /* Note: ht40p is used only for HT40 channels. If it should not be shown use -1 */
-const char* channel_width_string_short(enum chan_width w, int ht40p);
-int channel_get_num_bands(struct channel_list* channels);
-int channel_get_idx_from_band_idx(struct channel_list* channels, int band, int idx);
-const struct band_info* channel_get_band(struct channel_list* channels, int b);
-bool channel_band_add(struct channel_list* channels, int num_channels, enum chan_width max_chan_width,
+const char* uwifi_channel_width_string_short(enum uwifi_chan_width w, int ht40p);
+int uwifi_channel_get_num_bands(struct uwifi_channels* channels);
+int uwifi_channel_idx_from_band_idx(struct uwifi_channels* channels, int band, int idx);
+const struct uwifi_band* uwifi_channel_get_band(struct uwifi_channels* channels, int b);
+bool uwifi_channel_band_add(struct uwifi_channels* channels, int num_channels, enum uwifi_chan_width max_chan_width,
 		      unsigned char streams_rx, unsigned char streams_tx);
 
 #endif

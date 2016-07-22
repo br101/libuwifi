@@ -57,7 +57,7 @@ struct uwifi_node {
 	unsigned int		wlan_seqno;
 	struct essid_info*	essid;								// TODO!!!
 	struct uwifi_node*	wlan_ap_node;							// X
-	enum chan_width		wlan_chan_width;
+	enum uwifi_chan_width		wlan_chan_width;
 	unsigned char		wlan_tx_streams;
 	unsigned char		wlan_rx_streams;
 

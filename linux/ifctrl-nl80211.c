@@ -284,7 +284,7 @@ nla_put_failure:
 }
 
 bool ifctrl_iwset_freq(const char *const interface, unsigned int freq,
-		       enum chan_width width,
+		       enum uwifi_chan_width width,
 		       unsigned int center1)
 {
 	struct nl_msg *msg;
@@ -388,7 +388,7 @@ static int nl80211_get_freqlist_cb(struct nl_msg *msg, void *arg)
 	struct nlattr *freqs[NL80211_FREQUENCY_ATTR_MAX + 1];
 	struct nlattr *band, *freq;
 
-	struct channel_list* list = arg;
+	struct uwifi_channels* list = arg;
 
 	nla_for_each_nested(band, attr[NL80211_ATTR_WIPHY_BANDS], bands_remain)
 	{
@@ -431,7 +431,7 @@ static int nl80211_get_freqlist_cb(struct nl_msg *msg, void *arg)
 			    freqs[NL80211_FREQUENCY_ATTR_DISABLED])
 				continue;
 
-			channel_list_add(list, nla_get_u32(freqs[NL80211_FREQUENCY_ATTR_FREQ]));
+			uwifi_channel_list_add(list, nla_get_u32(freqs[NL80211_FREQUENCY_ATTR_FREQ]));
 
 			if (++i >= MAX_CHANNELS)
 				goto end;
@@ -449,7 +449,7 @@ end:
 	return NL_SKIP;
 }
 
-bool ifctrl_iwget_freqlist(int phy, struct channel_list* channels)
+bool ifctrl_iwget_freqlist(int phy, struct uwifi_channels* channels)
 {
 	struct nl_msg *msg;
 	bool ret;

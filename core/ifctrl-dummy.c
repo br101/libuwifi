@@ -50,7 +50,7 @@ bool ifctrl_iwset_monitor(__attribute__((unused)) const char *interface)
 
 bool ifctrl_iwset_freq(__attribute__((unused)) const char *const interface,
 		       __attribute__((unused)) unsigned int freq,
-		       __attribute__((unused)) enum chan_width width,
+		       __attribute__((unused)) enum uwifi_chan_width width,
 		       __attribute__((unused)) unsigned int center1)
 {
 	printlog("set freq: not implemented");
@@ -64,7 +64,7 @@ bool ifctrl_iwget_interface_info(__attribute__((unused)) const char *interface)
 };
 
 bool ifctrl_iwget_freqlist(__attribute__((unused)) int phy,
-			   __attribute__((unused)) struct channel_list* channels)
+			   __attribute__((unused)) struct uwifi_channels* channels)
 {
 	printlog("get freqlist: not implemented");
 	return false;
