@@ -17,8 +17,8 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef _UTIL_H_
-#define _UTIL_H_
+#ifndef _UWIFI_UTIL_H_
+#define _UWIFI_UTIL_H_
 
 #define MAC_NOT_EMPTY(_mac) (_mac[0] || _mac[1] || _mac[2] || _mac[3] || _mac[4] || _mac[5])
 

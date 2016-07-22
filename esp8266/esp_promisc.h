@@ -1,3 +1,6 @@
+#ifndef _UWIFI_ESP_PROMISC_H_
+#define _UWIFI_ESP_PROMISC_H_
+
 /* Promiscous callback structures, see ESP manual */
 
 struct RxControl {
@@ -46,3 +49,5 @@ struct sniffer_buf2 {
 	uint16_t cnt;
 	uint16_t len;			// length
 };
+
+#endif

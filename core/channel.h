@@ -17,8 +17,8 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef _CHANNEL_H_
-#define _CHANNEL_H_
+#ifndef _UWIFI_CHANNEL_H_
+#define _UWIFI_CHANNEL_H_
 
 #include <stdbool.h>
 #include <stdint.h>

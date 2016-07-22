@@ -1,5 +1,5 @@
-#ifndef _PARSE_WLAN_H_
-#define _PARSE_WLAN_H_
+#ifndef _UWIFI_PARSE_WLAN_H_
+#define _UWIFI_PARSE_WLAN_H_
 
 #include <stdbool.h>
 #include <stdint.h>

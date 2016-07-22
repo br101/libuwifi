@@ -17,8 +17,8 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef _CAPTURE_H_
-#define _CAPTURE_H_
+#ifndef _UWIFI_CAPTURE_H_
+#define _UWIFI_CAPTURE_H_
 
 #include <stddef.h>
 #include <sys/types.h>

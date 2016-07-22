@@ -18,8 +18,8 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef IFCTRL_H
-#define IFCTRL_H
+#ifndef _UWIFI_IFCTRL_H
+#define _UWIFI_IFCTRL_H
 
 #include <stdbool.h>
 

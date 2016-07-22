@@ -1,5 +1,5 @@
-#ifndef _RAW_PARSE_H_
-#define _RAW_PARSE_H_
+#ifndef _UWIFI_RAW_PARSE_H_
+#define _UWIFI_RAW_PARSE_H_
 
 #include <stddef.h>
 #include "wlan_parser.h"

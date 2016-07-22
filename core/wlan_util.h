@@ -17,8 +17,8 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef _WLAN_UTIL_H_
-#define _WLAN_UTIL_H_
+#ifndef _UWIFI_WLAN_UTIL_H_
+#define _UWIFI_WLAN_UTIL_H_
 
 #include <stdbool.h>
 #include <stdint.h>

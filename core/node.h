@@ -17,8 +17,8 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef _NODE_H_
-#define _NODE_H_
+#ifndef _UWIFI_NODE_H_
+#define _UWIFI_NODE_H_
 
 #include "platform.h"
 #include "wlan_parser.h"

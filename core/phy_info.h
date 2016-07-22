@@ -1,5 +1,5 @@
-#ifndef _PHY_INFO_H_
-#define _PHY_INFO_H_
+#ifndef _UWIFI_PHY_INFO_H_
+#define _UWIFI_PHY_INFO_H_
 
 #include <stdbool.h>
 
