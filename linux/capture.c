@@ -126,7 +126,7 @@ int open_packet_socket(char* devname)
 	return mon_fd;
 }
 
-inline int recv_packet(int fd, unsigned char* buffer, size_t bufsize)
+ssize_t recv_packet(int fd, unsigned char* buffer, size_t bufsize)
 {
 	return recv(fd, buffer, bufsize, MSG_DONTWAIT);
 }

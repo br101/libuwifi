@@ -26,9 +26,6 @@
 #include "capture.h"
 #include "util.h"
 
-void __attribute__ ((format (printf, 1, 2)))
-printlog(const char *fmt, ...);
-
 #define PCAP_TIMEOUT 200
 
 static unsigned char* pcap_buffer;
@@ -46,7 +43,7 @@ static void handler(u_char *user, const struct pcap_pkthdr *h, const u_char *byt
 	memmove(pcap_buffer, bytes, *((int *)user));
 }
 
-int open_packet_socket(char* devname, __attribute__((unused)) int recv_buffer_size)
+int open_packet_socket(char* devname)
 {
 	char error[PCAP_ERRBUF_SIZE];
 	int ret;
@@ -76,8 +73,7 @@ int open_packet_socket(char* devname, __attribute__((unused)) int recv_buffer_si
 }
 
 int device_get_hwinfo(__attribute__((unused)) int fd,
-		      __attribute__((unused)) char* ifname,
-		      __attribute__((unused)) unsigned char* mac)
+		      __attribute__((unused)) char* ifname)
 {
 	if (pcap_fp != NULL) {
 		switch (pcap_datalink(pcap_fp)) {
@@ -89,11 +85,10 @@ int device_get_hwinfo(__attribute__((unused)) int fd,
 			return 801;
 		}
 	}
-	/* TODO: mac address not implemented */
 	return -1;
 }
 
-int recv_packet(__attribute__((unused)) int fd,
+ssize_t recv_packet(__attribute__((unused)) int fd,
 		unsigned char* buffer, size_t bufsize)
 {
 	int ret = 0;

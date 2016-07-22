@@ -21,10 +21,11 @@
 #define _CAPTURE_H_
 
 #include <stddef.h>
+#include <sys/types.h>
 
 int open_packet_socket(char* devname);
 
-int recv_packet(int fd, unsigned char* buffer, size_t bufsize);
+ssize_t recv_packet(int fd, unsigned char* buffer, size_t bufsize);
 
 void close_packet_socket(int fd);
 
