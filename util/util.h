@@ -20,6 +20,10 @@
 #ifndef _UWIFI_UTIL_H_
 #define _UWIFI_UTIL_H_
 
+/* for use in printf-like functions */
+#define MAC_FMT "%02x:%02x:%02x:%02x:%02x:%02x"
+#define MAC_PAR(x) x[0], x[1], x[2], x[3], x[4], x[5]
+
 #define MAC_NOT_EMPTY(_mac) (_mac[0] || _mac[1] || _mac[2] || _mac[3] || _mac[4] || _mac[5])
 
 #define MAC_EMPTY(_mac) (!_mac[0] && !_mac[1] && !_mac[2] && !_mac[3] && !_mac[4] && !_mac[5])
@@ -45,32 +49,23 @@
 			(_x) |= (_s);		\
 		} while(0)
 
-#define max(_x, _y) ((_x) > (_y) ? (_x) : (_y))
+#ifndef MAX
+#define MAX(_x, _y) ((_x) > (_y) ? (_x) : (_y))
+#endif
 
-#define min(_x, _y) ((_x) < (_y) ? (_x) : (_y))
+#ifndef MIN
+#define MIN(_x, _y) ((_x) < (_y) ? (_x) : (_y))
+#endif
 
+#ifndef DIV_ROUND_UP
 #define DIV_ROUND_UP(n,d) (((n) + (d) - 1) / (d))
-
-#define MAC_FMT "%02x:%02x:%02x:%02x:%02x:%02x"
-#define MAC_PAR(x) x[0], x[1], x[2], x[3], x[4], x[5]
+#endif
 
 void dump_packet(const unsigned char* buf, int len);
-const char* ether_sprintf(const unsigned char *mac);
-const char* ether_sprintf_short(const unsigned char *mac);
-const char* ip_sprintf(const unsigned int ip);
-const char* ip_sprintf_short(const unsigned int ip);
-int normalize(float val, int max_val, int max);
-int ilog2(int x);
 
-static inline int normalize_db(int val, int max)
-{
-	if (val <= 30)
-		return 0;
-	else if (val >= 100)
-		return max;
-	else
-		return normalize(val - 30, 70, max);
-}
+const char* ether_sprintf(const unsigned char *mac);
+
+int ilog2(int x);
 
 static inline __attribute__((const))
 int is_power_of_2(unsigned long n)

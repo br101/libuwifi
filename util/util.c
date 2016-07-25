@@ -21,18 +21,6 @@
 #include "util.h"
 #include <stdio.h>
 
-int normalize(float oval, int max_val, int max) {
-	int val;
-	val= (oval / max_val) * max;
-	if (val > max) /* cap if still bigger */
-		val = max;
-	if (val == 0 && oval > 0)
-		val = 1;
-	if (val < 0)
-		val = 0;
-	return val;
-}
-
 #if DO_DEBUG
 void dump_packet(const unsigned char* buf, int len)
 {
@@ -59,34 +47,8 @@ dump_packet(__attribute__((unused)) const unsigned char* buf,
 const char* ether_sprintf(const unsigned char *mac)
 {
 	static char etherbuf[18];
-	sprintf(etherbuf, "%02x:%02x:%02x:%02x:%02x:%02x",
-		mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+	sprintf(etherbuf, MAC_FMT, MAC_PAR(mac));
 	return etherbuf;
-}
-
-const char* ether_sprintf_short(const unsigned char *mac)
-{
-	static char etherbuf[5];
-	sprintf(etherbuf, "%02x%02x",
-		mac[4], mac[5]);
-	return etherbuf;
-}
-
-const char* ip_sprintf(const unsigned int ip)
-{
-	static char ipbuf[18];
-	unsigned char* cip = (unsigned char*)&ip;
-	sprintf(ipbuf, "%d.%d.%d.%d",
-		cip[0], cip[1], cip[2], cip[3]);
-	return ipbuf;
-}
-
-const char* ip_sprintf_short(const unsigned int ip)
-{
-	static char ipbuf[5];
-	unsigned char* cip = (unsigned char*)&ip;
-	sprintf(ipbuf, ".%d", cip[3]);
-	return ipbuf;
 }
 
 /* simple ilog2 implementation */
