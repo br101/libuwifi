@@ -15,7 +15,7 @@ int parse_prism_header(unsigned char* buf, int len, struct uwifi_packet* p)
 {
 	wlan_ng_prism2_header* ph;
 
-	DEBUG("PRISM2 HEADER\n");
+	debug("PRISM2 HEADER\n");
 
 	if (len > 0 && (size_t)len < sizeof(wlan_ng_prism2_header))
 		return -1;
@@ -43,7 +43,7 @@ int parse_prism_header(unsigned char* buf, int len, struct uwifi_packet* p)
 	/* just in case...*/
 	if (p->phy_rate == 0 || p->phy_rate > 1080) {
 		/* assume min rate, guess mode from channel */
-		DEBUG("*** fixing wrong rate\n");
+		debug("*** fixing wrong rate\n");
 		if (ph->channel.data > 14)
 			p->phy_rate = 120; /* 6 * 2 */
 		else
@@ -60,10 +60,10 @@ int parse_prism_header(unsigned char* buf, int len, struct uwifi_packet* p)
 	/* always assume shortpre */
 	p->phy_flags |= PHY_FLAG_SHORTPRE;
 
-	DEBUG("devname: %s\n", ph->devname);
-	DEBUG("signal: %d -> %d\n", ph->signal.data, p->phy_signal);
-	DEBUG("rate: %d\n", ph->rate.data);
-	DEBUG("rssi: %d\n", ph->rssi.data);
+	debug("devname: %s\n", ph->devname);
+	debug("signal: %d -> %d\n", ph->signal.data, p->phy_signal);
+	debug("rate: %d\n", ph->rate.data);
+	debug("rssi: %d\n", ph->rssi.data);
 
 	return sizeof(wlan_ng_prism2_header);
 }
@@ -90,21 +90,21 @@ static void get_radiotap_info(struct ieee80211_radiotap_iterator *iter, struct u
 		break;
 	case IEEE80211_RADIOTAP_FLAGS:
 		/* short preamble */
-		DEBUG("[flags %0x", *iter->this_arg);
+		debug("[flags %0x", *iter->this_arg);
 		if (*iter->this_arg & IEEE80211_RADIOTAP_F_SHORTPRE) {
 			p->phy_flags |= PHY_FLAG_SHORTPRE;
-			DEBUG(" shortpre");
+			debug(" shortpre");
 		}
 		if (*iter->this_arg & IEEE80211_RADIOTAP_F_BADFCS) {
 			p->phy_flags |= PHY_FLAG_BADFCS;
-			DEBUG(" badfcs");
+			debug(" badfcs");
 		}
-		DEBUG("]");
+		debug("]");
 		break;
 	case IEEE80211_RADIOTAP_RATE:
 		//TODO check!
 		//printf("\trate: %lf\n", (double)*iter->this_arg/2);
-		DEBUG("[rate %0x]", *iter->this_arg);
+		debug("[rate %0x]", *iter->this_arg);
 		p->phy_rate = (*iter->this_arg)*5; /* rate is in 500kbps */
 		p->phy_rate_idx = rate_to_index(p->phy_rate);
 		break;
@@ -115,25 +115,25 @@ static void get_radiotap_info(struct ieee80211_radiotap_iterator *iter, struct u
 	case IEEE80211_RADIOTAP_CHANNEL:
 		/* channel & channel type */
 		p->phy_freq = le16toh(*(uint16_t*)iter->this_arg);
-		DEBUG("[freq %d", p->phy_freq);
+		debug("[freq %d", p->phy_freq);
 		iter->this_arg = iter->this_arg + 2;
 		x = le16toh(*(uint16_t*)iter->this_arg);
 		if ((x & IEEE80211_CHAN_A) == IEEE80211_CHAN_A) {
 			p->phy_flags |= PHY_FLAG_A;
-			DEBUG("A]");
+			debug("A]");
 		}
 		else if ((x & IEEE80211_CHAN_G) == IEEE80211_CHAN_G) {
 			p->phy_flags |= PHY_FLAG_G;
-			DEBUG("G]");
+			debug("G]");
 		}
 		else if ((x & IEEE80211_CHAN_2GHZ) == IEEE80211_CHAN_2GHZ) {
 			p->phy_flags |= PHY_FLAG_B;
-			DEBUG("B]");
+			debug("B]");
 		}
 		break;
 	case IEEE80211_RADIOTAP_DBM_ANTSIGNAL:
 		c = *(signed char*)iter->this_arg;
-		DEBUG("[sig %0d]", c);
+		debug("[sig %0d]", c);
 		/* we get the signal per rx chain with newer drivers.
 		 * save the highest value, but make sure we don't override
 		 * with invalid values */
@@ -141,15 +141,15 @@ static void get_radiotap_info(struct ieee80211_radiotap_iterator *iter, struct u
 			p->phy_signal = c;
 		break;
 	case IEEE80211_RADIOTAP_DBM_ANTNOISE:
-		DEBUG("[noi %0x]", *(signed char*)iter->this_arg);
+		debug("[noi %0x]", *(signed char*)iter->this_arg);
 		// usually not present
 		//p->phy_noise = *(signed char*)iter->this_arg;
 		break;
 	case IEEE80211_RADIOTAP_ANTENNA:
-		DEBUG("[ant %0x]", *iter->this_arg);
+		debug("[ant %0x]", *iter->this_arg);
 		break;
 	case IEEE80211_RADIOTAP_DB_ANTSIGNAL:
-		DEBUG("[snr %0x]", *iter->this_arg);
+		debug("[snr %0x]", *iter->this_arg);
 		// usually not present
 		//p->phy_snr = *iter->this_arg;
 		break;
@@ -160,7 +160,7 @@ static void get_radiotap_info(struct ieee80211_radiotap_iterator *iter, struct u
 		/* Ref http://www.radiotap.org/defined-fields/MCS */
 		known = *iter->this_arg++;
 		flags = *iter->this_arg++;
-		DEBUG("[MCS known %0x flags %0x index %0x]", known, flags, *iter->this_arg);
+		debug("[MCS known %0x flags %0x index %0x]", known, flags, *iter->this_arg);
 		if (known & IEEE80211_RADIOTAP_MCS_HAVE_BW)
 			ht20 = (flags & IEEE80211_RADIOTAP_MCS_BW_MASK) == IEEE80211_RADIOTAP_MCS_BW_20;
 		else
@@ -171,16 +171,16 @@ static void get_radiotap_info(struct ieee80211_radiotap_iterator *iter, struct u
 		else
 			lgi = 1; /* assume long GI if not present */
 
-		DEBUG(" %s %s", ht20 ? "HT20" : "HT40", lgi ? "LGI" : "SGI");
+		debug(" %s %s", ht20 ? "HT20" : "HT40", lgi ? "LGI" : "SGI");
 
 		p->phy_rate_idx = 12 + *iter->this_arg;
 		p->phy_rate_flags = flags;
 		p->phy_rate = mcs_index_to_rate(*iter->this_arg, ht20, lgi);
 
-		DEBUG(" RATE %d ", p->phy_rate);
+		debug(" RATE %d ", p->phy_rate);
 		break;
 	default:
-		printlog("UNKNOWN RADIOTAP field %d", iter->this_arg_index);
+		print(LOG_ERR, ("UNKNOWN RADIOTAP field %d", iter->this_arg_index);
 		break;
 	}
 }
@@ -200,23 +200,23 @@ int parse_radiotap_header(unsigned char* buf, size_t len, struct uwifi_packet* p
 
 	err = ieee80211_radiotap_iterator_init(&iter, rh, rt_len, NULL);
 	if (err) {
-		DEBUG("malformed radiotap header (init returns %d)\n", err);
+		debug("malformed radiotap header (init returns %d)\n", err);
 		return -1;
 	}
 
-	DEBUG("Radiotap: ");
+	debug("Radiotap: ");
 	while (!(err = ieee80211_radiotap_iterator_next(&iter))) {
 		if (iter.is_radiotap_ns) {
 			get_radiotap_info(&iter, p);
 		}
 	}
 
-	DEBUG("\nSIG %d", p->phy_signal);
+	debug("\nSIG %d", p->phy_signal);
 
 	/* sanitize */
 	if (p->phy_rate == 0 || p->phy_rate > 6000) {
 		/* assume min rate for mode */
-		DEBUG("*** fixing wrong rate\n");
+		debug("*** fixing wrong rate\n");
 		if (p->phy_flags & PHY_FLAG_A)
 			p->phy_rate = 120; /* 6 * 2 */
 		else if (p->phy_flags & PHY_FLAG_B)
@@ -227,12 +227,12 @@ int parse_radiotap_header(unsigned char* buf, size_t len, struct uwifi_packet* p
 			p->phy_rate = 20;
 	}
 
-	DEBUG("\nrate: %.2f = idx %d\n", (float)p->phy_rate/10, p->phy_rate_idx);
-	DEBUG("signal: %d\n", p->phy_signal);
+	debug("\nrate: %.2f = idx %d\n", (float)p->phy_rate/10, p->phy_rate_idx);
+	debug("signal: %d\n", p->phy_signal);
 
 	if (p->phy_flags & PHY_FLAG_BADFCS) {
 		/* we can't trust frames with a bad FCS - stop parsing */
-		DEBUG("=== bad FCS, stop ===\n");
+		debug("=== bad FCS, stop ===\n");
 		return 0;
 	} else {
 		return rt_len;
@@ -256,11 +256,11 @@ int uwifi_parse_raw(unsigned char* buf, size_t len, struct uwifi_packet* p, int 
 	}
 
 	if ((size_t)ret >= len) {
-		DEBUG("impossible radiotap len");
+		debug("impossible radiotap len");
 		return -1;
 	}
 
-	DEBUG("before parse 80211 len: %zd\n", len - ret);
+	debug("before parse 80211 len: %zd\n", len - ret);
 	return uwifi_parse_80211_header(buf + ret, len - ret, p);
 }
 

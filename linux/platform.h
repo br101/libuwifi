@@ -15,13 +15,4 @@
 #include <math.h>	// pow
 #include <stdio.h>	// printf...
 
-void __attribute__ ((format (printf, 1, 2)))
-printlog(const char *fmt, ...);
-
-#if DO_DEBUG
-#define DEBUG(...) do { printf(__VA_ARGS__); } while (0)
-#else
-#define DEBUG(...)
-#endif
-
 uint32_t plat_time_usec(void);	// return monotonic time in usec

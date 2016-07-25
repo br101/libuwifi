@@ -30,7 +30,7 @@ OBJS=	core/channel.o			\
 	util/util.o			\
 
 INCLUDES=-I. -I./core -I./util -I./$(PLATFORM)
-CFLAGS+=-std=gnu99 -Wall -Wextra $(INCLUDES)
+CFLAGS+=-std=gnu99 -Wall -Wextra $(INCLUDES) -DDEBUG=$(DEBUG)
 
 include $(PLATFORM)/platform.mk
 

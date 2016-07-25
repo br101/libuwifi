@@ -20,6 +20,8 @@
 #ifndef _UWIFI_UTIL_H_
 #define _UWIFI_UTIL_H_
 
+#include "app.h"
+
 /* for use in printf-like functions */
 #define MAC_FMT "%02x:%02x:%02x:%02x:%02x:%02x"
 #define MAC_PAR(x) x[0], x[1], x[2], x[3], x[4], x[5]
@@ -72,5 +74,14 @@ int is_power_of_2(unsigned long n)
 {
 	return (n != 0 && ((n & (n - 1)) == 0));
 }
+
+/* these coincide with syslog levels */
+#define	LOG_CRIT	2	/* critical conditions */
+#define	LOG_ERR		3	/* error conditions */
+#define	LOG_WARNING	4	/* warning conditions */
+#define	LOG_INFO	6	/* informational */
+#define	LOG_DEBUG	7	/* debug-level messages */
+
+#define debug(...) do { if (DEBUG) print(LOG_DEBUG, __VA_ARGS__); } while (0)
 
 #endif
