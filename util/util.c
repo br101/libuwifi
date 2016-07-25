@@ -22,24 +22,26 @@
 #include <stdio.h>
 
 #if DO_DEBUG
-void dump_packet(const unsigned char* buf, int len)
+void dump_hex(const unsigned char* data, int len, const char* txt)
 {
 	int i;
-	for (i = 0; i < len; i++) {
-		if ((i % 2) == 0) {
+	if (txt != NULL)
+		printf("%s: ", txt);
+	for (i=0; i < len; i++) {
+		//debug("%02x ", data[i]);
+		if ((i % 2) == 0)
 			printf(" ");
-		}
-		if ((i % 16) == 0) {
+		if ((i % 16) == 0)
 			printf("\n");
-		}
-		printf("%02x", buf[i]);
+		printf("%02x", data[i]);
 	}
 	printf("\n");
 }
 #else
 void
-dump_packet(__attribute__((unused)) const unsigned char* buf,
-	    __attribute__((unused)) int len)
+dump_hex(__attribute__((unused)) const unsigned char* data,
+	 __attribute__((unused)) int len,
+	 __attribute__((unused)) const char* txt)
 {
 }
 #endif

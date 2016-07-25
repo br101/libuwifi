@@ -61,7 +61,7 @@
 #define DIV_ROUND_UP(n,d) (((n) + (d) - 1) / (d))
 #endif
 
-void dump_packet(const unsigned char* buf, int len);
+void dump_hex(const unsigned char* data, int len, const char* txt);
 
 const char* ether_sprintf(const unsigned char *mac);
 
