@@ -45,10 +45,10 @@ int device_get_hwinfo(int fd, char* ifname)
 	strncpy(ifr.ifr_name, ifname, sizeof(ifr.ifr_name));
 
 	if (ioctl(fd, SIOCGIFHWADDR, &ifr) < 0) {
-		printlog("Could not get arptype for '%s'", ifname);
+		printlog(LOG_ERR, "Could not get arptype for '%s'", ifname);
 		return -1;
 	}
-	DEBUG("ARPTYPE %d\n", ifr.ifr_hwaddr.sa_family);
+	debug("ARPTYPE %d\n", ifr.ifr_hwaddr.sa_family);
 	return ifr.ifr_hwaddr.sa_family;
 }
 
@@ -57,13 +57,13 @@ int get_mac_address(char* ifname, unsigned char* mac)
 	struct ifreq ifr;
 	int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
 	if (sock == -1) {
-		printlog("MAC addr socket failed");
+		printlog(LOG_ERR, "MAC addr socket failed");
 		return 0;
 	}
 
 	strcpy(ifr.ifr_name, ifname);
 	if (ioctl(sock, SIOCGIFHWADDR, &ifr) == -1) {
-		printlog("MAC addr ioctl failed for '%s'", ifname);
+		printlog(LOG_ERR, "MAC addr ioctl failed for '%s'", ifname);
 		close(sock);
 		return 0;
 	}
@@ -92,7 +92,7 @@ void set_receive_buffer(int fd, int sockbufsize)
 	ret = getsockopt(fd, SOL_SOCKET, SO_RCVBUF, &sockbufsize, &size);
 	if (ret != 0)
 		err(1, "getsockopt failed");
-	DEBUG("socket receive buffer size %d\n", sockbufsize);
+	debug("socket receive buffer size %d\n", sockbufsize);
 #endif
 }
 
@@ -105,7 +105,7 @@ int open_packet_socket(char* devname)
 
 	mon_fd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
 	if (mon_fd < 0) {
-		printlog("Could not create packet socket! Please run horst as root!");
+		printlog(LOG_ERR, "Could not create packet socket! Please run horst as root!");
 		exit(1);
 	}
 

@@ -180,7 +180,7 @@ static void get_radiotap_info(struct ieee80211_radiotap_iterator *iter, struct u
 		debug(" RATE %d ", p->phy_rate);
 		break;
 	default:
-		print(LOG_ERR, ("UNKNOWN RADIOTAP field %d", iter->this_arg_index);
+		printlog(LOG_ERR, "UNKNOWN RADIOTAP field %d", iter->this_arg_index);
 		break;
 	}
 }

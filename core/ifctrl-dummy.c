@@ -32,19 +32,19 @@ void ifctrl_finish(void)
 bool ifctrl_iwadd_monitor(__attribute__((unused)) const char *interface,
 			  __attribute__((unused))const char *monitor_interface)
 {
-	printlog("add monitor: not implemented");
+	printlog(LOG_ERR, "add monitor: not implemented");
 	return false;
 };
 
 bool ifctrl_iwdel(__attribute__((unused)) const char *interface)
 {
-	printlog("iwdel: not implemented");
+	printlog(LOG_ERR, "iwdel: not implemented");
 	return false;
 };
 
 bool ifctrl_iwset_monitor(__attribute__((unused)) const char *interface)
 {
-	printlog("set monitor: not implemented");
+	printlog(LOG_ERR, "set monitor: not implemented");
 	return false;
 };
 
@@ -53,20 +53,20 @@ bool ifctrl_iwset_freq(__attribute__((unused)) const char *const interface,
 		       __attribute__((unused)) enum uwifi_chan_width width,
 		       __attribute__((unused)) unsigned int center1)
 {
-	printlog("set freq: not implemented");
+	printlog(LOG_ERR, "set freq: not implemented");
 	return false;
 };
 
 bool ifctrl_iwget_interface_info(__attribute__((unused)) const char *interface)
 {
-	printlog("get interface info: not implemented");
+	printlog(LOG_ERR, "get interface info: not implemented");
 	return false;
 };
 
 bool ifctrl_iwget_freqlist(__attribute__((unused)) int phy,
 			   __attribute__((unused)) struct uwifi_channels* channels)
 {
-	printlog("get freqlist: not implemented");
+	printlog(LOG_ERR, "get freqlist: not implemented");
 	return false;
 };
 

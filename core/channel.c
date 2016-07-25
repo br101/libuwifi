@@ -95,10 +95,10 @@ static int get_center_freq_vht(unsigned int freq, enum uwifi_chan_width width)
 				center1 = 5570;
 			break;
 		case CHAN_WIDTH_8080:
-			printlog("VHT80+80 not supported");
+			printlog(LOG_ERR, "VHT80+80 not supported");
 			break;
 		default:
-			printlog("%s is not VHT", uwifi_channel_width_string(width, -1));
+			printlog(LOG_ERR, "%s is not VHT", uwifi_channel_width_string(width, -1));
 	}
 	return center1;
 }
@@ -153,7 +153,7 @@ bool uwifi_channel_change(struct uwifi_interface* intf, int idx, enum uwifi_chan
 			center1 = get_center_freq_vht(intf->channels.chan[idx].freq, width);
 			break;
 		default:
-			printlog("%s not implemented", uwifi_channel_width_string(width, -1));
+			printlog(LOG_ERR, "%s not implemented", uwifi_channel_width_string(width, -1));
 			break;
 	}
 
@@ -165,14 +165,14 @@ bool uwifi_channel_change(struct uwifi_interface* intf, int idx, enum uwifi_chan
 	uint32_t the_time = plat_time_usec();
 
 	if (!ifctrl_iwset_freq(intf->ifname, intf->channels.chan[idx].freq, width, center1)) {
-		printlog("ERROR: Failed to set CH %d (%d MHz) %s center %d",
+		printlog(LOG_ERR, "Failed to set CH %d (%d MHz) %s center %d",
 			intf->channels.chan[idx].chan, intf->channels.chan[idx].freq,
 			uwifi_channel_width_string(width, ht40plus),
 			center1);
 		return false;
 	}
 
-	printlog("Set CH %d (%d MHz) %s center %d after %dms",
+	printlog(LOG_INFO, "Set CH %d (%d MHz) %s center %d after %dms",
 		intf->channels.chan[idx].chan, intf->channels.chan[idx].freq,
 		uwifi_channel_width_string(width, ht40plus),
 		 center1, (the_time - intf->last_channelchange) / 1000);
@@ -261,16 +261,16 @@ bool uwifi_channel_init(struct uwifi_interface* intf)
 	ifctrl_iwget_freqlist(intf->if_phy, &intf->channels);
 	intf->channel_initialized = 1;
 
-	printlog("Got %d Bands, %d Channels:\n", intf->channels.num_bands, intf->channels.num_channels);
+	printlog(LOG_INFO, "Got %d Bands, %d Channels:\n", intf->channels.num_bands, intf->channels.num_channels);
 	for (int i = 0; i < intf->channels.num_channels && i < MAX_CHANNELS; i++)
-		printlog("%s\n", uwifi_channel_get_string(&intf->channels, i));
+		printlog(LOG_INFO, "%s\n", uwifi_channel_get_string(&intf->channels, i));
 
 	if (intf->channels.num_bands <= 0 || intf->channels.num_channels <= 0)
 		return false;
 
 	if (intf->channel_set_num > 0) {
 		/* configured values */
-		printlog("Setting configured channel %d\n", intf->channel_set_num);
+		printlog(LOG_INFO, "Setting configured channel %d\n", intf->channel_set_num);
 		int ini_idx = uwifi_channel_idx_from_chan(&intf->channels, intf->channel_set_num);
 		if (!uwifi_channel_change(intf, ini_idx, intf->channel_set_width, intf->channel_set_ht40plus))
 			return false;
@@ -279,7 +279,7 @@ bool uwifi_channel_init(struct uwifi_interface* intf)
 			/* this happens when we have not been able to change
 			 * the original interface to monitor mode and we added
 			 * an additional monitor (horstX) interface */
-			printlog("Could not get current channel of interface\n");
+			printlog(LOG_ERR, "Could not get current channel of interface\n");
 			intf->max_phy_rate = get_phy_thruput(intf->channels.band[0].max_chan_width,
 							    intf->channels.band[0].streams_rx);
 			return true; // not failure
@@ -291,7 +291,7 @@ bool uwifi_channel_init(struct uwifi_interface* intf)
 		/* try to set max width */
 		struct uwifi_band b = channel_get_band_from_idx(&intf->channels, intf->channel_idx);
 		if (intf->channel_width != b.max_chan_width) {
-			printlog("Try to set max channel width %s",
+			printlog(LOG_INFO, "Try to set max channel width %s",
 				uwifi_channel_width_string(b.max_chan_width, -1));
 			// try both HT40+ and HT40- if necessary
 			if (!uwifi_channel_change(intf, intf->channel_idx, b.max_chan_width, true) &&

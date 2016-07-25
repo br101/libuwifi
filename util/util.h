@@ -82,6 +82,6 @@ int is_power_of_2(unsigned long n)
 #define	LOG_INFO	6	/* informational */
 #define	LOG_DEBUG	7	/* debug-level messages */
 
-#define debug(...) do { if (DEBUG) print(LOG_DEBUG, __VA_ARGS__); } while (0)
+#define debug(...) do { if (DEBUG) printlog(LOG_DEBUG, __VA_ARGS__); } while (0)
 
 #endif
