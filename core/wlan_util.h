@@ -52,6 +52,8 @@ void ht_streams_from_mcs_set(unsigned char* mcs, unsigned char* rx, unsigned cha
 void vht_streams_from_mcs_set(unsigned char* mcs, unsigned char* rx, unsigned char* tx);
 const char* get_80211std(enum uwifi_chan_width width, int chan);
 int get_phy_thruput(enum uwifi_chan_width width, unsigned char streams_rx);
-int frequency2channel(int freq);
+int wlan_freq2chan(int freq);
+/* limited version as ambiguous without band */
+int wlan_chan2freq(int channel);
 
 #endif

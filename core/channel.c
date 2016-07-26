@@ -345,7 +345,7 @@ bool uwifi_channel_list_add(struct uwifi_channels* channels, int freq)
 	if (channels->num_channels >=  MAX_CHANNELS)
 		return false;
 
-	channels->chan[channels->num_channels].chan = frequency2channel(freq);
+	channels->chan[channels->num_channels].chan = wlan_freq2chan(freq);
 	channels->chan[channels->num_channels].freq = freq;
 	channels->num_channels++;
 	return true;

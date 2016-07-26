@@ -333,7 +333,7 @@ int get_phy_thruput(enum uwifi_chan_width width, unsigned char streams_rx)
 	return 0;
 }
 
-int frequency2channel(int freq)
+int wlan_freq2chan(int freq)
 {
 	if (freq == 2484)
 		return 14;
@@ -347,4 +347,15 @@ int frequency2channel(int freq)
 		return (freq - 56160) / 2160;
 	else
 		return 0;
+}
+
+int wlan_chan2freq(int channel)
+{
+	if (channel == 14)
+		return 2484;
+
+	if (channel < 14)
+		return 2407 + (channel * 5);
+
+	return 5000 + (channel * 5);
 }
