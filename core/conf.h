@@ -16,7 +16,7 @@ struct uwifi_interface {
 	bool			channel_scan;
 	int			channel_scan_rounds;
 	int			channel_set_num;	/* value we want to set */
-	enum uwifi_chan_width		channel_set_width;	/* value we want to set */
+	enum uwifi_chan_width	channel_set_width;	/* value we want to set */
 	bool			channel_set_ht40plus;	/* value we want to set */
 
 	/* not config but state */
@@ -26,7 +26,7 @@ struct uwifi_interface {
 	bool			channel_initialized;
 
 	int			channel_idx;	/* index into channels array */
-	enum uwifi_chan_width		channel_width;
+	enum uwifi_chan_width	channel_width;
 	bool			channel_ht40plus;	/* channel is HT40+ */
 	uint32_t		last_channelchange;
 

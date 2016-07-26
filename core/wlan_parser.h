@@ -48,7 +48,7 @@ struct uwifi_packet {
 	unsigned int		wlan_bintval;	/* beacon interval */
 	unsigned int		wlan_mode;	/* AP, STA or IBSS */				// X
 	unsigned char		wlan_channel;	/* channel from beacon, probe */		// X
-	enum uwifi_chan_width		wlan_chan_width;
+	enum uwifi_chan_width	wlan_chan_width;
 	unsigned char		wlan_tx_streams;
 	unsigned char		wlan_rx_streams;
 	unsigned char		wlan_qos_class;	/* for QDATA frames */
