@@ -176,6 +176,7 @@ struct information_element {
 
 /* only the information element IDs we are interested in */
 #define WLAN_IE_ID_SSID		0
+#define WLAN_IE_ID_SUPP_RATES	1
 #define WLAN_IE_ID_DSSS_PARAM	3
 #define WLAN_IE_ID_HT_CAPAB	45
 #define WLAN_IE_ID_RSN		48
