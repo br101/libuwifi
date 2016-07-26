@@ -36,6 +36,7 @@ struct uwifi_packet {
 	unsigned char		phy_rate_flags;	/* MCS flags */
 	unsigned int		phy_freq;	/* frequency from driver */
 	unsigned int		phy_flags;	/* A, B, G, shortpre */
+	bool			phy_injected;	/* frame was injected by ourselves */
 
 	/* wlan mac */
 	unsigned int		wlan_len;	/* packet length */

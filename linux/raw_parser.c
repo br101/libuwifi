@@ -81,11 +81,15 @@ static void get_radiotap_info(struct ieee80211_radiotap_iterator *iter, struct u
 	case IEEE80211_RADIOTAP_TX_ATTENUATION:
 	case IEEE80211_RADIOTAP_DB_TX_ATTENUATION:
 	case IEEE80211_RADIOTAP_DBM_TX_POWER:
-	case IEEE80211_RADIOTAP_TX_FLAGS:
 	case IEEE80211_RADIOTAP_RX_FLAGS:
 	case IEEE80211_RADIOTAP_RTS_RETRIES:
 	case IEEE80211_RADIOTAP_DATA_RETRIES:
 	case IEEE80211_RADIOTAP_AMPDU_STATUS:
+		break;
+	case IEEE80211_RADIOTAP_TX_FLAGS:
+		/* when TX flags are present we can conclude that a userspace
+		 * program has injected this packet */
+		p->phy_injected = true;
 		break;
 	case IEEE80211_RADIOTAP_FLAGS:
 		/* short preamble */
