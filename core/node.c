@@ -203,7 +203,7 @@ void uwifi_nodes_free(struct list_head* nodes)
 		return;
 
 	list_for_each_safe(nodes, ni, mi, list) {
-		DBG_PRINT("free node %s\n", ether_sprintf(ni->wlan_src));
+		DBG_PRINT("free node " MAC_FMT, MAC_PAR(ni->wlan_src));
 		list_del(&ni->list);
 		free(ni);
 	}

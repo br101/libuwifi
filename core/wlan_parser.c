@@ -168,11 +168,11 @@ int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet
 		p->wlan_seqno = (le16toh(wh->seq) & WLAN_FRAME_SEQ_MASK) >> 4;
 		DBG_PRINT("DATA SEQ %d\n", p->wlan_seqno);
 
-		DBG_PRINT("A1 %s\n", ether_sprintf(wh->addr1));
-		DBG_PRINT("A2 %s\n", ether_sprintf(wh->addr2));
-		DBG_PRINT("A3 %s\n", ether_sprintf(wh->addr3));
+		DBG_PRINT("A1 " MAC_FMT "\n", MAC_PAR(wh->addr1));
+		DBG_PRINT("A2 " MAC_FMT "\n", MAC_PAR(wh->addr2));
+		DBG_PRINT("A3 " MAC_FMT "\n", MAC_PAR(wh->addr3));
 		if (p->wlan_mode == WLAN_MODE_4ADDR) {
-			DBG_PRINT("A4 %s\n", ether_sprintf(wh->u.addr4));
+			DBG_PRINT("A4 " MAC_FMT "\n", MAC_PAR(wh->u.addr4));
 		}
 		DBG_PRINT("ToDS %d FromDS %d\n", (fc & WLAN_FRAME_FC_FROM_DS) != 0, (fc & WLAN_FRAME_FC_TO_DS) != 0);
 
@@ -314,15 +314,15 @@ int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet
 
 	if (ta != NULL) {
 		memcpy(p->wlan_src, ta, WLAN_MAC_LEN);
-		DBG_PRINT("TA    %s\n", ether_sprintf(ta));
+		DBG_PRINT("TA    " MAC_FMT "\n", MAC_PAR(ta));
 	}
 	if (ra != NULL) {
 		memcpy(p->wlan_dst, ra, WLAN_MAC_LEN);
-		DBG_PRINT("RA    %s\n", ether_sprintf(ra));
+		DBG_PRINT("RA    " MAC_FMT "\n", MAC_PAR(ra));
 	}
 	if (bssid != NULL) {
 		memcpy(p->wlan_bssid, bssid, WLAN_MAC_LEN);
-		DBG_PRINT("BSSID %s\n", ether_sprintf(bssid));
+		DBG_PRINT("BSSID " MAC_FMT "\n", MAC_PAR(bssid));
 	}
 
 	/* only data frames contain more info, otherwise stop parsing */

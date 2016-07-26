@@ -46,11 +46,11 @@ dump_hex(__attribute__((unused)) const unsigned char* data,
 }
 #endif
 
-const char* ether_sprintf(const unsigned char *mac)
+const char* mac_sprint(const unsigned char *mac)
 {
-	static char etherbuf[18];
-	sprintf(etherbuf, MAC_FMT, MAC_PAR(mac));
-	return etherbuf;
+	static char buf[18];
+	sprintf(buf, MAC_FMT, MAC_PAR(mac));
+	return buf;
 }
 
 /* simple ilog2 implementation */

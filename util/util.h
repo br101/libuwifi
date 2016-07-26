@@ -65,7 +65,7 @@
 
 void dump_hex(const unsigned char* data, int len, const char* txt);
 
-const char* ether_sprintf(const unsigned char *mac);
+const char* mac_sprint(const unsigned char *mac);
 
 int ilog2(int x);
 
