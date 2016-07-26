@@ -251,7 +251,7 @@ enum uwifi_chan_width chan_width_from_vht_capab(uint32_t vht)
 		case WLAN_IE_VHT_CAPAB_INFO_CHAN_WIDTH_80: return CHAN_WIDTH_80;
 		case WLAN_IE_VHT_CAPAB_INFO_CHAN_WIDTH_160: return CHAN_WIDTH_160;
 		case WLAN_IE_VHT_CAPAB_INFO_CHAN_WIDTH_BOTH: return CHAN_WIDTH_8080;
-		default: printlog(LOG_ERR, "(reserved)\n"); return CHAN_WIDTH_UNSPEC;
+		default: return CHAN_WIDTH_UNSPEC;
 	}
 }
 

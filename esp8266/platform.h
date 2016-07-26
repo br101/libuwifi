@@ -15,3 +15,5 @@
 #define sprintf			os_sprintf
 
 #define plat_time_usec		system_get_time
+
+#define printlog(_l, ...)	os_printf(__VA_ARGS__)
