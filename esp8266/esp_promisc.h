@@ -50,4 +50,8 @@ struct sniffer_buf2 {
 	uint16_t len;			// length
 };
 
+struct uwifi_packet;
+
+bool uwifi_esp_parse(uint8_t* buf, uint16_t len, struct uwifi_packet* pkt);
+
 #endif
