@@ -1,4 +1,4 @@
-/* horst - Highly Optimized Radio Scanning Tool
+/* libuwifi - Userspace Wifi Library
  *
  * Copyright (C) 2005-2016 Bruno Randolf (br1@einfach.org)
  *
@@ -105,7 +105,7 @@ int open_packet_socket(char* devname)
 
 	mon_fd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
 	if (mon_fd < 0) {
-		printlog(LOG_ERR, "Could not create packet socket! Please run horst as root!");
+		printlog(LOG_ERR, "Could not create packet socket! Please run as root!");
 		exit(1);
 	}
 

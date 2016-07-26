@@ -1,4 +1,4 @@
-/* horst - Highly Optimized Radio Scanning Tool
+/* libuwifi - Userspace Wifi Library
  *
  * Copyright (C) 2005-2016 Bruno Randolf (br1@einfach.org)
  *
@@ -197,7 +197,7 @@ bool uwifi_channel_auto_change(struct uwifi_interface* intf)
 			   * etc.), it will be fixed when the first packet
 			   * arrives, see fixup_packet_channel().
 			   *
-			   * Without this return, horst would busy-loop forever
+			   * Without this return, we would busy-loop forever
 			   * (making the ui totally unresponsive) in the channel
 			   * changing code below because start_idx would be -1
 			   * as well. Short-circuit exiting here is quite
@@ -278,7 +278,7 @@ bool uwifi_channel_init(struct uwifi_interface* intf)
 		if (intf->if_freq <= 0) {
 			/* this happens when we have not been able to change
 			 * the original interface to monitor mode and we added
-			 * an additional monitor (horstX) interface */
+			 * an additional monitor interface */
 			printlog(LOG_ERR, "Could not get current channel of interface\n");
 			intf->max_phy_rate = get_phy_thruput(intf->channels.band[0].max_chan_width,
 							    intf->channels.band[0].streams_rx);

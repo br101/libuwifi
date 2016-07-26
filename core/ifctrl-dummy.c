@@ -1,4 +1,4 @@
-/* horst - Highly Optimized Radio Scanning Tool
+/* libuwifi - Userspace Wifi Library
  *
  * Copyright (C) 2015-2016 Bruno Randolf <br1@einfach.org>
  *
@@ -19,6 +19,7 @@
 
 #include "ifctrl.h"
 #include "platform.h"
+#include "util.h"
 
 bool ifctrl_init(void)
 {

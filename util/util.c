@@ -1,4 +1,4 @@
-/* horst - Highly Optimized Radio Scanning Tool
+/* libuwifi - Userspace Wifi Library
  *
  * Copyright (C) 2005-2016 Bruno Randolf (br1@einfach.org)
  *
