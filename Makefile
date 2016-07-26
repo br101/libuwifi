@@ -19,7 +19,7 @@
 NAME=libuwifi
 
 # build options
-DEBUG=1
+DEBUG=0
 PLATFORM=linux
 
 OBJS=	core/channel.o			\
