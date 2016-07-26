@@ -28,7 +28,7 @@ void dump_hex(const unsigned char* data, int len, const char* txt)
 	if (txt != NULL)
 		printf("%s: ", txt);
 	for (i=0; i < len; i++) {
-		//debug("%02x ", data[i]);
+		//DBG_PRINT("%02x ", data[i]);
 		if ((i % 2) == 0)
 			printf(" ");
 		if ((i % 16) == 0)

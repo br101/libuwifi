@@ -62,8 +62,8 @@ static void copy_nodeinfo(struct uwifi_node* n, struct uwifi_packet* p, struct l
 			/* find AP node for this BSSID */
 			list_for_each(nodes, ap, list) {
 				if (memcmp(p->wlan_bssid, ap->wlan_src, WLAN_MAC_LEN) == 0) {
-					debug("AP node found %p\n", ap);
-					//debug("AP node ESSID %s\n",
+					DBG_PRINT("AP node found %p\n", ap);
+					//DBG_PRINT("AP node ESSID %s\n",
 					//      ap->essid != NULL ? ap->essid->essid : "unknown");
 					n->wlan_ap_node = ap;
 					break;
@@ -140,14 +140,14 @@ struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct list_head* n
 	/* find node by wlan source address */
 	list_for_each(nodes, n, list) {
 		if (memcmp(p->wlan_src, n->wlan_src, WLAN_MAC_LEN) == 0) {
-			debug("node found %p\n", n);
+			DBG_PRINT("node found %p\n", n);
 			break;
 		}
 	}
 
 	/* not found */
 	if (&n->list == &nodes->n) {
-		debug("node adding\n");
+		DBG_PRINT("node adding\n");
 		n = (struct uwifi_node*)malloc(sizeof(struct uwifi_node));
 		memset(n, 0, sizeof(struct uwifi_node));
 		n->essid = NULL;
@@ -184,7 +184,7 @@ void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec)
 			/* remove AP pointers to this node */
 			list_for_each_safe(nodes, n2, m2, list) {
 				if (n2->wlan_ap_node == n) {
-					debug("remove AP ref\n");
+					DBG_PRINT("remove AP ref\n");
 					n->wlan_ap_node = NULL;
 				}
 			}
@@ -203,7 +203,7 @@ void uwifi_nodes_free(struct list_head* nodes)
 		return;
 
 	list_for_each_safe(nodes, ni, mi, list) {
-		debug("free node %s\n", ether_sprintf(ni->wlan_src));
+		DBG_PRINT("free node %s\n", ether_sprintf(ni->wlan_src));
 		list_del(&ni->list);
 		free(ni);
 	}

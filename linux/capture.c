@@ -48,7 +48,7 @@ int device_get_hwinfo(int fd, char* ifname)
 		printlog(LOG_ERR, "Could not get arptype for '%s'", ifname);
 		return -1;
 	}
-	debug("ARPTYPE %d\n", ifr.ifr_hwaddr.sa_family);
+	DBG_PRINT("ARPTYPE %d\n", ifr.ifr_hwaddr.sa_family);
 	return ifr.ifr_hwaddr.sa_family;
 }
 
@@ -92,7 +92,7 @@ void set_receive_buffer(int fd, int sockbufsize)
 	ret = getsockopt(fd, SOL_SOCKET, SO_RCVBUF, &sockbufsize, &size);
 	if (ret != 0)
 		err(1, "getsockopt failed");
-	debug("socket receive buffer size %d\n", sockbufsize);
+	DBG_PRINT("socket receive buffer size %d\n", sockbufsize);
 #endif
 }
 
