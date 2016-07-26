@@ -6,7 +6,6 @@
 #include "util.h"
 #include "wlan_parser.h"
 #include "platform.h"
-#include "phy_info.h"
 #include "conf.h"
 #include "raw_parser.h"
 

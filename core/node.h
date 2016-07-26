@@ -24,7 +24,6 @@
 #include "wlan_parser.h"
 #include "ccan/list/list.h"
 #include "average.h"
-#include "phy_info.h"
 #include "conf.h"
 
 struct uwifi_node {

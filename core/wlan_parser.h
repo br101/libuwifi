@@ -9,6 +9,13 @@
 #include "channel.h"
 #include "util.h"
 
+#define PHY_FLAG_SHORTPRE	BIT(0)
+#define PHY_FLAG_BADFCS		BIT(1)
+#define PHY_FLAG_A		BIT(2)
+#define PHY_FLAG_B		BIT(3)
+#define PHY_FLAG_G		BIT(4)
+#define PHY_FLAG_MODE_MASK	0x1C
+
 #define WLAN_MODE_AP		BIT(0)
 #define WLAN_MODE_IBSS		BIT(1)
 #define WLAN_MODE_STA		BIT(2)
