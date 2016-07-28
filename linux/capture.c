@@ -33,46 +33,6 @@
 #include "util.h"
 #include "platform.h"
 
-
-/*
- *  Get the hardware type of the given interface as ARPHRD_xxx constant.
- */
-int device_get_hwinfo(int fd, char* ifname)
-{
-	struct ifreq ifr;
-
-	memset(&ifr, 0, sizeof(ifr));
-	strncpy(ifr.ifr_name, ifname, sizeof(ifr.ifr_name));
-
-	if (ioctl(fd, SIOCGIFHWADDR, &ifr) < 0) {
-		printlog(LOG_ERR, "Could not get arptype for '%s'", ifname);
-		return -1;
-	}
-	DBG_PRINT("ARPTYPE %d\n", ifr.ifr_hwaddr.sa_family);
-	return ifr.ifr_hwaddr.sa_family;
-}
-
-int get_mac_address(char* ifname, unsigned char* mac)
-{
-	struct ifreq ifr;
-	int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
-	if (sock == -1) {
-		printlog(LOG_ERR, "MAC addr socket failed");
-		return 0;
-	}
-
-	strcpy(ifr.ifr_name, ifname);
-	if (ioctl(sock, SIOCGIFHWADDR, &ifr) == -1) {
-		printlog(LOG_ERR, "MAC addr ioctl failed for '%s'", ifname);
-		close(sock);
-		return 0;
-	}
-
-	memcpy(mac, ifr.ifr_hwaddr.sa_data, 6);
-	close(sock);
-	return 1;
-}
-
 void set_receive_buffer(int fd, int sockbufsize)
 {
 	int ret;
@@ -82,7 +42,7 @@ void set_receive_buffer(int fd, int sockbufsize)
 	fprintf(PF, "%d", sockbufsize);
 	fclose(PF);
 
-	ret = setsockopt (fd, SOL_SOCKET, SO_RCVBUF, &sockbufsize, sizeof(sockbufsize));
+	ret = setsockopt(fd, SOL_SOCKET, SO_RCVBUF, &sockbufsize, sizeof(sockbufsize));
 	if (ret != 0)
 		err(1, "setsockopt failed");
 

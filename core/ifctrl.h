@@ -48,17 +48,6 @@ bool ifctrl_iwadd_monitor(const char *interface, const char *monitor_interface);
 bool ifctrl_iwdel(const char *interface);
 
 /**
- * ifctrl_flags() - set interface flags: up/down, promisc
- *
- * @interface: the name of the interface
- * @up: up or down
- * @promisc: promiscuous mode or not
- *
- * Return true on success, false on error.
- */
-bool ifctrl_flags(const char *interface, bool up, bool promisc);
-
-/**
  * ifctrl_iwset_monitor() - set 802.11 interface to monitor mode
  *
  * @interface: the name of the interface

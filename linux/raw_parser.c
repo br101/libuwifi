@@ -8,6 +8,7 @@
 #include "platform.h"
 #include "conf.h"
 #include "raw_parser.h"
+#include "netdev.h"
 
 /* return consumed length or -1 on error */
 int parse_prism_header(unsigned char* buf, int len, struct uwifi_packet* p)
