@@ -37,4 +37,9 @@ struct uwifi_interface {
 	int			arphdr; // the device ARP type
 };
 
+// TODO: move? platform specific or not?
+
+bool uwifi_init(struct uwifi_interface* intf);
+void uwifi_fini(struct uwifi_interface* intf);
+
 #endif

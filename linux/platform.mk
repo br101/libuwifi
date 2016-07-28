@@ -24,6 +24,7 @@ LIBNL=3.0
 #PCAP=0 #TODO revive
 
 OBJS+=	linux/capture.o			\
+	linux/interface.o		\
 	linux/netdev.o			\
 	linux/platform.o		\
 	linux/raw_parser.o		\

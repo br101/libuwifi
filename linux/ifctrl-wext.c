@@ -30,8 +30,6 @@
 #include "channel.h"
 #include "conf.h"
 
-extern int mon; /* monitoring socket */
-
 static bool wext_set_freq(int fd, const char* devname, int freq)
 {
 	struct iwreq iwr;
