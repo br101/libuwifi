@@ -43,7 +43,7 @@ static void handler(u_char *user, const struct pcap_pkthdr *h, const u_char *byt
 	memmove(pcap_buffer, bytes, *((int *)user));
 }
 
-int open_packet_socket(char* devname)
+int packet_socket_open(char* devname)
 {
 	char error[PCAP_ERRBUF_SIZE];
 	int ret;
@@ -88,7 +88,7 @@ int device_get_hwinfo(__attribute__((unused)) int fd,
 	return -1;
 }
 
-ssize_t recv_packet(__attribute__((unused)) int fd,
+ssize_t capture_recv(__attribute__((unused)) int fd,
 		unsigned char* buffer, size_t bufsize)
 {
 	int ret = 0;
@@ -100,7 +100,7 @@ ssize_t recv_packet(__attribute__((unused)) int fd,
 }
 
 
-void close_packet_socket(__attribute__((unused)) int fd)
+void capture_close(__attribute__((unused)) int fd)
 {
 	if (pcap_fp != NULL)
 		pcap_close(pcap_fp);

@@ -29,11 +29,11 @@
 #include <arpa/inet.h>
 #include <err.h>
 
-#include "capture.h"
+#include "packet_sock.h"
 #include "util.h"
 #include "platform.h"
 
-void set_receive_buffer(int fd, int sockbufsize)
+void socket_set_receive_buffer(int fd, int sockbufsize)
 {
 	int ret;
 
@@ -46,7 +46,7 @@ void set_receive_buffer(int fd, int sockbufsize)
 	if (ret != 0)
 		err(1, "setsockopt failed");
 
-#if DO_DEBUG
+#if DEBUG
 	socklen_t size = sizeof(sockbufsize);
 	sockbufsize = 0;
 	ret = getsockopt(fd, SOL_SOCKET, SO_RCVBUF, &sockbufsize, &size);
@@ -56,21 +56,18 @@ void set_receive_buffer(int fd, int sockbufsize)
 #endif
 }
 
-int open_packet_socket(char* devname)
+int packet_socket_open(char* devname)
 {
-	int ret;
-	int mon_fd;
-	int ifindex;
 	struct sockaddr_ll sall;
 
-	mon_fd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
-	if (mon_fd < 0) {
+	int fd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+	if (fd < 0) {
 		printlog(LOG_ERR, "Could not create packet socket! Please run as root!");
 		exit(1);
 	}
 
 	/* bind only to one interface */
-	ifindex = if_nametoindex(devname);
+	int ifindex = if_nametoindex(devname);
 	if (ifindex < 0)
 		return -1;
 
@@ -79,20 +76,14 @@ int open_packet_socket(char* devname)
 	sall.sll_family = AF_PACKET;
 	sall.sll_protocol = htons(ETH_P_ALL);
 
-	ret = bind(mon_fd, (struct sockaddr*)&sall, sizeof(sall));
+	int ret = bind(fd, (struct sockaddr*)&sall, sizeof(sall));
 	if (ret != 0)
 		err(1, "bind failed");
 
-	return mon_fd;
+	return fd;
 }
 
-ssize_t recv_packet(int fd, unsigned char* buffer, size_t bufsize)
+ssize_t packet_socket_recv(int fd, unsigned char* buffer, size_t bufsize)
 {
 	return recv(fd, buffer, bufsize, MSG_DONTWAIT);
-}
-
-void close_packet_socket(int fd)
-{
-	if (fd > 0)
-		close(fd);
 }

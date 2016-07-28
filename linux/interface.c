@@ -1,7 +1,9 @@
+#include <unistd.h>
+
 #include "conf.h"
 #include "ifctrl.h"
 #include "netdev.h"
-#include "capture.h"
+#include "packet_sock.h"
 #include "util.h"
 #include "node.h"
 
@@ -10,7 +12,7 @@ bool uwifi_init(struct uwifi_interface* intf)
 	list_head_init(&intf->wlan_nodes);
 	intf->channel_idx = -1;
 	intf->last_channelchange = plat_time_usec();
-	intf->sock = open_packet_socket(intf->ifname);
+	intf->sock = packet_socket_open(intf->ifname);
 
 	if (intf->sock < 0) {
 		printlog(LOG_ERR, "Could not open packet socket on '%s'", intf->ifname);
@@ -44,7 +46,7 @@ bool uwifi_init(struct uwifi_interface* intf)
 void uwifi_fini(struct uwifi_interface* intf)
 {
 	if (intf->sock > 0) {
-		close_packet_socket(intf->sock);
+		close(intf->sock);
 		intf->sock = -1;
 	}
 
