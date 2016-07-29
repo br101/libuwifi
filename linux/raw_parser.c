@@ -49,7 +49,7 @@ int uwifi_parse_prism_header(unsigned char* buf, int len, struct uwifi_packet* p
 			p->phy_rate = 20; /* 1 * 2 */
 	}
 
-	p->phy_rate_idx = rate_to_index(p->phy_rate);
+	p->phy_rate_idx = wlan_rate_to_index(p->phy_rate);
 
 	/* guess phy mode */
 	if (ph->channel.data > 14)
@@ -109,7 +109,7 @@ static void get_radiotap_info(struct ieee80211_radiotap_iterator *iter, struct u
 		//printf("\trate: %lf\n", (double)*iter->this_arg/2);
 		DBG_PRINT("[rate %0x]", *iter->this_arg);
 		p->phy_rate = (*iter->this_arg)*5; /* rate is in 500kbps */
-		p->phy_rate_idx = rate_to_index(p->phy_rate);
+		p->phy_rate_idx = wlan_rate_to_index(p->phy_rate);
 		break;
 #define IEEE80211_CHAN_A \
 	(IEEE80211_CHAN_5GHZ | IEEE80211_CHAN_OFDM)
@@ -178,7 +178,7 @@ static void get_radiotap_info(struct ieee80211_radiotap_iterator *iter, struct u
 
 		p->phy_rate_idx = 12 + *iter->this_arg;
 		p->phy_rate_flags = flags;
-		p->phy_rate = mcs_index_to_rate(*iter->this_arg, ht20, lgi);
+		p->phy_rate = wlan_ht_mcs_to_rate(*iter->this_arg, ht20, lgi);
 
 		DBG_PRINT(" RATE %d ", p->phy_rate);
 		break;

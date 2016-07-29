@@ -25,7 +25,7 @@
 
 /* lists of packet names */
 
-struct pkt_name stype_names[WLAN_NUM_TYPES][WLAN_NUM_STYPES] = {
+const struct pkt_name stype_names[WLAN_NUM_TYPES][WLAN_NUM_STYPES] = {
 {
 	{ 'a', "ASOCRQ", WLAN_FRAME_ASSOC_REQ, "Association request" },
 	{ 'A', "ASOCRP", WLAN_FRAME_ASSOC_RESP, "Association response" },
@@ -82,7 +82,7 @@ struct pkt_name stype_names[WLAN_NUM_TYPES][WLAN_NUM_STYPES] = {
 static struct pkt_name unknow = { '?', "UNKNOW", 0, "Unknown" };
 static struct pkt_name badfcs = { '*', "BADFCS", 0, "Bad FCS" };
 
-struct pkt_name get_packet_struct(uint16_t type)
+struct pkt_name wlan_get_packet_struct(uint16_t type)
 {
 	int t = WLAN_FRAME_TYPE(type);
 
@@ -96,18 +96,18 @@ struct pkt_name get_packet_struct(uint16_t type)
 	return unknow;
 }
 
-char get_packet_type_char(uint16_t type)
+char wlan_get_packet_type_char(uint16_t type)
 {
-	return get_packet_struct(type).c;
+	return wlan_get_packet_struct(type).c;
 }
 
-const char* get_packet_type_name(uint16_t type)
+const char* wlan_get_packet_type_name(uint16_t type)
 {
-	return get_packet_struct(type).name;
+	return wlan_get_packet_struct(type).name;
 }
 
 /* rate in 100kbps */
-int rate_to_index(int rate)
+int wlan_rate_to_index(int rate)
 {
 	switch (rate) {
 		case 540: return 12;
@@ -127,7 +127,7 @@ int rate_to_index(int rate)
 }
 
 /* return rate in 100kbps */
-int rate_index_to_rate(int idx)
+int wlan_rate_to_rate(int idx)
 {
 	switch (idx) {
 		case 12: return 540;
@@ -147,7 +147,7 @@ int rate_index_to_rate(int idx)
 }
 
 /* return rate in 100kbps */
-int mcs_index_to_rate(int mcs, bool ht20, bool lgi)
+int wlan_ht_mcs_to_rate(int mcs, bool ht20, bool lgi)
 {
 	/* MCS Index, http://en.wikipedia.org/wiki/IEEE_802.11n-2009#Data_rates */
 	switch (mcs) {
@@ -192,7 +192,7 @@ int mcs_index_to_rate(int mcs, bool ht20, bool lgi)
  * Formula from http://equicom.hu/uploads/file/fluke/pros/how_fast_80211ac_poster.PDF
  * may not be 100% exact, but good enough
  */
-int vht_mcs_index_to_rate(enum uwifi_chan_width width, int streams, int mcs, bool sgi)
+int wlan_vht_mcs_to_rate(enum uwifi_chan_width width, int streams, int mcs, bool sgi)
 {
 	int wf;
 	float mf;
@@ -245,7 +245,7 @@ int vht_mcs_index_to_rate(enum uwifi_chan_width width, int streams, int mcs, boo
 	return 10.0 /* kpbs */ * streams * wf * mf / (sgi ? 3.6 : 4.0);
 }
 
-enum uwifi_chan_width chan_width_from_vht_capab(uint32_t vht)
+enum uwifi_chan_width wlan_chan_width_from_vht_capab(uint32_t vht)
 {
 	switch (((vht & WLAN_IE_VHT_CAPAB_INFO_CHAN_WIDTH) >> 2)) {
 		case WLAN_IE_VHT_CAPAB_INFO_CHAN_WIDTH_80: return CHAN_WIDTH_80;
@@ -256,7 +256,7 @@ enum uwifi_chan_width chan_width_from_vht_capab(uint32_t vht)
 }
 
 /* Note: mcs must be at least 13 bytes long! In theory its 16 byte */
-void ht_streams_from_mcs_set(unsigned char* mcs, unsigned char* rx, unsigned char* tx)
+void wlan_ht_streams_from_mcs(unsigned char* mcs, unsigned char* rx, unsigned char* tx)
 {
 	int i;
 	for (i = 0; i < 4; i++) {
@@ -276,7 +276,7 @@ void ht_streams_from_mcs_set(unsigned char* mcs, unsigned char* rx, unsigned cha
 }
 
 /* Note: mcs must be at least 6 bytes long! In theory its 8 byte */
-void vht_streams_from_mcs_set(unsigned char* mcs, unsigned char* rx, unsigned char* tx)
+void wlan_vht_streams_from_mcs(unsigned char* mcs, unsigned char* rx, unsigned char* tx)
 {
 	int i;
 	/* RX */
@@ -296,7 +296,7 @@ void vht_streams_from_mcs_set(unsigned char* mcs, unsigned char* rx, unsigned ch
 	*tx = i;
 }
 
-const char* get_80211std(enum uwifi_chan_width width, int chan)
+const char* wlan_80211std_string(enum uwifi_chan_width width, int chan)
 {
 	switch (width) {
 		case CHAN_WIDTH_UNSPEC:
@@ -315,20 +315,20 @@ const char* get_80211std(enum uwifi_chan_width width, int chan)
 }
 
 /* in 100kbps or -1 when unsupported */
-int get_phy_thruput(enum uwifi_chan_width width, unsigned char streams_rx)
+int wlan_max_phy_rate(enum uwifi_chan_width width, unsigned char streams_rx)
 {
 	switch (width) {
 		case CHAN_WIDTH_UNSPEC:
 		case CHAN_WIDTH_20_NOHT:
 			return 540;
 		case CHAN_WIDTH_20:
-			return mcs_index_to_rate(streams_rx * 8 - 1, true, false);
+			return wlan_ht_mcs_to_rate(streams_rx * 8 - 1, true, false);
 		case CHAN_WIDTH_40:
-			return mcs_index_to_rate(streams_rx * 8 - 1, false, false);
+			return wlan_ht_mcs_to_rate(streams_rx * 8 - 1, false, false);
 		case CHAN_WIDTH_80:
 		case CHAN_WIDTH_160:
 		case CHAN_WIDTH_8080:
-			return vht_mcs_index_to_rate(width, streams_rx, 9, true);
+			return wlan_vht_mcs_to_rate(width, streams_rx, 9, true);
 	}
 	return 0;
 }

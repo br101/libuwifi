@@ -407,18 +407,18 @@ static int nl80211_get_freqlist_cb(struct nl_msg *msg, void *arg)
 
 		if (bands[NL80211_BAND_ATTR_HT_MCS_SET] &&
 		    nla_len(bands[NL80211_BAND_ATTR_HT_MCS_SET]) == 16) {
-			ht_streams_from_mcs_set(nla_data(bands[NL80211_BAND_ATTR_HT_MCS_SET]),
+			wlan_ht_streams_from_mcs(nla_data(bands[NL80211_BAND_ATTR_HT_MCS_SET]),
 						&list->band[b].streams_rx, &list->band[b].streams_tx);
 		}
 
 		if (bands[NL80211_BAND_ATTR_VHT_CAPA]) {
 			uint32_t vht = nla_get_u32(bands[NL80211_BAND_ATTR_VHT_CAPA]);
-			list->band[b].max_chan_width = chan_width_from_vht_capab(vht);
+			list->band[b].max_chan_width = wlan_chan_width_from_vht_capab(vht);
 		}
 
 		if (bands[NL80211_BAND_ATTR_VHT_MCS_SET] &&
 		    nla_len(bands[NL80211_BAND_ATTR_VHT_MCS_SET]) == 8) {
-			vht_streams_from_mcs_set(nla_data(bands[NL80211_BAND_ATTR_VHT_MCS_SET]),
+			wlan_vht_streams_from_mcs(nla_data(bands[NL80211_BAND_ATTR_VHT_MCS_SET]),
 						&list->band[b].streams_rx, &list->band[b].streams_tx);
 		}
 

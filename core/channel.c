@@ -180,7 +180,7 @@ bool uwifi_channel_change(struct uwifi_interface* intf, int idx, enum uwifi_chan
 	intf->channel_idx = idx;
 	intf->channel_width = width;
 	intf->channel_ht40plus = ht40plus;
-	intf->max_phy_rate = get_phy_thruput(width, channel_get_band_from_idx(&intf->channels, idx).streams_rx);
+	intf->max_phy_rate = wlan_max_phy_rate(width, channel_get_band_from_idx(&intf->channels, idx).streams_rx);
 	intf->last_channelchange = the_time;
 	return true;
 }
@@ -280,7 +280,7 @@ bool uwifi_channel_init(struct uwifi_interface* intf)
 			 * the original interface to monitor mode and we added
 			 * an additional monitor interface */
 			printlog(LOG_ERR, "Could not get current channel of interface\n");
-			intf->max_phy_rate = get_phy_thruput(intf->channels.band[0].max_chan_width,
+			intf->max_phy_rate = wlan_max_phy_rate(intf->channels.band[0].max_chan_width,
 							    intf->channels.band[0].streams_rx);
 			return true; // not failure
 
@@ -300,7 +300,7 @@ bool uwifi_channel_init(struct uwifi_interface* intf)
 		} else {
 			intf->channel_set_width = intf->channel_width;
 			intf->channel_set_ht40plus = intf->channel_ht40plus;
-			intf->max_phy_rate = get_phy_thruput(intf->channel_width, b.streams_rx);
+			intf->max_phy_rate = wlan_max_phy_rate(intf->channel_width, b.streams_rx);
 		}
 	}
 	return true;

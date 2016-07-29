@@ -58,7 +58,7 @@ void uwifi_parse_information_elements(unsigned char* buf, size_t bufLen, struct 
 				p->wlan_chan_width = CHAN_WIDTH_20;
 
 			if (ie->len >= 26) {
-				ht_streams_from_mcs_set(&ie->var[3], &p->wlan_rx_streams, &p->wlan_tx_streams);
+				wlan_ht_streams_from_mcs(&ie->var[3], &p->wlan_rx_streams, &p->wlan_tx_streams);
 				DBG_PRINT("STREAMS %dx%d\n", p->wlan_tx_streams, p->wlan_rx_streams);
 			}
 			break;
@@ -84,8 +84,8 @@ void uwifi_parse_information_elements(unsigned char* buf, size_t bufLen, struct 
 		case WLAN_IE_ID_VHT_CAPAB:
 			DBG_PRINT("VHT %d %x\n", ie->len, ie->var[0]);
 			if (ie->len >= 12) {
-				p->wlan_chan_width = chan_width_from_vht_capab(ie->var[0]);
-				vht_streams_from_mcs_set(&ie->var[4], &p->wlan_rx_streams, &p->wlan_tx_streams);
+				p->wlan_chan_width = wlan_chan_width_from_vht_capab(ie->var[0]);
+				wlan_vht_streams_from_mcs(&ie->var[4], &p->wlan_rx_streams, &p->wlan_tx_streams);
 				DBG_PRINT("VHT STREAMS %dx%d\n", p->wlan_tx_streams, p->wlan_rx_streams);
 			}
 			break;
@@ -125,7 +125,7 @@ int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet
 	fc = le16toh(wh->fc);
 	p->wlan_type = (fc & WLAN_FRAME_FC_MASK);
 	DBG_PRINT("wlan_type %x - type %x - stype %x\n", fc, fc & WLAN_FRAME_FC_TYPE_MASK, fc & WLAN_FRAME_FC_STYPE_MASK);
-	DBG_PRINT("%s\n", get_packet_type_name(fc));
+	DBG_PRINT("%s\n", wlan_get_packet_type_name(fc));
 
 	if (WLAN_FRAME_IS_DATA(fc)) {
 

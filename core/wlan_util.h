@@ -38,20 +38,20 @@ struct pkt_name {
  * Names and abbreviations for all WLAN frame types (2 bit, but only MGMT, CTRL
  * and DATA defined) and subtypes (4 bit)
  */
-extern struct pkt_name stype_names[WLAN_NUM_TYPES][WLAN_NUM_STYPES];
+extern const struct pkt_name stype_names[WLAN_NUM_TYPES][WLAN_NUM_STYPES];
 
-struct pkt_name get_packet_struct(uint16_t type);
-char get_packet_type_char(uint16_t type);
-const char* get_packet_type_name(uint16_t type);
-int rate_to_index(int rate);
-int rate_index_to_rate(int idx);
-int mcs_index_to_rate(int mcs, bool ht20, bool lgi);
-int vht_mcs_index_to_rate(enum uwifi_chan_width width, int streams, int mcs, bool sgi);
-enum uwifi_chan_width chan_width_from_vht_capab(uint32_t vht);
-void ht_streams_from_mcs_set(unsigned char* mcs, unsigned char* rx, unsigned char* tx);
-void vht_streams_from_mcs_set(unsigned char* mcs, unsigned char* rx, unsigned char* tx);
-const char* get_80211std(enum uwifi_chan_width width, int chan);
-int get_phy_thruput(enum uwifi_chan_width width, unsigned char streams_rx);
+struct pkt_name wlan_get_packet_struct(uint16_t type);
+char wlan_get_packet_type_char(uint16_t type);
+const char* wlan_get_packet_type_name(uint16_t type);
+int wlan_rate_to_index(int rate);
+int wlan_rate_to_rate(int idx);
+int wlan_ht_mcs_to_rate(int mcs, bool ht20, bool lgi);
+int wlan_vht_mcs_to_rate(enum uwifi_chan_width width, int streams, int mcs, bool sgi);
+enum uwifi_chan_width wlan_chan_width_from_vht_capab(uint32_t vht);
+void wlan_ht_streams_from_mcs(unsigned char* mcs, unsigned char* rx, unsigned char* tx);
+void wlan_vht_streams_from_mcs(unsigned char* mcs, unsigned char* rx, unsigned char* tx);
+const char* wlan_80211std_string(enum uwifi_chan_width width, int chan);
+int wlan_max_phy_rate(enum uwifi_chan_width width, unsigned char streams_rx);
 int wlan_freq2chan(int freq);
 /* limited version as ambiguous without band */
 int wlan_chan2freq(int channel);
