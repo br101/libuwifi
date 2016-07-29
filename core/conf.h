@@ -9,9 +9,8 @@
 #define IF_NAMESIZE		16
 
 struct uwifi_interface {
-	int			sock;
 	char			ifname[IF_NAMESIZE + 1];
-	int			channel_time;	/* dwell time in usec */
+	int			channel_time;		/* dwell time in usec */
 	int			channel_max;
 	bool			channel_scan;
 	int			channel_scan_rounds;
@@ -20,12 +19,14 @@ struct uwifi_interface {
 	bool			channel_set_ht40plus;	/* value we want to set */
 
 	/* not config but state */
+	int			sock;
 	struct list_head	wlan_nodes;
+	uint32_t		last_nodetimeout;
 	struct uwifi_channels	channels;
 	int			num_channels;
 	bool			channel_initialized;
 
-	int			channel_idx;	/* index into channels array */
+	int			channel_idx;		/* index into channels array */
 	enum uwifi_chan_width	channel_width;
 	bool			channel_ht40plus;	/* channel is HT40+ */
 	uint32_t		last_channelchange;
@@ -34,7 +35,7 @@ struct uwifi_interface {
 	unsigned int		if_freq;
 	unsigned int		max_phy_rate;
 	int			if_type;
-	int			arphdr; // the device ARP type
+	int			arphdr;			/* the device ARP type */
 };
 
 // TODO: move? platform specific or not?

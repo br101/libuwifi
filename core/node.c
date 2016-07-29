@@ -22,8 +22,6 @@
 #include "wlan80211.h"
 #include "node.h"
 
-static uint32_t last_nodetimeout;
-
 static void copy_nodeinfo(struct uwifi_node* n, struct uwifi_packet* p, struct list_head* nodes)
 {
 	struct uwifi_node* ap;
@@ -161,13 +159,13 @@ struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct list_head* n
 	return n;
 }
 
-void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec)
+void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec, uint32_t* last_nodetimeout)
 {
 	struct uwifi_node *n, *m, *n2, *m2;
 //	struct chan_node *cn, *cn2;
 	uint32_t the_time = plat_time_usec();
 
-	if ((the_time - last_nodetimeout) < timeout_sec * 1000000)
+	if ((the_time - *last_nodetimeout) < timeout_sec * 1000000)
 		return;
 
 	list_for_each_safe(nodes, n, m, list) {
@@ -191,7 +189,7 @@ void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec)
 			free(n);
 		}
 	}
-	last_nodetimeout = the_time;
+	*last_nodetimeout = the_time;
 }
 
 void uwifi_nodes_free(struct list_head* nodes)
