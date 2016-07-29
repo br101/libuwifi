@@ -20,13 +20,13 @@
 
 #include "ifctrl.h"
 #include "main.h"
-#include "ieee80211_util.h"
+#include "wlan_util.h"
 
 #import <CoreWLAN/CoreWLAN.h>
 
 bool osx_set_freq(const char *interface, unsigned int freq)
 {
-    int channel = ieee80211_freq2channel(freq);
+    int channel = wlan_freq2chan(freq);
 
     CWWiFiClient * wifiClient = [CWWiFiClient sharedWiFiClient];
     NSString * interfaceName = [[NSString alloc] initWithUTF8String: interface];
@@ -45,7 +45,7 @@ bool osx_set_freq(const char *interface, unsigned int freq)
         NSError *err = nil;
         BOOL result = [currentInterface setWLANChannel:wlanChannel error:&err];
         if( !result ) {
-            printlog("set channel %ld err: %s", (long)[wlanChannel channelNumber], [[err localizedDescription] UTF8String]);
+            printlog(LOG_INFO, "set channel %ld err: %s", (long)[wlanChannel channelNumber], [[err localizedDescription] UTF8String]);
             ret = false;
         }
     }
@@ -105,7 +105,7 @@ int osx_get_channels(const char* devname, struct channel_list* channels) {
         NSInteger num = [eachChannel channelNumber];
         CWChannelBand band = [eachChannel channelBand];
         CWChannelWidth width = [eachChannel channelWidth];
-        printlog("num: %ld, band: %ld, width: %ld", num, (long)band, (long)width);
+        printlog(LOG_INFO, "num: %ld, band: %ld, width: %ld", num, (long)band, (long)width);
 
         if (lastNum != num ) {
             channel_list_add(ieee80211_channel2freq(num));
@@ -132,8 +132,8 @@ int osx_get_channels(const char* devname, struct channel_list* channels) {
         }
     }
 
-    printlog("band 0 channels: %d", channels->band[0].num_channels);
-    printlog("band 1 channels: %d", channels->band[1].num_channels);
+    printlog(LOG_INFO, "band 0 channels: %d", channels->band[0].num_channels);
+    printlog(LOG_INFO, "band 1 channels: %d", channels->band[1].num_channels);
 
     return i;
 }
@@ -159,17 +159,17 @@ void ifctrl_finish() {
 };
 
 bool ifctrl_iwadd_monitor(__attribute__((unused))const char *interface, __attribute__((unused))const char *monitor_interface) {
-    printlog("add monitor: not implemented");
+    printlog(LOG_ERR, "add monitor: not implemented");
     return false;
 };
 
 bool ifctrl_iwdel(__attribute__((unused))const char *interface) {
-    printlog("iwdel: not implemented");
+    printlog(LOG_ERR, "iwdel: not implemented");
     return false;
 };
 
 bool ifctrl_iwset_monitor(__attribute__((unused))const char *interface) {
-    printlog("set monitor: not implemented");
+    printlog(LOG_ERR, "set monitor: not implemented");
     return false;
 };
 
@@ -180,18 +180,18 @@ bool ifctrl_iwset_freq(__attribute__((unused))const char *interface, __attribute
     return false;
 };
 
-bool ifctrl_iwget_interface_info(__attribute__((unused))const char *interface) {
-    printlog("get interface info: not implemented");
+bool ifctrl_iwget_interface_info(__attribute__((unused)) struct uwifi_interface* intf) {
+    printlog(LOG_ERR, "get interface info: not implemented");
     return false;
 };
 
-bool ifctrl_iwget_freqlist(__attribute__((unused))int phy,  struct channel_list* channels) {
-    int num_channels = osx_get_channels(conf.ifname, channels);
+bool ifctrl_iwget_freqlist(struct uwifi_interface* intf) {
+    int num_channels = osx_get_channels(intf->ifname, &intf->channels);
     if (num_channels)
         return true;
     return false;
 };
 
-bool ifctrl_is_monitor() {
+bool ifctrl_is_monitor(__attribute__((unused)) struct uwifi_interface* intf) {
     return true;
 };
