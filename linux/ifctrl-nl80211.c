@@ -449,7 +449,7 @@ end:
 	return NL_SKIP;
 }
 
-bool ifctrl_iwget_freqlist(int phy, struct uwifi_channels* channels)
+bool ifctrl_iwget_freqlist(struct uwifi_interface* intf)
 {
 	struct nl_msg *msg;
 	bool ret;
@@ -457,9 +457,9 @@ bool ifctrl_iwget_freqlist(int phy, struct uwifi_channels* channels)
 	if (!nl80211_msg_prepare(&msg, NL80211_CMD_GET_WIPHY, NULL))
 		return false;
 
-	NLA_PUT_U32(msg, NL80211_ATTR_WIPHY, phy);
+	NLA_PUT_U32(msg, NL80211_ATTR_WIPHY, intf->if_phy);
 
-	ret = nl80211_send_recv(sock, msg, nl80211_get_freqlist_cb, channels); /* frees msg */
+	ret = nl80211_send_recv(sock, msg, nl80211_get_freqlist_cb, &intf->channels); /* frees msg */
 	if (!ret)
 		fprintf(stderr, "failed to get freqlist\n");
 	return ret;

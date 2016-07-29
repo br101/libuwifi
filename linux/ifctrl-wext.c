@@ -30,6 +30,8 @@
 #include "channel.h"
 #include "conf.h"
 
+static int wext_fd;
+
 static bool wext_set_freq(int fd, const char* devname, int freq)
 {
 	struct iwreq iwr;
@@ -42,7 +44,7 @@ static bool wext_set_freq(int fd, const char* devname, int freq)
 	iwr.u.freq.e = 1;
 
 	if (ioctl(fd, SIOCSIWFREQ, &iwr) < 0) {
-		printlog("ERROR: wext set channel");
+		printlog(LOG_ERR, "WEXT could not set channel");
 		return false;
 	}
 	return true;
@@ -59,13 +61,13 @@ static int wext_get_freq(int fd, const char* devname)
 	if (ioctl(fd, SIOCGIWFREQ, &iwr) < 0)
 		return 0;
 
-	DEBUG("FREQ %d %d\n", iwr.u.freq.m, iwr.u.freq.e);
+	DBG_PRINT("FREQ %d %d\n", iwr.u.freq.m, iwr.u.freq.e);
 
 	return iwr.u.freq.m;
 }
 
 static int wext_get_channels(int fd, const char* devname,
-		      struct uwifi_channels* channels)
+			     struct uwifi_channels* channels)
 {
 	struct iwreq iwr;
 	struct iw_range range;
@@ -83,18 +85,18 @@ static int wext_get_channels(int fd, const char* devname,
 	iwr.u.data.flags = 0;
 
 	if (ioctl(fd, SIOCGIWRANGE, &iwr) < 0) {
-		printlog("ERROR: wext get channel list");
+		printlog(LOG_ERR, "WEXT get channel list");
 		return 0;
 	}
 
 	if (range.we_version_compiled < 16) {
-		printlog("ERROR: wext version %d too old to get channels",
+		printlog(LOG_ERR, "WEXT version %d too old to get channels",
 			 range.we_version_compiled);
 		return 0;
 	}
 
 	for (i = 0; i < range.num_frequency && i < MAX_CHANNELS; i++) {
-		DEBUG("  Channel %.2d: %dMHz\n", range.freq[i].i, range.freq[i].m);
+		DBG_PRINT("  Channel %.2d: %dMHz\n", range.freq[i].i, range.freq[i].m);
 		channels->chan[i].chan = range.freq[i].i;
 		/* different drivers return different frequencies
 		 * (e.g. ipw2200 vs mac80211) try to fix them up here */
@@ -120,29 +122,34 @@ static int wext_get_channels(int fd, const char* devname,
 
 bool ifctrl_init(void)
 {
+	wext_fd = socket(PF_INET, SOCK_DGRAM, 0);
+	if (wext_fd < 0)
+		return false;
 	return true;
 };
 
 void ifctrl_finish(void)
 {
+	if (wext_fd >= 0)
+		close(wext_fd);
 };
 
 bool ifctrl_iwadd_monitor(__attribute__((unused)) const char *interface,
-			 __attribute__((unused)) const char *monitor_interface)
+			  __attribute__((unused)) const char *monitor_interface)
 {
-	printlog("add monitor: not supported with WEXT");
+	printlog(LOG_ERR, "add monitor: not supported with WEXT");
 	return false;
 }
 
 bool ifctrl_iwdel(__attribute__((unused)) const char *interface)
 {
-	printlog("del: not supported with WEXT");
+	printlog(LOG_ERR, "del: not supported with WEXT");
 	return false;
 }
 
 bool ifctrl_iwset_monitor(__attribute__((unused)) const char *interface)
 {
-	printlog("set monitor: not supported with WEXT");
+	printlog(LOG_ERR, "set monitor: not supported with WEXT");
 	return false;
 }
 
@@ -152,27 +159,27 @@ bool ifctrl_iwset_freq(const char *const interface,
 		       __attribute__((unused)) enum uwifi_chan_width width,
 		       __attribute__((unused)) unsigned int center1)
 {
-	if (wext_set_freq(mon, interface, freq))
+	if (wext_set_freq(wext_fd, interface, freq))
 		return true;
 	return false;
 }
 
-bool ifctrl_iwget_interface_info(const char *interface)
+bool ifctrl_iwget_interface_info(struct uwifi_interface* intf)
 {
-	conf.if_freq = wext_get_freq(mon, interface);
-	if (conf.if_freq == 0)
+	intf->if_freq = wext_get_freq(wext_fd, intf->ifname);
+	if (intf->if_freq == 0)
 		return false;
 	return true;
 }
 
-bool ifctrl_iwget_freqlist(__attribute__((unused)) int phy, struct uwifi_channels* channels)
+bool ifctrl_iwget_freqlist(struct uwifi_interface* intf)
 {
-	if (wext_get_channels(mon, conf.ifname, channels))
+	if (wext_get_channels(wext_fd, intf->ifname, &intf->channels))
 		return true;
 	return false;
 }
 
-bool ifctrl_is_monitor(void)
+bool ifctrl_is_monitor(__attribute__((unused)) struct uwifi_interface* intf)
 {
 	return true; /* assume yes */
 }

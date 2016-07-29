@@ -61,7 +61,7 @@ bool ifctrl_iwset_freq(const char *const interface, unsigned int freq,
 
 bool ifctrl_iwget_interface_info(struct uwifi_interface* intf);
 
-bool ifctrl_iwget_freqlist(int phy, struct uwifi_channels* channels);
+bool ifctrl_iwget_freqlist(struct uwifi_interface* intf);
 
 bool ifctrl_is_monitor(struct uwifi_interface* intf);
 

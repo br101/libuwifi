@@ -258,7 +258,7 @@ char* uwifi_channel_get_string(struct uwifi_channels* channels, int idx)
 bool uwifi_channel_init(struct uwifi_interface* intf)
 {
 	/* get available channels */
-	ifctrl_iwget_freqlist(intf->if_phy, &intf->channels);
+	ifctrl_iwget_freqlist(intf);
 	intf->channel_initialized = 1;
 
 	printlog(LOG_INFO, "Got %d Bands, %d Channels:\n", intf->channels.num_bands, intf->channels.num_channels);
