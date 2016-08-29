@@ -1,8 +1,10 @@
 /*
- * lib/average.c
+ * libuwifi - Userspace Wifi Library
  *
- * This source code is licensed under the GNU General Public License,
- * Version 2.  See the file COPYING for more details.
+ * Copyright (C) 2011 Bruno Randolf <br1@einfach.org>
+ *
+ * This source code is licensed under the GNU Lesser General Public License,
+ * Version 3. See the file COPYING for more details.
  */
 
 #include "average.h"

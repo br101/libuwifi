@@ -1,3 +1,12 @@
+/*
+ * libuwifi - Userspace Wifi Library
+ *
+ * Copyright (C) 2005-2016 Bruno Randolf (br1@einfach.org)
+ *
+ * This source code is licensed under the GNU Lesser General Public License,
+ * Version 3. See the file COPYING for more details.
+ */
+
 #include "esp8266/platform.h"
 #include "esp8266/esp_promisc.h"
 #include "core/wlan_parser.h"

@@ -1,3 +1,12 @@
+/*
+ * libuwifi - Userspace Wifi Library
+ *
+ * Copyright (C) 2011 Bruno Randolf <br1@einfach.org>
+ *
+ * This source code is licensed under the GNU Lesser General Public License,
+ * Version 3. See the file COPYING for more details.
+ */
+
 #ifndef _LINUX_AVERAGE_H
 #define _LINUX_AVERAGE_H
 

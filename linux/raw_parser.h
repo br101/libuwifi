@@ -1,3 +1,12 @@
+/*
+ * libuwifi - Userspace Wifi Library
+ *
+ * Copyright (C) 2005-2016 Bruno Randolf (br1@einfach.org)
+ *
+ * This source code is licensed under the GNU Lesser General Public License,
+ * Version 3. See the file COPYING for more details.
+ */
+
 #ifndef _UWIFI_RAW_PARSE_H_
 #define _UWIFI_RAW_PARSE_H_
 
