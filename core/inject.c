@@ -1,13 +1,11 @@
 #include <stdbool.h>
 #include <inttypes.h>
 #include <string.h>
-#include <net/ethernet.h>
-#include <arpa/inet.h>
 #include <err.h>
 
-#include "wlan80211.h"
-
+#include "platform.h"
 #include "inject.h"
+#include "wlan80211.h"
 
 static unsigned char supprates[] = {
 	0x8c /* 6Mbps (basic)*/, 0x12 /* 9Mbps */, 0x98 /* 12Mbps (basic) */,
