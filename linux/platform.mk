@@ -12,7 +12,8 @@ WEXT=0
 LIBNL=3.0
 #PCAP=0 #TODO revive
 
-OBJS+=	linux/interface.o		\
+OBJS+=	linux/inject_rtap.o		\
+	linux/interface.o		\
 	linux/netdev.o			\
 	linux/packet_sock.o		\
 	linux/platform.o		\

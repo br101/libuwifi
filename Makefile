@@ -12,6 +12,7 @@ DEBUG=0
 PLATFORM=linux
 
 OBJS=	core/channel.o			\
+	core/inject.o			\
 	core/node.o			\
 	core/wlan_parser.o		\
 	core/wlan_util.o		\
