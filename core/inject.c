@@ -5,7 +5,7 @@
 #include <arpa/inet.h>
 #include <err.h>
 
-#include <uwifi/wlan80211.h>
+#include "wlan80211.h"
 
 #include "inject.h"
 
