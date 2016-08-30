@@ -67,9 +67,10 @@ int uwifi_create_nulldata(unsigned char* buf, unsigned char* sa, unsigned char* 
 
 	header->fc = htole16(WLAN_FRAME_NULL | WLAN_FRAME_FC_TO_DS);
 	header->duration = htole16(0);
-	memcpy(header->addr1, da, 6);
+	//TODO: order is different depending on direction!
+	memcpy(header->addr1, bssid, 6);
 	memcpy(header->addr2, sa, 6);
-	memcpy(header->addr3, bssid, 6);
+	memcpy(header->addr3, da, 6);
 	header->seq = htole16(seq) << 4;
 	return sizeof(struct wlan_frame);
 }
