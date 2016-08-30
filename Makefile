@@ -45,6 +45,7 @@ clean:
 	-rm -f $(NAME).a*
 	-rm -f .buildflags
 	-rm -f .objdeps.mk
+	-make -C radiotap clean
 
 .buildflags: force
 	echo '$(CFLAGS)' | cmp -s - $@ || echo '$(CFLAGS)' > $@

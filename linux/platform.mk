@@ -10,6 +10,7 @@ INST_PATH=/usr/local
 # build options
 WEXT=0
 LIBNL=3.0
+BUILD_RADIOTAP=1
 #PCAP=0 #TODO revive
 
 OBJS+=	linux/inject_rtap.o		\
@@ -21,6 +22,11 @@ OBJS+=	linux/inject_rtap.o		\
 
 LIBS=-lradiotap
 CFLAGS+=-fPIC
+
+ifeq ($(BUILD_RADIOTAP),1)
+  INCLUDES += -I./radiotap
+  LDFLAGS += -L./radiotap
+endif
 
 ifeq ($(WEXT),1)
   OBJS += linux/ifctrl-wext.o
@@ -40,11 +46,17 @@ endif
 
 all: $(NAME).so $(NAME).a
 
-$(NAME).so: $(OBJS)
+$(NAME).so: $(OBJS) $(if BUILD_RADIOTAP,radiotap/libradiotap.so,)
 	$(CC) $(LDFLAGS) -shared -Wl,-soname,$(NAME).so.1 -o $(NAME).so $(OBJS) $(LIBS)
 	-ln -s $(NAME).so $(NAME).so.1
 
-install: $(NAME).so $(NAME).a
+radiotap/libradiotap.so:
+	cd radiotap; cmake .; make
+
+radiotap-install:
+	make -C radiotap install
+
+install: $(NAME).so $(NAME).a $(if BUILD_RADIOTAP,radiotap-install,)
 	-mkdir -p $(INST_PATH)/include/uwifi
 	-mkdir -p $(INST_PATH)/lib
 	cp ./core/*.h $(INST_PATH)/include/uwifi
