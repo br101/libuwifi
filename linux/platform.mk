@@ -20,12 +20,13 @@ OBJS+=	linux/inject_rtap.o		\
 	linux/platform.o		\
 	linux/raw_parser.o		\
 
-LIBS=-lradiotap
 CFLAGS+=-fPIC
 
 ifeq ($(BUILD_RADIOTAP),1)
   INCLUDES += -I./radiotap
-  LDFLAGS += -L./radiotap
+  OBJS += radiotap/radiotap.o
+else
+  LIBS=-lradiotap
 endif
 
 ifeq ($(WEXT),1)
@@ -46,17 +47,11 @@ endif
 
 all: $(NAME).so $(NAME).a
 
-$(NAME).so: $(OBJS) $(if BUILD_RADIOTAP,radiotap/libradiotap.so,)
+$(NAME).so: $(OBJS)
 	$(CC) $(LDFLAGS) -shared -Wl,-soname,$(NAME).so.1 -o $(NAME).so $(OBJS) $(LIBS)
 	-ln -s $(NAME).so $(NAME).so.1
 
-radiotap/libradiotap.so:
-	cd radiotap; cmake .; make
-
-radiotap-install:
-	make -C radiotap install
-
-install: $(NAME).so $(NAME).a $(if BUILD_RADIOTAP,radiotap-install,)
+install: $(NAME).so $(NAME).a
 	-mkdir -p $(INST_PATH)/include/uwifi
 	-mkdir -p $(INST_PATH)/lib
 	cp ./core/*.h $(INST_PATH)/include/uwifi
