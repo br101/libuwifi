@@ -369,6 +369,85 @@ bool ifctrl_iwget_interface_info(struct uwifi_interface* intf)
 	return ret;
 }
 
+static size_t sta_maxlen;
+static size_t sta_idx;
+
+static int nl80211_get_station_cb(struct nl_msg *msg, void *arg)
+{
+	struct sta_info* stas = arg;
+	struct nlattr **tb = nl80211_parse(msg);
+	struct nlattr *sinfo[NL80211_STA_INFO_MAX + 1];
+	static struct nla_policy sta_policy[NL80211_STA_INFO_MAX + 1] = {
+		[NL80211_STA_INFO_INACTIVE_TIME] = { .type = NLA_U32 },
+		[NL80211_STA_INFO_RX_BYTES] = { .type = NLA_U32 },
+		[NL80211_STA_INFO_TX_BYTES] = { .type = NLA_U32 },
+		[NL80211_STA_INFO_RX_PACKETS] = { .type = NLA_U32 },
+		[NL80211_STA_INFO_TX_PACKETS] = { .type = NLA_U32 },
+		[NL80211_STA_INFO_SIGNAL] = { .type = NLA_U8 },
+		[NL80211_STA_INFO_T_OFFSET] = { .type = NLA_U64 },
+		[NL80211_STA_INFO_TX_BITRATE] = { .type = NLA_NESTED },
+		[NL80211_STA_INFO_RX_BITRATE] = { .type = NLA_NESTED },
+		[NL80211_STA_INFO_LLID] = { .type = NLA_U16 },
+		[NL80211_STA_INFO_PLID] = { .type = NLA_U16 },
+		[NL80211_STA_INFO_PLINK_STATE] = { .type = NLA_U8 },
+		[NL80211_STA_INFO_TX_RETRIES] = { .type = NLA_U32 },
+		[NL80211_STA_INFO_TX_FAILED] = { .type = NLA_U32 },
+		[NL80211_STA_INFO_STA_FLAGS] = { .minlen = sizeof(struct nl80211_sta_flag_update) },
+		[NL80211_STA_INFO_LOCAL_PM] = { .type = NLA_U32},
+		[NL80211_STA_INFO_PEER_PM] = { .type = NLA_U32},
+		[NL80211_STA_INFO_NONPEER_PM] = { .type = NLA_U32},
+		[NL80211_STA_INFO_CHAIN_SIGNAL] = { .type = NLA_NESTED },
+		[NL80211_STA_INFO_CHAIN_SIGNAL_AVG] = { .type = NLA_NESTED },
+	};
+
+	if (!tb[NL80211_ATTR_STA_INFO]) {
+		fprintf(stderr, "STA info missing!\n");
+		return NL_SKIP;
+	}
+
+	if (nla_parse_nested(sinfo, NL80211_STA_INFO_MAX,
+			     tb[NL80211_ATTR_STA_INFO],
+			     sta_policy)) {
+		fprintf(stderr, "failed to parse STA nested attributes!\n");
+		return NL_SKIP;
+	}
+
+	if (sta_idx >= sta_maxlen)
+		return NL_SKIP;
+
+	unsigned char* mac = nla_data(tb[NL80211_ATTR_MAC]);
+	memcpy(stas[sta_idx].mac, mac, WLAN_MAC_LEN);
+
+	if (sinfo[NL80211_STA_INFO_INACTIVE_TIME])
+		stas[sta_idx].last = nla_get_u32(sinfo[NL80211_STA_INFO_INACTIVE_TIME]);
+
+	if (sinfo[NL80211_STA_INFO_SIGNAL])
+		stas[sta_idx].rssi = (int8_t)nla_get_u8(sinfo[NL80211_STA_INFO_SIGNAL]);
+
+	sta_idx++;
+	return NL_SKIP;
+}
+
+int ifctrl_iwget_stations(const char *const ifname, struct sta_info* stas, size_t maxlen)
+{
+	struct nl_msg *msg;
+	bool ret;
+
+	if (!nl80211_msg_prepare(&msg, NL80211_CMD_GET_STATION, ifname))
+		return false;
+
+	nlmsg_hdr(msg)->nlmsg_flags |= NLM_F_DUMP;
+
+	sta_maxlen = maxlen;
+	ret = nl80211_send_recv(sock, msg, nl80211_get_station_cb, stas); /* frees msg */
+	if (!ret) {
+		fprintf(stderr, "failed to get stations\n");
+		return ret;
+	} else {
+		return sta_idx;
+	}
+}
+
 static int nl80211_get_freqlist_cb(struct nl_msg *msg, void *arg)
 {
 	int bands_remain, freqs_remain, i = 0, b = 0;

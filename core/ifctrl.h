@@ -55,4 +55,12 @@ bool ifctrl_iwget_freqlist(struct uwifi_interface* intf);
 
 bool ifctrl_is_monitor(struct uwifi_interface* intf);
 
+struct sta_info {
+	unsigned char mac[6];
+	int8_t rssi;
+	uint32_t last;
+};
+
+int ifctrl_iwget_stations(const char *const ifname, struct sta_info* inf, size_t maxlen);
+
 #endif
