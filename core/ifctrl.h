@@ -63,4 +63,9 @@ struct sta_info {
 
 int ifctrl_iwget_stations(const char *const ifname, struct sta_info* inf, size_t maxlen);
 
+bool ifctrl_iw_disconnect(const char *const interface);
+
+bool ifctrl_iw_connect(const char *const interface, const char* essid, int freq,
+		       const unsigned char* bssid);
+
 #endif

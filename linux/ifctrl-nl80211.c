@@ -273,6 +273,40 @@ nla_put_failure:
 	return false;
 }
 
+bool ifctrl_iw_disconnect(const char *const interface)
+{
+	struct nl_msg *msg;
+
+	if (!nl80211_msg_prepare(&msg, NL80211_CMD_DISCONNECT, interface))
+		return false;
+
+	return nl80211_send(sock, msg); /* frees msg */
+}
+
+bool ifctrl_iw_connect(const char *const interface, const char* essid, int freq,
+		       const unsigned char* bssid)
+{
+	struct nl_msg *msg;
+
+	if (!nl80211_msg_prepare(&msg, NL80211_CMD_CONNECT, interface))
+		return false;
+
+	NLA_PUT(msg, NL80211_ATTR_SSID, strlen(essid), essid);
+
+	if (freq)
+		NLA_PUT_U32(msg, NL80211_ATTR_WIPHY_FREQ, freq);
+
+	if (bssid)
+		NLA_PUT(msg, NL80211_ATTR_MAC, 6, bssid);
+
+	return nl80211_send(sock, msg); /* frees msg */
+
+nla_put_failure:
+	fprintf(stderr, "failed to add attribute to netlink message\n");
+	nlmsg_free(msg);
+	return false;
+}
+
 bool ifctrl_iwset_freq(const char *const interface, unsigned int freq,
 		       enum uwifi_chan_width width,
 		       unsigned int center1)
