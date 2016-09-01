@@ -6,10 +6,10 @@ part is platform independent and can be used anywhere from Microcontrollers
 to Linux and OSX.
 
  * IEEE 802.11 frame formats and frame parsing
- * Grouping information by source MAC address ("node")
+ * RSSI and statistics per source MAC address ("node")
  * Channel management (channel, frequency, channel width) for 802.11n and 802.11ac
  * Raw sockets under Linux
- * Creating and configuring monitor interfaces (nl80211 and OSX)
+ * Creating monitor interfaces and configuring wifi interfaces (nl80211 and OSX)
  * ESP8266 promiscuous mode
  * Frame injection
 
