@@ -19,6 +19,7 @@ OBJS+=	linux/inject_rtap.o		\
 	linux/packet_sock.o		\
 	linux/platform.o		\
 	linux/raw_parser.o		\
+	linux/wpa_ctrl.o		\
 
 CFLAGS+=-fPIC
 
