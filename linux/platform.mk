@@ -16,6 +16,7 @@ BUILD_RADIOTAP=1
 OBJS+=	linux/inject_rtap.o		\
 	linux/interface.o		\
 	linux/netdev.o			\
+	linux/netl80211.o		\
 	linux/packet_sock.o		\
 	linux/platform.o		\
 	linux/raw_parser.o		\
