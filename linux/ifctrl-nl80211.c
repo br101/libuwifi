@@ -33,8 +33,7 @@
 
 static struct nl_sock *sock = NULL;
 static struct nl_sock *nl_event = NULL;
-static struct nl_cache *cache = NULL;
-static struct genl_family *family = NULL;
+static int family_id;
 
 static bool nl80211_init(void)
 {
@@ -52,22 +51,14 @@ static bool nl80211_init(void)
 		goto out;
 	}
 
-	err = genl_ctrl_alloc_cache(sock, &cache);
-	if (err) {
-		nl_perror(err, "failed to allocate netlink controller cache");
-		goto out;
-	}
-
-	family = genl_ctrl_search_by_name(cache, NL80211_GENL_NAME);
-	if (!family) {
+	family_id = genl_ctrl_resolve(sock, NL80211_GENL_NAME);
+	if (family_id < 0) {
 		fprintf(stderr, "failed to find nl80211\n");
 		goto out;
 	}
 
 	return true;
 out:
-	genl_family_put(family);
-	nl_cache_free(cache);
 	nl_socket_free(sock);
 	return false;
 }
@@ -75,8 +66,7 @@ out:
 static void nl80211_finish(void)
 {
 	nl_socket_free(sock);
-	genl_family_put(family);
-	nl_cache_free(cache);
+	nl_socket_free(nl_event);
 }
 
 static bool nl80211_msg_prepare(struct nl_msg **const msgp,
@@ -89,7 +79,7 @@ static bool nl80211_msg_prepare(struct nl_msg **const msgp,
 		return false;
 	}
 
-	if (!genlmsg_put(msg, 0, 0, genl_family_get_id(family), 0, 0 /*flags*/, cmd, 0)) {
+	if (!genlmsg_put(msg, 0, 0, family_id, 0, 0 /*flags*/, cmd, 0)) {
 		fprintf(stderr, "failed to add generic netlink headers\n");
 		goto nla_put_failure;
 	}
