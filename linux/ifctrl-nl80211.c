@@ -31,27 +31,27 @@
 #define NL80211_GENL_NAME "nl80211"
 #endif
 
-static struct nl_sock *sock = NULL;
-static struct nl_sock *nl_event = NULL;
+static struct nl_sock *nl_sock;
+static struct nl_sock *nl_event;
 static int family_id;
 
 static bool nl80211_init(void)
 {
 	int err;
 
-	sock = nl_socket_alloc();
-	if (!sock) {
+	nl_sock = nl_socket_alloc();
+	if (!nl_sock) {
 		fprintf(stderr, "failed to allocate netlink socket\n");
 		goto out;
 	}
 
-	err = genl_connect(sock);
+	err = genl_connect(nl_sock);
 	if (err) {
 		nl_perror(err, "failed to make generic netlink connection");
 		goto out;
 	}
 
-	family_id = genl_ctrl_resolve(sock, NL80211_GENL_NAME);
+	family_id = genl_ctrl_resolve(nl_sock, NL80211_GENL_NAME);
 	if (family_id < 0) {
 		fprintf(stderr, "failed to find nl80211\n");
 		goto out;
@@ -59,13 +59,13 @@ static bool nl80211_init(void)
 
 	return true;
 out:
-	nl_socket_free(sock);
+	nl_socket_free(nl_sock);
 	return false;
 }
 
 static void nl80211_finish(void)
 {
-	nl_socket_free(sock);
+	nl_socket_free(nl_sock);
 	nl_socket_free(nl_event);
 }
 
@@ -231,7 +231,7 @@ bool ifctrl_iwadd_monitor(const char *const interface,
 	NLA_PUT_STRING(msg, NL80211_ATTR_IFNAME, monitor_interface);
 	NLA_PUT_U32(msg, NL80211_ATTR_IFTYPE, NL80211_IFTYPE_MONITOR);
 
-	return nl80211_send(sock, msg); /* frees msg */
+	return nl80211_send(nl_sock, msg); /* frees msg */
 
 nla_put_failure:
 	fprintf(stderr, "failed to add attribute to netlink message\n");
@@ -246,7 +246,7 @@ bool ifctrl_iwdel(const char *const interface)
 	if (!nl80211_msg_prepare(&msg, NL80211_CMD_DEL_INTERFACE, interface))
 		return false;
 
-	return nl80211_send(sock, msg); /* frees msg */
+	return nl80211_send(nl_sock, msg); /* frees msg */
 }
 
 bool ifctrl_iwset_monitor(const char *const interface)
@@ -257,7 +257,7 @@ bool ifctrl_iwset_monitor(const char *const interface)
 		return false;
 
 	NLA_PUT_U32(msg, NL80211_ATTR_IFTYPE, NL80211_IFTYPE_MONITOR);
-	return nl80211_send(sock, msg); /* frees msg */
+	return nl80211_send(nl_sock, msg); /* frees msg */
 
 nla_put_failure:
 	fprintf(stderr, "failed to add attribute to netlink message\n");
@@ -272,7 +272,7 @@ bool ifctrl_iw_disconnect(const char *const interface)
 	if (!nl80211_msg_prepare(&msg, NL80211_CMD_DISCONNECT, interface))
 		return false;
 
-	return nl80211_send(sock, msg); /* frees msg */
+	return nl80211_send(nl_sock, msg); /* frees msg */
 }
 
 bool ifctrl_iw_connect(const char *const interface, const char* essid, int freq,
@@ -291,7 +291,7 @@ bool ifctrl_iw_connect(const char *const interface, const char* essid, int freq,
 	if (bssid)
 		NLA_PUT(msg, NL80211_ATTR_MAC, 6, bssid);
 
-	return nl80211_send(sock, msg); /* frees msg */
+	return nl80211_send(nl_sock, msg); /* frees msg */
 
 nla_put_failure:
 	fprintf(stderr, "failed to add attribute to netlink message\n");
@@ -331,7 +331,7 @@ bool ifctrl_iwset_freq(const char *const interface, unsigned int freq,
 	if (center1)
 		NLA_PUT_U32(msg, NL80211_ATTR_CENTER_FREQ1, center1);
 
-	return nl80211_send(sock, msg); /* frees msg */
+	return nl80211_send(nl_sock, msg); /* frees msg */
 
 nla_put_failure:
 	fprintf(stderr, "failed to add attribute to netlink message\n");
@@ -389,7 +389,7 @@ bool ifctrl_iwget_interface_info(struct uwifi_interface* intf)
 	if (!nl80211_msg_prepare(&msg, NL80211_CMD_GET_INTERFACE, intf->ifname))
 		return false;
 
-	ret = nl80211_send_recv(sock, msg, nl80211_get_interface_info_cb, intf); /* frees msg */
+	ret = nl80211_send_recv(nl_sock, msg, nl80211_get_interface_info_cb, intf); /* frees msg */
 	if (!ret)
 		fprintf(stderr, "failed to get interface info\n");
 	return ret;
@@ -465,7 +465,7 @@ int ifctrl_iwget_stations(const char *const ifname, struct sta_info* stas, size_
 	nlmsg_hdr(msg)->nlmsg_flags |= NLM_F_DUMP;
 
 	sta_maxlen = maxlen;
-	ret = nl80211_send_recv(sock, msg, nl80211_get_station_cb, stas); /* frees msg */
+	ret = nl80211_send_recv(nl_sock, msg, nl80211_get_station_cb, stas); /* frees msg */
 	if (!ret) {
 		fprintf(stderr, "failed to get stations\n");
 		return ret;
@@ -554,7 +554,7 @@ bool ifctrl_iwget_freqlist(struct uwifi_interface* intf)
 
 	NLA_PUT_U32(msg, NL80211_ATTR_WIPHY, intf->if_phy);
 
-	ret = nl80211_send_recv(sock, msg, nl80211_get_freqlist_cb, &intf->channels); /* frees msg */
+	ret = nl80211_send_recv(nl_sock, msg, nl80211_get_freqlist_cb, &intf->channels); /* frees msg */
 	if (!ret)
 		fprintf(stderr, "failed to get freqlist\n");
 	return ret;
