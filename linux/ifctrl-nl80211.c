@@ -25,12 +25,14 @@
 #include "ifctrl.h"
 #include "wlan_util.h"
 #include "conf.h"
+#include "util.h"
 
 #ifndef NL80211_GENL_NAME
 #define NL80211_GENL_NAME "nl80211"
 #endif
 
 static struct nl_sock *sock = NULL;
+static struct nl_sock *nl_event = NULL;
 static struct nl_cache *cache = NULL;
 static struct genl_family *family = NULL;
 
@@ -576,4 +578,199 @@ nla_put_failure:
 bool ifctrl_is_monitor(struct uwifi_interface* intf)
 {
 	return intf->if_type == NL80211_IFTYPE_MONITOR;
+}
+
+/*** somewhat inefficient way of resolving multicast group ids ***/
+
+struct nl_group_id {
+	const char *group;
+	int id;
+};
+
+static int nl_family_group_id_cb(struct nl_msg *msg, void *arg)
+{
+	struct nl_group_id *grp = arg;
+	struct nlattr *tb[CTRL_ATTR_MAX + 1];
+	struct genlmsghdr *gnlh = nlmsg_data(nlmsg_hdr(msg));
+	struct nlattr *mcgrp;
+	int rem_mcgrp;
+
+	nla_parse(tb, CTRL_ATTR_MAX, genlmsg_attrdata(gnlh, 0),
+		  genlmsg_attrlen(gnlh, 0), NULL);
+
+	if (!tb[CTRL_ATTR_MCAST_GROUPS])
+		return NL_SKIP;
+
+	nla_for_each_nested(mcgrp, tb[CTRL_ATTR_MCAST_GROUPS], rem_mcgrp) {
+		struct nlattr *tb_mcgrp[CTRL_ATTR_MCAST_GRP_MAX + 1];
+
+		nla_parse(tb_mcgrp, CTRL_ATTR_MCAST_GRP_MAX,
+			  nla_data(mcgrp), nla_len(mcgrp), NULL);
+
+		if (!tb_mcgrp[CTRL_ATTR_MCAST_GRP_NAME] ||
+		    !tb_mcgrp[CTRL_ATTR_MCAST_GRP_ID])
+			continue;
+		if (strncmp(nla_data(tb_mcgrp[CTRL_ATTR_MCAST_GRP_NAME]),
+			    grp->group, nla_len(tb_mcgrp[CTRL_ATTR_MCAST_GRP_NAME])))
+			continue;
+		grp->id = nla_get_u32(tb_mcgrp[CTRL_ATTR_MCAST_GRP_ID]);
+		break;
+	}
+
+	return NL_SKIP;
+}
+
+static int nl_get_multicast_id(struct nl_sock *sock, const char *family, const char *group)
+{
+	struct nl_group_id grp = {
+		.group = group,
+		.id = -ENOENT,
+	};
+
+	struct nl_msg* msg = nlmsg_alloc();
+	if (!msg) {
+		fprintf(stderr, "failed to allocate netlink message\n");
+		return -ENOMEM;
+	}
+
+	int ctrlid = genl_ctrl_resolve(sock, "nlctrl");
+
+	genlmsg_put(msg, 0, 0, ctrlid, 0, 0, CTRL_CMD_GETFAMILY, 0);
+	NLA_PUT_STRING(msg, CTRL_ATTR_FAMILY_NAME, family);
+
+	if (nl80211_send_recv(sock, msg, nl_family_group_id_cb, &grp))
+		return grp.id;
+
+nla_put_failure:
+	nlmsg_free(msg);
+	return -1;
+}
+
+static int nl80211_event_cb(struct nl_msg *msg, void *arg)
+{
+	iw_event_cb_t user_cb = arg;
+	int ifindex = -1;
+	int phy = -1;
+	int x = -1;
+	unsigned char* mac = NULL;
+
+	/* don't use nl80211_parse here as we need the generic message header */
+	struct genlmsghdr *gnlh = nlmsg_data(nlmsg_hdr(msg));
+	static struct nlattr *tb[NL80211_ATTR_MAX + 1];
+	nla_parse(tb, NL80211_ATTR_MAX, genlmsg_attrdata(gnlh, 0),
+	          genlmsg_attrlen(gnlh, 0), NULL);
+
+	if (tb[NL80211_ATTR_IFINDEX])
+		ifindex = nla_get_u32(tb[NL80211_ATTR_IFINDEX]);
+
+	if (tb[NL80211_ATTR_WIPHY])
+		phy = nla_get_u32(tb[NL80211_ATTR_WIPHY]);
+
+	switch (gnlh->cmd) {
+		case NL80211_CMD_NEW_WIPHY:
+		case NL80211_CMD_TRIGGER_SCAN:
+		case NL80211_CMD_NEW_SCAN_RESULTS:
+		case NL80211_CMD_SCAN_ABORTED:
+		case NL80211_CMD_START_SCHED_SCAN:
+		case NL80211_CMD_SCHED_SCAN_STOPPED:
+		case NL80211_CMD_SCHED_SCAN_RESULTS:
+		case NL80211_CMD_REG_CHANGE:
+		case NL80211_CMD_REG_BEACON_HINT:
+			break; /* ignored */
+
+		case NL80211_CMD_NEW_STATION:
+		case NL80211_CMD_DEL_STATION:
+		case NL80211_CMD_JOIN_IBSS:
+			mac = nla_data(tb[NL80211_ATTR_MAC]);
+			break;
+
+		case NL80211_CMD_AUTHENTICATE:
+		case NL80211_CMD_ASSOCIATE:
+		case NL80211_CMD_DEAUTHENTICATE:
+		case NL80211_CMD_DISASSOCIATE:
+		case NL80211_CMD_UNPROT_DEAUTHENTICATE:
+		case NL80211_CMD_UNPROT_DISASSOCIATE:
+			//tb[NL80211_ATTR_FRAME]
+			//tb[NL80211_ATTR_TIMED_OUT]
+			break;
+
+		case NL80211_CMD_CONNECT:
+			if (tb[NL80211_ATTR_STATUS_CODE])
+				x = nla_get_u16(tb[NL80211_ATTR_STATUS_CODE]);
+			if (tb[NL80211_ATTR_MAC])
+				mac = nla_data(tb[NL80211_ATTR_MAC]);
+			break;
+
+		case NL80211_CMD_ROAM:
+			if (tb[NL80211_ATTR_MAC])
+				mac = nla_data(tb[NL80211_ATTR_MAC]);
+			break;
+
+		case NL80211_CMD_DISCONNECT:
+			//tb[NL80211_ATTR_DISCONNECTED_BY_AP])
+			if (tb[NL80211_ATTR_REASON_CODE])
+				x = nla_get_u16(tb[NL80211_ATTR_REASON_CODE]);
+			break;
+
+		case NL80211_CMD_REMAIN_ON_CHANNEL:
+		case NL80211_CMD_CANCEL_REMAIN_ON_CHANNEL:
+		case NL80211_CMD_NOTIFY_CQM:
+			//connection quality monitor
+		case NL80211_CMD_MICHAEL_MIC_FAILURE:
+		case NL80211_CMD_FRAME_TX_STATUS:
+			// injected frame TX status?
+		case NL80211_CMD_PMKSA_CANDIDATE:
+		case NL80211_CMD_SET_WOWLAN:
+		case NL80211_CMD_PROBE_CLIENT:
+		case NL80211_CMD_VENDOR:
+		case NL80211_CMD_RADAR_DETECT:
+		case NL80211_CMD_DEL_WIPHY:
+			break; /* ignored */
+	}
+
+	user_cb(gnlh->cmd, phy, ifindex, mac, x);
+
+	return NL_SKIP;
+}
+
+int ifctrl_iw_event_init_socket(iw_event_cb_t user_cb)
+{
+	int mcid, ret;
+
+	/* open and connect genl socket */
+	nl_event = nl_socket_alloc();
+	if (!nl_event) {
+		fprintf(stderr, "failed to allocate event netlink socket\n");
+		return -1;
+	}
+
+	ret = genl_connect(nl_event);
+	if (ret) {
+		nl_perror(ret, "failed to make generic netlink connection");
+		return -1;
+	}
+
+	/* resolve and subscribe to multicast groups */
+	const char* grp_names[] = { "config", "scan", "regulatory", "mlme" /*, "vendor" */};
+	for (size_t i = 0; i < ARRAY_SIZE(grp_names); i++) {
+		mcid = nl_get_multicast_id(nl_event, NL80211_GENL_NAME, grp_names[i]);
+		if (mcid >= 0) {
+			ret = nl_socket_add_membership(nl_event, mcid);
+			if (ret)
+				return -1;
+		}
+	}
+
+	nl_socket_disable_seq_check(nl_event);
+	nl_socket_set_nonblocking(nl_event);
+
+	nl_socket_modify_cb(nl_event, NL_CB_VALID, NL_CB_CUSTOM, nl80211_event_cb, user_cb);
+
+	return nl_socket_get_fd(nl_event);
+}
+
+void ifctrl_iw_event_receive()
+{
+	if (nl_event)
+		nl_recvmsgs_default(nl_event);
 }

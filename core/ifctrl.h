@@ -68,4 +68,9 @@ bool ifctrl_iw_disconnect(const char *const interface);
 bool ifctrl_iw_connect(const char *const interface, const char* essid, int freq,
 		       const unsigned char* bssid);
 
+typedef void (*iw_event_cb_t)(int evt, int phy, int ifindex, const unsigned char* mac, int x);
+
+int ifctrl_iw_event_init_socket(iw_event_cb_t);
+void ifctrl_iw_event_receive();
+
 #endif

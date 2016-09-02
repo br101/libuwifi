@@ -51,6 +51,10 @@
 #define DIV_ROUND_UP(n,d) (((n) + (d) - 1) / (d))
 #endif
 
+#ifndef ARRAY_SIZE
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
+#endif
+
 void dump_hex(const unsigned char* data, int len, const char* txt);
 
 const char* mac_sprint(const unsigned char *mac);
