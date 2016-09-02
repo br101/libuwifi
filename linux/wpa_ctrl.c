@@ -148,6 +148,7 @@ int wpa_ctrl_request(struct wpa_ctrl *ctrl, const char *cmd,
 				}
 				continue;
 			}
+			reply[res] = '\0';
 			return res;
 		} else {
 			return -2;
