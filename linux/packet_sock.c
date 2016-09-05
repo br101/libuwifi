@@ -57,8 +57,8 @@ int packet_socket_open(char* devname)
 	}
 
 	/* bind only to one interface */
-	int ifindex = if_nametoindex(devname);
-	if (ifindex < 0)
+	unsigned int ifindex = if_nametoindex(devname);
+	if (ifindex == 0)
 		return -1;
 
 	memset(&sall, 0, sizeof(struct sockaddr_ll));
