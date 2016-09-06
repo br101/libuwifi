@@ -284,7 +284,9 @@ int ifctrl_iwget_stations(const char *const ifname, struct sta_info* stas, size_
 
 	nlmsg_hdr(msg)->nlmsg_flags |= NLM_F_DUMP;
 
+	sta_idx = 0;
 	sta_maxlen = maxlen;
+
 	ret = nl80211_send_recv(nl_sock, msg, nl80211_get_station_cb, stas); /* frees msg */
 	if (!ret) {
 		fprintf(stderr, "failed to get stations\n");
