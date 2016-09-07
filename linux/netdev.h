@@ -11,6 +11,7 @@
 #define _UWIFI_NETDEV_H_
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #ifndef ARPHRD_IEEE80211_RADIOTAP
 #define ARPHRD_IEEE80211_RADIOTAP 803    /* IEEE 802.11 + radiotap header */
@@ -24,6 +25,8 @@
 int netdev_get_hwinfo(char* ifname);
 
 bool netdev_get_mac_address(const char* ifname, unsigned char* mac);
+
+bool netdev_get_ip_address(const char* ifname, uint32_t* ip);
 
 bool netdev_set_up_promisc(const char *const ifname, bool up, bool promisc);
 

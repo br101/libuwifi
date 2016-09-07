@@ -12,6 +12,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
+#include <netinet/in.h>
 #include <unistd.h>
 #include <err.h>
 
@@ -58,6 +59,29 @@ bool netdev_get_mac_address(const char* ifname, unsigned char* mac)
 
 	close(fd);
 	memcpy(mac, ifr.ifr_hwaddr.sa_data, 6);
+	return true;
+}
+
+bool netdev_get_ip_address(const char* ifname, uint32_t* ip) {
+	struct ifreq ifr;
+	int fd = socket(AF_INET, SOCK_DGRAM, 0);
+	if (fd == -1)
+		return false;
+
+	memset(&ifr, 0, sizeof(ifr));
+	ifr.ifr_addr.sa_family = AF_INET;
+	strncpy(ifr.ifr_name, ifname, IF_NAMESIZE - 1);
+
+	if (ioctl(fd, SIOCGIFADDR, &ifr) < 0) {
+		printlog(LOG_ERR, "IP addr ioctl failed for '%s'", ifname);
+		close(fd);
+		return false;
+	}
+
+	struct sockaddr_in* sin = (struct sockaddr_in *)&ifr.ifr_addr;
+	*ip = sin->sin_addr.s_addr;
+
+	close(fd);
 	return true;
 }
 
