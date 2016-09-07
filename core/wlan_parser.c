@@ -126,10 +126,12 @@ int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet
 				hdrlen += 4;
 		}
 
-		/* AP, STA or IBSS */
+		/* AP, STA or IBSS and address fields */
 		if ((fc & WLAN_FRAME_FC_FROM_DS) == 0 &&
 		    (fc & WLAN_FRAME_FC_TO_DS) == 0) {
 			p->wlan_mode = WLAN_MODE_IBSS;
+			ra = wh->addr1;
+			ta = wh->addr2;
 			bssid = wh->addr3;
 		} else if ((fc & WLAN_FRAME_FC_FROM_DS) &&
 			   (fc & WLAN_FRAME_FC_TO_DS)) {
@@ -142,12 +144,18 @@ int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet
 					bssid = wh->addr3;
 				// in the MSDU case BSSID is unknown
 			}
+			ra = wh->addr1;
+			ta = wh->addr2;
 		} else if (fc & WLAN_FRAME_FC_FROM_DS) {
 			p->wlan_mode = WLAN_MODE_AP;
+			ra = wh->addr1;
 			bssid = wh->addr2;
+			ta = wh->addr3;
 		} else if (fc & WLAN_FRAME_FC_TO_DS) {
 			p->wlan_mode = WLAN_MODE_STA;
 			bssid = wh->addr1;
+			ta = wh->addr2;
+			ra = wh->addr3;
 		}
 
 		if (len < hdrlen)
@@ -165,9 +173,6 @@ int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet
 			DBG_PRINT("A4 " MAC_FMT "\n", MAC_PAR(wh->u.addr4));
 		}
 		DBG_PRINT("ToDS %d FromDS %d\n", (fc & WLAN_FRAME_FC_FROM_DS) != 0, (fc & WLAN_FRAME_FC_TO_DS) != 0);
-
-		ra = wh->addr1;
-		ta = wh->addr2;
 
 		/* WEP */
 		if (fc & WLAN_FRAME_FC_PROTECTED)
