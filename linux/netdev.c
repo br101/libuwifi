@@ -85,6 +85,31 @@ bool netdev_get_ip_address(const char* ifname, uint32_t* ip) {
 	return true;
 }
 
+bool netdev_set_ip_address(const char* ifname, uint32_t ip) {
+	struct ifreq ifr;
+
+	int fd = socket(AF_INET, SOCK_DGRAM, 0);
+	if (fd == -1)
+		return false;
+
+	memset(&ifr, 0, sizeof(ifr));
+	ifr.ifr_addr.sa_family = AF_INET;
+	strncpy(ifr.ifr_name, ifname, IF_NAMESIZE - 1);
+
+	struct sockaddr_in* sai = (struct sockaddr_in *)&ifr.ifr_addr;
+	sai->sin_family = AF_INET;
+	sai->sin_addr.s_addr = ip;
+
+	if (ioctl(fd, SIOCSIFADDR, &ifr) < 0) {
+		printlog(LOG_ERR, "IP set addr ioctl failed for '%s'", ifname);
+		close(fd);
+		return false;
+	}
+
+	close(fd);
+	return true;
+}
+
 bool netdev_set_up_promisc(const char *const ifname, bool up, bool promisc)
 {
 	struct ifreq ifr;

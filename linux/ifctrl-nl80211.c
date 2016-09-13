@@ -40,6 +40,25 @@ void ifctrl_finish(void)
 	nl80211_finish();
 }
 
+bool ifctrl_iwadd_sta(int phyidx, const char *const new_interface)
+{
+	struct nl_msg *msg;
+
+	if (!nl80211_msg_prepare(&msg, NL80211_CMD_NEW_INTERFACE, NULL))
+		return false;
+
+	NLA_PUT_U32(msg, NL80211_ATTR_WIPHY, phyidx);
+	NLA_PUT_STRING(msg, NL80211_ATTR_IFNAME, new_interface);
+	NLA_PUT_U32(msg, NL80211_ATTR_IFTYPE, NL80211_IFTYPE_STATION);
+
+	return nl80211_send(nl_sock, msg); /* frees msg */
+
+nla_put_failure:
+	fprintf(stderr, "failed to add attribute to netlink message\n");
+	nlmsg_free(msg);
+	return false;
+}
+
 bool ifctrl_iwadd_monitor(const char *const interface,
 			  const char *const monitor_interface)
 {

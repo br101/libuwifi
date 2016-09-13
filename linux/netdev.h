@@ -28,6 +28,8 @@ bool netdev_get_mac_address(const char* ifname, unsigned char* mac);
 
 bool netdev_get_ip_address(const char* ifname, uint32_t* ip);
 
+bool netdev_set_ip_address(const char* ifname, uint32_t ip);
+
 bool netdev_set_up_promisc(const char *const ifname, bool up, bool promisc);
 
 #endif
