@@ -20,7 +20,7 @@ OBJS=	core/channel.o			\
 	util/util.o			\
 
 INCLUDES=-I. -I./core -I./util -I./$(PLATFORM)
-CFLAGS+=-std=gnu99 -Wall -Wextra $(INCLUDES) -DDEBUG=$(DEBUG)
+CFLAGS+=-std=gnu99 -Wall -Wextra $(INCLUDES) -DDEBUG=$(DEBUG) -DUWIFI_VER=\"$(shell git describe --tags)\"
 
 include $(PLATFORM)/platform.mk
 

@@ -80,4 +80,6 @@ int is_power_of_2(unsigned long n)
 
 #define DBG_PRINT(...) do { if (DEBUG) printlog(LOG_DEBUG, __VA_ARGS__); } while (0)
 
+extern const char* UWIFI_VERSION;
+
 #endif

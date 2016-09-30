@@ -51,3 +51,10 @@ int ilog2(int x)
 		x = x >> 1;
 	return n;
 }
+
+/* UWIFI_VER is defined by Makefile from git describe */
+#ifndef UWIFI_VER
+#define UWIFI_VER "unknown"
+#endif
+
+const char* UWIFI_VERSION = UWIFI_VER;
