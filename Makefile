@@ -16,6 +16,7 @@ OBJS=	core/channel.o			\
 	core/node.o			\
 	core/wlan_parser.o		\
 	core/wlan_util.o		\
+	core/essid.o			\
 	util/average.o			\
 	util/util.o			\
 
