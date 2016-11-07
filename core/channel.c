@@ -279,7 +279,8 @@ bool uwifi_channel_init(struct uwifi_interface* intf)
 			 * an additional monitor interface */
 			printlog(LOG_ERR, "Could not get current channel of interface\n");
 			intf->max_phy_rate = wlan_max_phy_rate(intf->channels.band[0].max_chan_width,
-							    intf->channels.band[0].streams_rx);
+							       intf->channels.band[0].streams_rx);
+			intf->channel_idx = -1;
 			return true; // not failure
 
 		}
