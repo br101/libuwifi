@@ -155,10 +155,10 @@ bool uwifi_channel_change(struct uwifi_interface* intf, int idx, enum uwifi_chan
 	uint32_t the_time = plat_time_usec();
 
 	if (!ifctrl_iwset_freq(intf->ifname, intf->channels.chan[idx].freq, width, center1)) {
-		printlog(LOG_ERR, "Failed to set CH %d (%d MHz) %s center %d",
+		printlog(LOG_ERR, "Failed to set CH %d (%d MHz) %s center %d after %dms",
 			intf->channels.chan[idx].chan, intf->channels.chan[idx].freq,
 			uwifi_channel_width_string(width, ht40plus),
-			center1);
+			center1, (the_time - intf->last_channelchange) / 1000);
 		return false;
 	}
 
@@ -175,64 +175,72 @@ bool uwifi_channel_change(struct uwifi_interface* intf, int idx, enum uwifi_chan
 	return true;
 }
 
-bool uwifi_channel_auto_change(struct uwifi_interface* intf)
+/* Return -1 on error, 0 when no change necessary and 1 on success */
+int uwifi_channel_auto_change(struct uwifi_interface* intf)
 {
 	int new_idx;
-	bool ret = true;
+	int ret = true;
 	int start_idx;
 
+	if (!intf->channel_scan)
+		return 0;
+
+	/* Return if the current channel is still unknown for some reason
+	 * (mac80211 bug, busy physical interface, etc.), it will be fixed when
+	 * the first packet arrives, see fixup_packet_channel().
+	 *
+	 * Without this return, we would busy-loop forever below because
+	 * start_idx would be -1 as well. Short-circuit exiting here is quite
+	 * logical though: it does not make any sense to scan channels as long
+	 * as the channel module is not initialized properly. */
 	if (intf->channel_idx == -1)
-		return false; /* The current channel is still unknown for some
-			   * reason (mac80211 bug, busy physical interface,
-			   * etc.), it will be fixed when the first packet
-			   * arrives, see fixup_packet_channel().
-			   *
-			   * Without this return, we would busy-loop forever
-			   * (making the ui totally unresponsive) in the channel
-			   * changing code below because start_idx would be -1
-			   * as well. Short-circuit exiting here is quite
-			   * logical though: it does not make any sense to scan
-			   * channels as long as the channel module is not
-			   * initialized properly. */
+		return 0;
 
 	if (uwifi_channel_get_remaining_dwell_time(intf) > 0)
-		return false; /* too early */
+		return 0; /* too early */
 
-	if (intf->channel_scan) {
-		start_idx = new_idx = intf->channel_idx;
-		do {
-			enum uwifi_chan_width max_width = channel_get_band_from_idx(&intf->channels, new_idx).max_chan_width;
-			/*
-			 * For HT40 we visit the same channel twice, once with HT40+
-			 * and once with HT40-. This is necessary to see the HT40+/-
-			 * data packets
-			 */
-			if (max_width == CHAN_WIDTH_40) {
-				if (intf->channel_ht40plus)
-					new_idx++;
-				intf->channel_ht40plus = !intf->channel_ht40plus; // toggle
-			} else {
+	start_idx = new_idx = intf->channel_idx;
+	do {
+		enum uwifi_chan_width max_width = channel_get_band_from_idx(&intf->channels, new_idx).max_chan_width;
+		/*
+		 * For HT40 we visit the same channel twice, once with HT40+
+		 * and once with HT40-. This is necessary to see the HT40+/-
+		 * data packets
+		 */
+		if (max_width == CHAN_WIDTH_40) {
+			if (intf->channel_ht40plus)
 				new_idx++;
-			}
+			intf->channel_ht40plus = !intf->channel_ht40plus; // toggle
+		} else {
+			new_idx++;
+		}
 
-			if (new_idx >= intf->channels.num_channels ||
-			    new_idx >= MAX_CHANNELS ||
-			    (intf->channel_max &&
-			     uwifi_channel_get_chan(&intf->channels, new_idx) > intf->channel_max)) {
-				new_idx = 0;
-				max_width = channel_get_band_from_idx(&intf->channels, new_idx).max_chan_width;
-				intf->channel_ht40plus = true;
-			}
+		if (new_idx >= intf->channels.num_channels ||
+		    new_idx >= MAX_CHANNELS ||
+		    (intf->channel_max &&
+		     uwifi_channel_get_chan(&intf->channels, new_idx) > intf->channel_max)) {
+			new_idx = 0;
+			max_width = channel_get_band_from_idx(&intf->channels, new_idx).max_chan_width;
+			intf->channel_ht40plus = true;
+		}
 
-			ret = uwifi_channel_change(intf, new_idx, max_width, intf->channel_ht40plus);
+		ret = uwifi_channel_change(intf, new_idx, max_width, intf->channel_ht40plus);
 
-		/* try setting different channels in case we get errors only
-		 * on some channels (e.g. ipw2200 reports channel 14 but cannot
-		 * be set to use it). stop if we tried all channels */
-		} while (ret != 1 && new_idx != start_idx);
+		/* try setting different channels in case we get errors only on
+		 * some channels (e.g. ipw2200 reports channel 14 but cannot be
+		 * set to use it). stop if we tried all channels */
+	} while (ret != 1 && new_idx != start_idx);
+
+	/* even when all channels failed, set the last channel change time, so
+	 * we don't get into a busy loop, unsuccessfully trying to change
+	 * channels all the time. also we hope the application reacts to the -1
+	 * error code */
+	if (ret != 1) {
+		intf->last_channelchange = plat_time_usec();
+		return -1;
 	}
 
-	return ret;
+	return 1;
 }
 
 char* uwifi_channel_get_string(struct uwifi_channels* channels, int idx)

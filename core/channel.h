@@ -49,7 +49,7 @@ struct uwifi_channels {
 struct uwifi_interface;
 
 bool uwifi_channel_change(struct uwifi_interface* intf, int idx, enum uwifi_chan_width width, bool ht40plus);
-bool uwifi_channel_auto_change(struct uwifi_interface* intf);
+int uwifi_channel_auto_change(struct uwifi_interface* intf);
 int uwifi_channel_idx_from_chan(struct uwifi_channels* channels, int c);
 int uwifi_channel_idx_from_freq(struct uwifi_channels* channels, unsigned int f);
 int uwifi_channel_get_chan(struct uwifi_channels* channels, int idx);
