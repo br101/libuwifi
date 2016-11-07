@@ -17,7 +17,7 @@ static void copy_nodeinfo(struct uwifi_node* n, struct uwifi_packet* p, struct l
 	struct uwifi_node* ap;
 
 	memcpy(n->wlan_src, p->wlan_src, WLAN_MAC_LEN);
-	memcpy(&n->last_pkt, p, sizeof(struct uwifi_packet));
+
 	n->last_seen = plat_time_usec();
 	n->pkt_count++;
 	n->pkt_types |= p->pkt_types;
@@ -77,6 +77,8 @@ static void copy_nodeinfo(struct uwifi_node* n, struct uwifi_packet* p, struct l
 		n->wlan_channel = p->wlan_channel;
 	}
 
+	n->phy_rate_last = p->phy_rate;
+	n->phy_sig_last = p->phy_signal;
 	ewma_add(&n->phy_sig_avg, -p->phy_signal);
 	n->phy_sig_sum += -p->phy_signal;
 	n->phy_sig_count += 1;

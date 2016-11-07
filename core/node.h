@@ -15,6 +15,7 @@
 #include "ccan/list/list.h"
 #include "average.h"
 #include "conf.h"
+#include "essid.h"
 
 struct uwifi_node {
 	/* housekeeping */
@@ -29,6 +30,8 @@ struct uwifi_node {
 	unsigned int		pkt_count;	/* nr of packets seen */
 
 	/* wlan phy (from radiotap) */
+	unsigned int		phy_rate_last;
+	int			phy_sig_last;
 	int			phy_sig_max;
 	struct ewma		phy_sig_avg;
 	unsigned long		phy_sig_sum;							// X
@@ -44,7 +47,7 @@ struct uwifi_node {
 	unsigned int		wlan_retries_all;
 	unsigned int		wlan_retries_last;
 	unsigned int		wlan_seqno;
-	struct essid_info*	essid;								// TODO!!!
+	struct essid_info*	essid;
 	struct uwifi_node*	wlan_ap_node;							// X
 	enum uwifi_chan_width	wlan_chan_width;
 	unsigned char		wlan_tx_streams;
@@ -65,8 +68,6 @@ struct uwifi_node {
 	unsigned int		olsr_count;	/* number of OLSR packets */
 	unsigned int		olsr_neigh;	/* number if OLSR neighbours */
 	unsigned int		olsr_tc;	/* unused */
-
-	struct uwifi_packet	last_pkt;
 };
 
 struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct list_head* nodes);

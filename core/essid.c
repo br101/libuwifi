@@ -34,7 +34,7 @@ static void update_essid_split_status(struct essid_info* e)
 		DBG_PRINT("SPLIT      node %p src " MAC_FMT " bssid " MAC_FMT "\n",
 			n, MAC_PAR(n->wlan_src), MAC_PAR(n->wlan_bssid));
 
-		if (n->wlan_mode & WLAN_MODE_AP)
+		if (n->wlan_mode & WLAN_MODE_AP || n->wlan_mode & WLAN_MODE_PROBE)
 			continue;
 
 		if (last_bssid && memcmp(last_bssid, n->wlan_bssid, WLAN_MAC_LEN) != 0) {
@@ -82,8 +82,9 @@ void uwifi_essids_update(struct uwifi_packet* p, struct uwifi_node* n)
 		return; /* ignore */
 
 	/* only check beacons and probe response frames */
-	if ((p->wlan_type != WLAN_FRAME_BEACON) &&
-	    (p->wlan_type != WLAN_FRAME_PROBE_RESP))
+	if (p->wlan_type != WLAN_FRAME_BEACON &&
+	    p->wlan_type != WLAN_FRAME_PROBE_RESP &&
+	    p->wlan_type != WLAN_FRAME_PROBE_REQ)
 		return;
 
 	DBG_PRINT("SPLIT check ibss '%s' node " MAC_FMT "bssid " MAC_FMT "\n" , p->wlan_essid,

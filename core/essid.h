@@ -28,6 +28,9 @@ struct essid_meta_info {
 
 extern struct essid_meta_info essids;
 
+struct uwifi_node;
+struct uwifi_packet;
+
 void uwifi_essids_init();
 void uwifi_essids_remove_node(struct uwifi_node* n);
 void uwifi_essids_update(struct uwifi_packet* p, struct uwifi_node* n);

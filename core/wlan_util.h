@@ -41,6 +41,7 @@ enum uwifi_chan_width wlan_chan_width_from_vht_capab(uint32_t vht);
 void wlan_ht_streams_from_mcs(unsigned char* mcs, unsigned char* rx, unsigned char* tx);
 void wlan_vht_streams_from_mcs(unsigned char* mcs, unsigned char* rx, unsigned char* tx);
 const char* wlan_80211std_string(enum uwifi_chan_width width, int chan);
+const char* wlan_mode_string(int mode);
 int wlan_max_phy_rate(enum uwifi_chan_width width, unsigned char streams_rx);
 int wlan_freq2chan(int freq);
 /* limited version as ambiguous without band */
