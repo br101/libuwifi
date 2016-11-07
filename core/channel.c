@@ -259,16 +259,16 @@ bool uwifi_channel_init(struct uwifi_interface* intf)
 	ifctrl_iwget_freqlist(intf);
 	intf->channel_initialized = 1;
 
-	printlog(LOG_INFO, "Got %d Bands, %d Channels:\n", intf->channels.num_bands, intf->channels.num_channels);
+	printlog(LOG_INFO, "Got %d Bands, %d Channels:", intf->channels.num_bands, intf->channels.num_channels);
 	for (int i = 0; i < intf->channels.num_channels && i < MAX_CHANNELS; i++)
-		printlog(LOG_INFO, "%s\n", uwifi_channel_get_string(&intf->channels, i));
+		printlog(LOG_INFO, "%s", uwifi_channel_get_string(&intf->channels, i));
 
 	if (intf->channels.num_bands <= 0 || intf->channels.num_channels <= 0)
 		return false;
 
 	if (intf->channel_set_num > 0) {
 		/* configured values */
-		printlog(LOG_INFO, "Setting configured channel %d\n", intf->channel_set_num);
+		printlog(LOG_INFO, "Setting configured channel %d", intf->channel_set_num);
 		int ini_idx = uwifi_channel_idx_from_chan(&intf->channels, intf->channel_set_num);
 		if (!uwifi_channel_change(intf, ini_idx, intf->channel_set_width, intf->channel_set_ht40plus))
 			return false;
@@ -277,7 +277,7 @@ bool uwifi_channel_init(struct uwifi_interface* intf)
 			/* this happens when we have not been able to change
 			 * the original interface to monitor mode and we added
 			 * an additional monitor interface */
-			printlog(LOG_ERR, "Could not get current channel of interface\n");
+			printlog(LOG_ERR, "Could not get current channel of interface");
 			intf->max_phy_rate = wlan_max_phy_rate(intf->channels.band[0].max_chan_width,
 							       intf->channels.band[0].streams_rx);
 			intf->channel_idx = -1;
