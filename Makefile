@@ -5,23 +5,23 @@
 # This program is licensed under the GNU Lesser General Public License,
 # Version 3. See the file COPYING for more details.
 
-NAME=libuwifi
+NAME = libuwifi
 
 # build options
-DEBUG=0
-PLATFORM=linux
+DEBUG = 0
+PLATFORM = linux
 
-OBJS=	core/channel.o			\
-	core/inject.o			\
-	core/node.o			\
-	core/wlan_parser.o		\
-	core/wlan_util.o		\
-	core/essid.o			\
-	util/average.o			\
-	util/util.o			\
+OBJS += core/channel.o
+OBJS += core/inject.o
+OBJS += core/node.o
+OBJS += core/wlan_parser.o
+OBJS += core/wlan_util.o
+OBJS += core/essid.o
+OBJS += util/average.o
+OBJS += util/util.o
 
-INCLUDES=-I. -I./core -I./util -I./$(PLATFORM)
-CFLAGS+=-std=gnu99 -Wall -Wextra $(INCLUDES) -DDEBUG=$(DEBUG) -DUWIFI_VER=\"$(shell git describe --tags)\"
+INCLUDES = -I. -I./core -I./util -I./$(PLATFORM)
+CFLAGS += -std=gnu99 -Wall -Wextra $(INCLUDES) -DDEBUG=$(DEBUG) -DUWIFI_VER=\"$(shell git describe --tags)\"
 
 include $(PLATFORM)/platform.mk
 
