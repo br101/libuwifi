@@ -163,7 +163,7 @@ bool uwifi_channel_change(struct uwifi_interface* intf, struct uwifi_chan_spec* 
 		return false;
 	}
 
-	printlog(LOG_INFO, "Set %s center %d after %dms",
+	printlog(LOG_DEBUG, "Set %s center %d after %dms",
 		uwifi_channel_get_string(spec), spec->center_freq,
 		(the_time - intf->last_channelchange) / 1000);
 
