@@ -5,30 +5,30 @@
 # This program is licensed under the GNU Lesser General Public License,
 # Version 3. See the file COPYING for more details.
 
-INST_PATH=/usr/local
+INST_PATH = /usr/local
 
 # build options
-WEXT=0
-LIBNL=3.0
-BUILD_RADIOTAP=1
-#PCAP=0 #TODO revive
+WEXT = 0
+LIBNL = 3.0
+BUILD_RADIOTAP = 1
+#PCAP = 0 #TODO revive
 
-OBJS+=	linux/inject_rtap.o		\
-	linux/interface.o		\
-	linux/netdev.o			\
-	linux/netl80211.o		\
-	linux/packet_sock.o		\
-	linux/platform.o		\
-	linux/raw_parser.o		\
-	linux/wpa_ctrl.o		\
+OBJS += linux/inject_rtap.o
+OBJS += linux/interface.o
+OBJS += linux/netdev.o
+OBJS += linux/netl80211.o
+OBJS += linux/packet_sock.o
+OBJS += linux/platform.o
+OBJS += linux/raw_parser.o
+OBJS += linux/wpa_ctrl.o
 
-CFLAGS+=-fPIC
+CFLAGS += -fPIC
 
 ifeq ($(BUILD_RADIOTAP),1)
   INCLUDES += -I./radiotap
   OBJS += radiotap/radiotap.o
 else
-  LIBS=-lradiotap
+  LIBS = -lradiotap
 endif
 
 ifeq ($(WEXT),1)
@@ -40,9 +40,9 @@ else
     OBJS += linux/ifctrl-nl80211.o
     CFLAGS += $(shell pkg-config --cflags libnl-$(LIBNL))
     ifeq ($(LIBNL),tiny)
-      LIBS+=-lnl-tiny
+      LIBS += -lnl-tiny
     else
-      LIBS+=-lnl-3 -lnl-genl-3
+      LIBS += -lnl-3 -lnl-genl-3
     endif
   endif
 endif

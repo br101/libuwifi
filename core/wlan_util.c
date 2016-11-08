@@ -12,6 +12,7 @@
 #include "wlan80211.h"
 #include "wlan_util.h"
 #include "channel.h"
+#include "wlan_parser.h"
 
 /* lists of packet names */
 
@@ -302,6 +303,19 @@ const char* wlan_80211std_string(enum uwifi_chan_width width, int chan)
 		default:
 			return "?";
 	}
+}
+
+/** this does not handle combined modes */
+const char* wlan_mode_string(int mode) {
+	if (mode & WLAN_MODE_AP)
+		return "AP";
+	else if (mode & WLAN_MODE_AP)
+		return "IBSS";
+	else if (mode & WLAN_MODE_STA)
+		return "STA";
+	else if (mode & WLAN_MODE_PROBE)
+		return "PRB";
+	return "UNK";
 }
 
 /* in 100kbps or -1 when unsupported */
