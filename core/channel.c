@@ -177,9 +177,9 @@ bool uwifi_channel_change(struct uwifi_interface* intf, struct uwifi_chan_spec* 
 /* Return -1 on error, 0 when no change necessary and 1 on success */
 int uwifi_channel_auto_change(struct uwifi_interface* intf)
 {
-	int ret;
+	int ret = 0;
 	int new_idx;
-	int start_idx;
+	int tries;
 	bool ht40plus;
 
 	if (!intf->channel_scan)
@@ -195,10 +195,22 @@ int uwifi_channel_auto_change(struct uwifi_interface* intf)
 		return 0; /* too early */
 
 	ht40plus = uwifi_channel_is_ht40plus(&intf->channel);
-	start_idx = new_idx = intf->channel_idx;
-	struct uwifi_chan_spec new_chan;
+	new_idx = intf->channel_idx;
+
+	/* maximum number of tries until we give up. we use the number of allowed
+	 * channels multiplied by two because we likely try HT40+ and HT40- on
+	 * each channel, even though it may fail. Also the exact number of tries
+	 * does not matter as long as we try every channel */
+	if (intf->channel_max)
+		tries = uwifi_channel_idx_from_chan(&intf->channels, intf->channel_max) * 2;
+	else
+		tries = intf->channels.num_channels * 2;
+
+	struct uwifi_chan_spec new_chan = { 0 };
 
 	do {
+		tries--;
+
 		new_chan.width = channel_get_band_from_idx(&intf->channels, new_idx).max_chan_width;
 
 		/* For HT40 visit the same channel twice, once with HT40+ and
@@ -248,8 +260,7 @@ int uwifi_channel_auto_change(struct uwifi_interface* intf)
 		/* try setting different channels in case we get errors only on
 		 * some channels (e.g. ipw2200 reports channel 14 but cannot be
 		 * set to use it). stop if we tried all channels */
-	} while (ret != 1 && (new_idx != start_idx ||
-			(intf->channel.center_freq != new_chan.center_freq)));
+	} while (ret != 1 && tries > 0);
 
 	/* even when all channels failed, set the last channel change time, so
 	 * we don't get into a busy loop, unsuccessfully trying to change
