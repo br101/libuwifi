@@ -254,7 +254,7 @@ int uwifi_channel_auto_change(struct uwifi_interface* intf)
 	return 1;
 }
 
-char* uwifi_channel_get_string(struct uwifi_channels* channels, int idx)
+char* uwifi_channel_list_string(struct uwifi_channels* channels, int idx)
 {
 	static char buf[32];
 	struct uwifi_chan_freq* c = &channels->chan[idx];
@@ -272,7 +272,7 @@ bool uwifi_channel_init(struct uwifi_interface* intf)
 
 	printlog(LOG_INFO, "Got %d Bands, %d Channels:", intf->channels.num_bands, intf->channels.num_channels);
 	for (int i = 0; i < intf->channels.num_channels && i < MAX_CHANNELS; i++)
-		printlog(LOG_INFO, "%s", uwifi_channel_get_string(&intf->channels, i));
+		printlog(LOG_INFO, "%s", uwifi_channel_list_string(&intf->channels, i));
 
 	if (intf->channels.num_bands <= 0 || intf->channels.num_channels <= 0)
 		return false;
