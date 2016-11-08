@@ -24,6 +24,8 @@
 
 #include <linux/nl80211.h>
 
+#include "netl80211.h"
+
 #ifndef NL80211_GENL_NAME
 #define NL80211_GENL_NAME "nl80211"
 #endif

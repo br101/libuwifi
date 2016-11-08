@@ -57,7 +57,7 @@ static void update_essid_split_status(struct essid_info* e)
 	}
 }
 
-void remove_node_from_essid(struct uwifi_node* n)
+static void remove_node_from_essid(struct uwifi_node* n)
 {
 	DBG_PRINT("SPLIT   remove node from old essid\n");
 	list_del(&n->essid_nodes);
@@ -126,16 +126,16 @@ void uwifi_essids_update(struct uwifi_packet* p, struct uwifi_node* n)
 	update_essid_split_status(e);
 }
 
-void uwifi_essids_init() {
+void uwifi_essids_init(void) {
 	list_head_init(&essids.list);
 }
 
-void uwifi_essids_reset() {
+void uwifi_essids_reset(void) {
 	essids.split_active = 0;
 	essids.split_essid = NULL;
 }
 
-void uwifi_essids_free() {
+void uwifi_essids_free(void) {
 	struct essid_info *e, *f;
 
 	list_for_each_safe(&essids.list, e, f, list) {

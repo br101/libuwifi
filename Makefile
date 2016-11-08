@@ -38,7 +38,7 @@ $(NAME).a: $(OBJS)
 $(OBJS): .buildflags
 
 check: $(OBJS:%.o=%.c)
-	sparse $(CFLAGS) $^
+	sparse $(CFLAGS) -D__linux__ $^
 
 clean:
 	-rm -f core/*.o util/*.o linux/*.o osx/*.o esp8266/*.o *~

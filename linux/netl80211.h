@@ -14,7 +14,7 @@
 #include <stdbool.h>
 #include <netlink/handlers.h>
 #include <linux/nl80211.h>
-	
+
 extern struct nl_sock *nl_sock;
 extern struct nl_sock *nl_event;
 

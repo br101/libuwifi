@@ -533,7 +533,7 @@ int ifctrl_iw_event_init_socket(iw_event_cb_t user_cb)
 	return nl_socket_get_fd(nl_event);
 }
 
-void ifctrl_iw_event_receive()
+void ifctrl_iw_event_receive(void)
 {
 	if (nl_event)
 		nl_recvmsgs_default(nl_event);
