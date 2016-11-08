@@ -166,10 +166,10 @@ bool uwifi_channel_change(struct uwifi_interface* intf, int idx, enum uwifi_chan
 		return false;
 	}
 
-	printlog(LOG_INFO, "Set CH %d (%d MHz) %s center %d after %dms",
-		intf->channels.chan[idx].chan, intf->channels.chan[idx].freq,
-		uwifi_channel_width_string(width, ht40plus),
-		 center1, (the_time - intf->last_channelchange) / 1000);
+// 	printlog(LOG_INFO, "Set CH %d (%d MHz) %s center %d after %dms",
+// 		intf->channels.chan[idx].chan, intf->channels.chan[idx].freq,
+// 		uwifi_channel_width_string(width, ht40plus),
+// 		 center1, (the_time - intf->last_channelchange) / 1000);
 
 	intf->channel_idx = idx;
 	intf->channel_width = width;
