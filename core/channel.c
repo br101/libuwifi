@@ -147,10 +147,14 @@ bool uwifi_channel_change(struct uwifi_interface* intf, int idx, enum uwifi_chan
 			break;
 	}
 
-	/* only 20 MHz channels don't need additional center freq, otherwise we fail here
-	 * quietly because the scanning code sometimes tries invalid HT40+/- channels */
-	if (center1 == 0 && !(width == CHAN_WIDTH_20_NOHT || width == CHAN_WIDTH_20))
+	/* only 20 MHz channels don't need additional center freq, otherwise warn
+	 * if someone tries invalid HT40+/- channels */
+	if (center1 == 0 && !(width == CHAN_WIDTH_20_NOHT || width == CHAN_WIDTH_20)) {
+		printlog(LOG_ERR, "CH %d (%d MHz) %s not valid",
+			 intf->channels.chan[idx].chan, intf->channels.chan[idx].freq,
+			 uwifi_channel_width_string(width, ht40plus));
 		return false;
+	}
 
 	uint32_t the_time = plat_time_usec();
 
@@ -178,9 +182,10 @@ bool uwifi_channel_change(struct uwifi_interface* intf, int idx, enum uwifi_chan
 /* Return -1 on error, 0 when no change necessary and 1 on success */
 int uwifi_channel_auto_change(struct uwifi_interface* intf)
 {
+	int ret;
 	int new_idx;
-	int ret = true;
 	int start_idx;
+	bool ht40plus;
 
 	if (!intf->channel_scan)
 		return 0;
@@ -199,7 +204,9 @@ int uwifi_channel_auto_change(struct uwifi_interface* intf)
 	if (uwifi_channel_get_remaining_dwell_time(intf) > 0)
 		return 0; /* too early */
 
+	ht40plus = intf->channel_ht40plus;
 	start_idx = new_idx = intf->channel_idx;
+
 	do {
 		enum uwifi_chan_width max_width = channel_get_band_from_idx(&intf->channels, new_idx).max_chan_width;
 		/*
@@ -208,9 +215,9 @@ int uwifi_channel_auto_change(struct uwifi_interface* intf)
 		 * data packets
 		 */
 		if (max_width == CHAN_WIDTH_40) {
-			if (intf->channel_ht40plus)
+			if (ht40plus)
 				new_idx++;
-			intf->channel_ht40plus = !intf->channel_ht40plus; // toggle
+			ht40plus = !ht40plus; // toggle
 		} else {
 			new_idx++;
 		}
@@ -221,15 +228,19 @@ int uwifi_channel_auto_change(struct uwifi_interface* intf)
 		     uwifi_channel_get_chan(&intf->channels, new_idx) > intf->channel_max)) {
 			new_idx = 0;
 			max_width = channel_get_band_from_idx(&intf->channels, new_idx).max_chan_width;
-			intf->channel_ht40plus = true;
+			ht40plus = true;
 		}
 
-		ret = uwifi_channel_change(intf, new_idx, max_width, intf->channel_ht40plus);
+		/* since above we simply toggle HT40+/- check here to avoid invalid HT40+/- channels */
+		if (get_center_freq_ht40(&intf->channels, intf->channels.chan[new_idx].freq, ht40plus) == 0)
+			continue;
+
+		ret = uwifi_channel_change(intf, new_idx, max_width, ht40plus);
 
 		/* try setting different channels in case we get errors only on
 		 * some channels (e.g. ipw2200 reports channel 14 but cannot be
 		 * set to use it). stop if we tried all channels */
-	} while (ret != 1 && new_idx != start_idx);
+	} while (ret != 1 && (new_idx != start_idx || ht40plus != intf->channel_ht40plus));
 
 	/* even when all channels failed, set the last channel change time, so
 	 * we don't get into a busy loop, unsuccessfully trying to change
@@ -274,10 +285,8 @@ bool uwifi_channel_init(struct uwifi_interface* intf)
 			return false;
 	} else {
 		if (intf->if_freq <= 0) {
-			/* this happens when we have not been able to change
-			 * the original interface to monitor mode and we added
-			 * an additional monitor interface */
-			printlog(LOG_ERR, "Could not get current channel of interface");
+			/* this happens when we are on secondary monitor interface */
+			printlog(LOG_ERR, "Could not get current channel");
 			intf->max_phy_rate = wlan_max_phy_rate(intf->channels.band[0].max_chan_width,
 							       intf->channels.band[0].streams_rx);
 			intf->channel_idx = -1;
@@ -286,6 +295,9 @@ bool uwifi_channel_init(struct uwifi_interface* intf)
 		}
 		intf->channel_idx = uwifi_channel_idx_from_freq(&intf->channels, intf->if_freq);
 		intf->channel_set_num = uwifi_channel_get_chan(&intf->channels, intf->channel_idx);
+		printlog(LOG_INFO, "Current channel: %d (%d MHz) %s",
+			 intf->channel_set_num, intf->if_freq,
+			 uwifi_channel_width_string(intf->channel_width, intf->channel_ht40plus));
 
 		/* try to set max width */
 		struct uwifi_band b = channel_get_band_from_idx(&intf->channels, intf->channel_idx);
