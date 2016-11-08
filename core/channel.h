@@ -46,9 +46,15 @@ struct uwifi_channels {
 	int num_bands;
 };
 
+struct uwifi_chan_spec {
+	unsigned int freq;
+	enum uwifi_chan_width width;
+	unsigned int center_freq;
+};
+
 struct uwifi_interface;
 
-bool uwifi_channel_change(struct uwifi_interface* intf, int idx, enum uwifi_chan_width width, bool ht40plus);
+bool uwifi_channel_change(struct uwifi_interface* intf, struct uwifi_chan_spec* spec);
 int uwifi_channel_auto_change(struct uwifi_interface* intf);
 int uwifi_channel_idx_from_chan(struct uwifi_channels* channels, int c);
 int uwifi_channel_idx_from_freq(struct uwifi_channels* channels, unsigned int f);
@@ -68,5 +74,6 @@ int uwifi_channel_idx_from_band_idx(struct uwifi_channels* channels, int band, i
 const struct uwifi_band* uwifi_channel_get_band(struct uwifi_channels* channels, int b);
 bool uwifi_channel_band_add(struct uwifi_channels* channels, int num_channels, enum uwifi_chan_width max_chan_width,
 		      unsigned char streams_rx, unsigned char streams_tx);
+bool uwifi_channel_is_ht40plus(const struct uwifi_chan_spec* spec);
 
 #endif

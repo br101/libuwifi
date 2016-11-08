@@ -122,59 +122,54 @@ const char* uwifi_channel_width_string_short(enum uwifi_chan_width w, int ht40p)
 	return "";
 }
 
-/* Note: ht40plus is only used for HT40 channel width, to distinguish between
- * HT40+ and HT40- */
-bool uwifi_channel_change(struct uwifi_interface* intf, int idx, enum uwifi_chan_width width, bool ht40plus)
+char* uwifi_channel_list_string(struct uwifi_channels* channels, int idx)
 {
-	unsigned int center1 = 0;
+	static char buf[32];
+	struct uwifi_chan_freq* c = &channels->chan[idx];
+	sprintf(buf, "%-3d: %d HT40%s%s", c->chan, c->freq,
+			get_center_freq_ht40(channels, c->freq, true) ? "+" : "",
+			get_center_freq_ht40(channels, c->freq, false) ? "-" : "");
+	return buf;
+}
 
-	if (width == CHAN_WIDTH_UNSPEC)
-		width = channel_get_band_from_idx(&intf->channels, idx).max_chan_width;
+char* uwifi_channel_get_string(const struct uwifi_chan_spec* spec)
+{
+	static char buf[32];
+	sprintf(buf, "CH %d (%d MHz) %s", wlan_freq2chan(spec->freq), spec->freq,
+		uwifi_channel_width_string(spec->width, uwifi_channel_is_ht40plus(spec)));
+	return buf;
+}
 
-	switch (width) {
-		case CHAN_WIDTH_20_NOHT:
-		case CHAN_WIDTH_20:
-			break;
-		case CHAN_WIDTH_40:
-			center1 = get_center_freq_ht40(&intf->channels, intf->channels.chan[idx].freq, ht40plus);
-			break;
-		case CHAN_WIDTH_80:
-		case CHAN_WIDTH_160:
-			center1 = get_center_freq_vht(intf->channels.chan[idx].freq, width);
-			break;
-		default:
-			printlog(LOG_ERR, "%s not implemented", uwifi_channel_width_string(width, -1));
-			break;
-	}
+bool uwifi_channel_is_ht40plus(const struct uwifi_chan_spec* spec)
+{
+	return spec->width == CHAN_WIDTH_40 && spec->center_freq > spec->freq;
+}
 
+bool uwifi_channel_change(struct uwifi_interface* intf, struct uwifi_chan_spec* spec)
+{
 	/* only 20 MHz channels don't need additional center freq, otherwise warn
 	 * if someone tries invalid HT40+/- channels */
-	if (center1 == 0 && !(width == CHAN_WIDTH_20_NOHT || width == CHAN_WIDTH_20)) {
-		printlog(LOG_ERR, "CH %d (%d MHz) %s not valid",
-			 intf->channels.chan[idx].chan, intf->channels.chan[idx].freq,
-			 uwifi_channel_width_string(width, ht40plus));
+	if (spec->center_freq == 0 && !(spec->width == CHAN_WIDTH_20_NOHT || spec->width == CHAN_WIDTH_20)) {
+		printlog(LOG_ERR, "CH %s not valid", uwifi_channel_get_string(spec));
 		return false;
 	}
 
 	uint32_t the_time = plat_time_usec();
 
-	if (!ifctrl_iwset_freq(intf->ifname, intf->channels.chan[idx].freq, width, center1)) {
-		printlog(LOG_ERR, "Failed to set CH %d (%d MHz) %s center %d after %dms",
-			intf->channels.chan[idx].chan, intf->channels.chan[idx].freq,
-			uwifi_channel_width_string(width, ht40plus),
-			center1, (the_time - intf->last_channelchange) / 1000);
+	if (!ifctrl_iwset_freq(intf->ifname, spec->freq, spec->width, spec->center_freq)) {
+		printlog(LOG_ERR, "Failed to set %s center %d after %dms",
+			uwifi_channel_get_string(spec), spec->center_freq,
+			(the_time - intf->last_channelchange) / 1000);
 		return false;
 	}
 
-// 	printlog(LOG_INFO, "Set CH %d (%d MHz) %s center %d after %dms",
-// 		intf->channels.chan[idx].chan, intf->channels.chan[idx].freq,
-// 		uwifi_channel_width_string(width, ht40plus),
-// 		 center1, (the_time - intf->last_channelchange) / 1000);
+	printlog(LOG_INFO, "Set %s center %d after %dms",
+		uwifi_channel_get_string(spec), spec->center_freq,
+		(the_time - intf->last_channelchange) / 1000);
 
-	intf->channel_idx = idx;
-	intf->channel_width = width;
-	intf->channel_ht40plus = ht40plus;
-	intf->max_phy_rate = wlan_max_phy_rate(width, channel_get_band_from_idx(&intf->channels, idx).streams_rx);
+	intf->channel_idx = uwifi_channel_idx_from_freq(&intf->channels, spec->freq);
+	intf->channel = *spec;
+	intf->max_phy_rate = wlan_max_phy_rate(spec->width, channel_get_band_from_idx(&intf->channels, intf->channel_idx).streams_rx);
 	intf->last_channelchange = the_time;
 	return true;
 }
@@ -192,55 +187,69 @@ int uwifi_channel_auto_change(struct uwifi_interface* intf)
 
 	/* Return if the current channel is still unknown for some reason
 	 * (mac80211 bug, busy physical interface, etc.), it will be fixed when
-	 * the first packet arrives, see fixup_packet_channel().
-	 *
-	 * Without this return, we would busy-loop forever below because
-	 * start_idx would be -1 as well. Short-circuit exiting here is quite
-	 * logical though: it does not make any sense to scan channels as long
-	 * as the channel module is not initialized properly. */
+	 * the first packet arrives, see fixup_packet_channel(). */
 	if (intf->channel_idx == -1)
 		return 0;
 
 	if (uwifi_channel_get_remaining_dwell_time(intf) > 0)
 		return 0; /* too early */
 
-	ht40plus = intf->channel_ht40plus;
+	ht40plus = uwifi_channel_is_ht40plus(&intf->channel);
 	start_idx = new_idx = intf->channel_idx;
+	struct uwifi_chan_spec new_chan;
 
 	do {
-		enum uwifi_chan_width max_width = channel_get_band_from_idx(&intf->channels, new_idx).max_chan_width;
-		/*
-		 * For HT40 we visit the same channel twice, once with HT40+
-		 * and once with HT40-. This is necessary to see the HT40+/-
-		 * data packets
-		 */
-		if (max_width == CHAN_WIDTH_40) {
+		new_chan.width = channel_get_band_from_idx(&intf->channels, new_idx).max_chan_width;
+
+		/* For HT40 visit the same channel twice, once with HT40+ and
+		 * once with HT40-. This is necessary to see the HT40+ and HT40-
+		 * data packets */
+		if (new_chan.width == CHAN_WIDTH_40) {
 			if (ht40plus)
 				new_idx++;
-			ht40plus = !ht40plus; // toggle
 		} else {
 			new_idx++;
 		}
 
+		/* wrap around */
 		if (new_idx >= intf->channels.num_channels ||
 		    new_idx >= MAX_CHANNELS ||
 		    (intf->channel_max &&
 		     uwifi_channel_get_chan(&intf->channels, new_idx) > intf->channel_max)) {
 			new_idx = 0;
-			max_width = channel_get_band_from_idx(&intf->channels, new_idx).max_chan_width;
 			ht40plus = true;
+			new_chan.width = channel_get_band_from_idx(&intf->channels, new_idx).max_chan_width;
 		}
 
-		/* since above we simply toggle HT40+/- check here to avoid invalid HT40+/- channels */
-		if (get_center_freq_ht40(&intf->channels, intf->channels.chan[new_idx].freq, ht40plus) == 0)
-			continue;
+		/* set center freq, esp HT40+/- */
+		switch (new_chan.width) {
+			case CHAN_WIDTH_20_NOHT:
+			case CHAN_WIDTH_20:
+				break; /* no center freq necessary */
+			case CHAN_WIDTH_40:
+				ht40plus = !ht40plus; // toggle
+				new_chan.center_freq = get_center_freq_ht40(&intf->channels, intf->channels.chan[new_idx].freq, ht40plus);
+				if (new_chan.center_freq == 0)
+					continue;
+				break;
+			case CHAN_WIDTH_80:
+			case CHAN_WIDTH_160:
+				new_chan.center_freq = get_center_freq_vht(intf->channels.chan[new_idx].freq, new_chan.width);
+				break;
+			default:
+				printlog(LOG_ERR, "%s not implemented", uwifi_channel_width_string(new_chan.width, -1));
+				break;
+		}
 
-		ret = uwifi_channel_change(intf, new_idx, max_width, ht40plus);
+		new_chan.freq = uwifi_channel_get_freq(&intf->channels, new_idx);
+
+		ret = uwifi_channel_change(intf, &new_chan);
 
 		/* try setting different channels in case we get errors only on
 		 * some channels (e.g. ipw2200 reports channel 14 but cannot be
 		 * set to use it). stop if we tried all channels */
-	} while (ret != 1 && (new_idx != start_idx || ht40plus != intf->channel_ht40plus));
+	} while (ret != 1 && (new_idx != start_idx ||
+			(intf->channel.center_freq != new_chan.center_freq)));
 
 	/* even when all channels failed, set the last channel change time, so
 	 * we don't get into a busy loop, unsuccessfully trying to change
@@ -252,16 +261,6 @@ int uwifi_channel_auto_change(struct uwifi_interface* intf)
 	}
 
 	return 1;
-}
-
-char* uwifi_channel_list_string(struct uwifi_channels* channels, int idx)
-{
-	static char buf[32];
-	struct uwifi_chan_freq* c = &channels->chan[idx];
-	sprintf(buf, "%-3d: %d HT40%s%s", c->chan, c->freq,
-			get_center_freq_ht40(channels, c->freq, true) ? "+" : "",
-			get_center_freq_ht40(channels, c->freq, false) ? "-" : "");
-	return buf;
 }
 
 bool uwifi_channel_init(struct uwifi_interface* intf)
@@ -277,14 +276,14 @@ bool uwifi_channel_init(struct uwifi_interface* intf)
 	if (intf->channels.num_bands <= 0 || intf->channels.num_channels <= 0)
 		return false;
 
-	if (intf->channel_set_num > 0) {
+	if (intf->channel_set.freq > 0) {
 		/* configured values */
-		printlog(LOG_INFO, "Setting configured channel %d", intf->channel_set_num);
-		int ini_idx = uwifi_channel_idx_from_chan(&intf->channels, intf->channel_set_num);
-		if (!uwifi_channel_change(intf, ini_idx, intf->channel_set_width, intf->channel_set_ht40plus))
+		printlog(LOG_INFO, "Setting configured channel %s",
+			 uwifi_channel_get_string(&intf->channel_set));
+		if (!uwifi_channel_change(intf, &intf->channel_set))
 			return false;
 	} else {
-		if (intf->if_freq <= 0) {
+		if (intf->channel.freq <= 0) {
 			/* this happens when we are on secondary monitor interface */
 			printlog(LOG_ERR, "Could not get current channel");
 			intf->max_phy_rate = wlan_max_phy_rate(intf->channels.band[0].max_chan_width,
@@ -293,25 +292,26 @@ bool uwifi_channel_init(struct uwifi_interface* intf)
 			return true; // not failure
 
 		}
-		intf->channel_idx = uwifi_channel_idx_from_freq(&intf->channels, intf->if_freq);
-		intf->channel_set_num = uwifi_channel_get_chan(&intf->channels, intf->channel_idx);
-		printlog(LOG_INFO, "Current channel: %d (%d MHz) %s",
-			 intf->channel_set_num, intf->if_freq,
-			 uwifi_channel_width_string(intf->channel_width, intf->channel_ht40plus));
+		intf->channel_idx = uwifi_channel_idx_from_freq(&intf->channels, intf->channel.freq);
+		intf->channel_set = intf->channel;
+		printlog(LOG_INFO, "Current channel: %s", uwifi_channel_get_string(&intf->channel));
 
 		/* try to set max width */
 		struct uwifi_band b = channel_get_band_from_idx(&intf->channels, intf->channel_idx);
-		if (intf->channel_width != b.max_chan_width) {
+		if (intf->channel.width != b.max_chan_width) {
 			printlog(LOG_INFO, "Try to set max channel width %s",
 				uwifi_channel_width_string(b.max_chan_width, -1));
-			// try both HT40+ and HT40- if necessary
-			if (!uwifi_channel_change(intf, intf->channel_idx, b.max_chan_width, true) &&
-			    !uwifi_channel_change(intf, intf->channel_idx, b.max_chan_width, false))
-				return false;
+			intf->channel_set.width = b.max_chan_width;
+			if (b.max_chan_width == CHAN_WIDTH_40) {
+				// try both HT40+ and HT40- if necessary
+				intf->channel_set.center_freq = get_center_freq_ht40(&intf->channels, intf->channel_set.freq, true);
+				if (!intf->channel_set.center_freq)
+					get_center_freq_ht40(&intf->channels, intf->channel_set.freq, false);
+				if (!uwifi_channel_change(intf, &intf->channel_set))
+					return false;
+				}
 		} else {
-			intf->channel_set_width = intf->channel_width;
-			intf->channel_set_ht40plus = intf->channel_ht40plus;
-			intf->max_phy_rate = wlan_max_phy_rate(intf->channel_width, b.streams_rx);
+			intf->max_phy_rate = wlan_max_phy_rate(intf->channel.width, b.streams_rx);
 		}
 	}
 	return true;

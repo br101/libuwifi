@@ -184,31 +184,30 @@ static int nl80211_get_interface_info_cb(struct nl_msg *msg, void *arg)
 	struct nlattr **tb = nl80211_parse(msg);
 
 	if (tb[NL80211_ATTR_WIPHY_FREQ])
-		intf->if_freq = nla_get_u32(tb[NL80211_ATTR_WIPHY_FREQ]);
+		intf->channel.freq = nla_get_u32(tb[NL80211_ATTR_WIPHY_FREQ]);
 
 	if (tb[NL80211_ATTR_CHANNEL_WIDTH]) {
 		int nlw = nla_get_u32(tb[NL80211_ATTR_CHANNEL_WIDTH]);
 		switch (nlw) {
 			case NL80211_CHAN_WIDTH_20_NOHT:
-				intf->channel_width = CHAN_WIDTH_20_NOHT; break;
+				intf->channel.width = CHAN_WIDTH_20_NOHT; break;
 			case NL80211_CHAN_WIDTH_20:
-				intf->channel_width = CHAN_WIDTH_20; break;
+				intf->channel.width = CHAN_WIDTH_20; break;
 			case NL80211_CHAN_WIDTH_40:
-				intf->channel_width = CHAN_WIDTH_40; break;
+				intf->channel.width = CHAN_WIDTH_40; break;
 			case NL80211_CHAN_WIDTH_80:
-				intf->channel_width = CHAN_WIDTH_80; break;
+				intf->channel.width = CHAN_WIDTH_80; break;
 			case NL80211_CHAN_WIDTH_160:
-				intf->channel_width = CHAN_WIDTH_160; break;
+				intf->channel.width = CHAN_WIDTH_160; break;
 			case NL80211_CHAN_WIDTH_80P80:
-				intf->channel_width = CHAN_WIDTH_8080; break;
+				intf->channel.width = CHAN_WIDTH_8080; break;
 			default:
-				intf->channel_width = CHAN_WIDTH_UNSPEC; break;
+				intf->channel.width = CHAN_WIDTH_UNSPEC; break;
 		}
 	}
 
-	if (intf->channel_width == CHAN_WIDTH_40 && tb[NL80211_ATTR_CENTER_FREQ1]) {
-		unsigned int center1 = nla_get_u32(tb[NL80211_ATTR_CENTER_FREQ1]);
-		intf->channel_ht40plus = center1 > intf->if_freq;
+	if (tb[NL80211_ATTR_CENTER_FREQ1]) {
+		intf->channel.center_freq = nla_get_u32(tb[NL80211_ATTR_CENTER_FREQ1]);
 	}
 
 	if (tb[NL80211_ATTR_IFTYPE])
