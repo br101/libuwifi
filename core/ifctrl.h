@@ -64,6 +64,19 @@ struct sta_info {
 
 int ifctrl_iwget_stations(const char *const ifname, struct sta_info* inf, size_t maxlen);
 
+struct survey_info {
+	uint32_t freq;
+	bool in_use;
+	int8_t noise;
+	uint64_t time_active;
+	uint64_t time_busy;
+	uint64_t time_busy_ext;
+	uint64_t time_rx;
+	uint64_t time_tx;
+};
+
+int ifctrl_iwget_survey(const char *const ifname, struct survey_info* inf, size_t maxlen);
+
 bool ifctrl_iw_disconnect(const char *const interface);
 
 bool ifctrl_iw_connect(const char *const interface, const char* essid, int freq,

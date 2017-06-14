@@ -318,6 +318,83 @@ int ifctrl_iwget_stations(const char *const ifname, struct sta_info* stas, size_
 	}
 }
 
+static size_t surv_maxlen;
+static size_t surv_idx;
+
+static int nl80211_get_survey_cb(struct nl_msg *msg, void *arg)
+{
+	struct survey_info* inf = arg;
+	struct nlattr **tb = nl80211_parse(msg);
+	struct nlattr *sinfo[NL80211_SURVEY_INFO_MAX + 1];
+	static struct nla_policy survey_policy[NL80211_SURVEY_INFO_MAX + 1] = {
+		[NL80211_SURVEY_INFO_FREQUENCY] = { .type = NLA_U32 },
+		[NL80211_SURVEY_INFO_NOISE] = { .type = NLA_U8 },
+	};
+
+	if (!tb[NL80211_ATTR_SURVEY_INFO]) {
+		fprintf(stderr, "Survey info missing!\n");
+		return NL_SKIP;
+	}
+
+	if (nla_parse_nested(sinfo, NL80211_SURVEY_INFO_MAX,
+			     tb[NL80211_ATTR_SURVEY_INFO],
+			     survey_policy)) {
+		fprintf(stderr, "failed to parse nested attributes!\n");
+		return NL_SKIP;
+	}
+
+	if (surv_idx >= surv_maxlen)
+		return NL_SKIP;
+
+	if (sinfo[NL80211_SURVEY_INFO_FREQUENCY])
+		inf[surv_idx].freq = nla_get_u32(sinfo[NL80211_SURVEY_INFO_FREQUENCY]);
+
+	inf[surv_idx].in_use = sinfo[NL80211_SURVEY_INFO_IN_USE];
+
+	if (sinfo[NL80211_SURVEY_INFO_NOISE])
+		inf[surv_idx].noise = nla_get_u8(sinfo[NL80211_SURVEY_INFO_NOISE]);
+
+	if (sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME])
+		inf[surv_idx].time_active = nla_get_u64(sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME]);
+
+	if (sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_BUSY])
+		inf[surv_idx].time_busy = nla_get_u64(sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_BUSY]);
+
+	if (sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_EXT_BUSY])
+		inf[surv_idx].time_busy_ext = nla_get_u64(sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_EXT_BUSY]);
+
+	if (sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_RX])
+		inf[surv_idx].time_rx = nla_get_u64(sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_RX]);
+
+	if (sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_TX])
+		inf[surv_idx].time_tx = nla_get_u64(sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_TX]);
+
+	surv_idx++;
+	return NL_SKIP;
+}
+
+int ifctrl_iwget_survey(const char *const ifname, struct survey_info* inf, size_t maxlen)
+{
+	struct nl_msg *msg;
+	bool ret;
+
+	if (!nl80211_msg_prepare(&msg, NL80211_CMD_GET_SURVEY, ifname))
+		return false;
+
+	nlmsg_hdr(msg)->nlmsg_flags |= NLM_F_DUMP;
+
+	surv_idx = 0;
+	surv_maxlen = maxlen;
+
+	ret = nl80211_send_recv(nl_sock, msg, nl80211_get_survey_cb, inf); /* frees msg */
+	if (!ret) {
+		fprintf(stderr, "failed to get survey\n");
+		return ret;
+	} else {
+		return surv_idx;
+	}
+}
+
 static int nl80211_get_freqlist_cb(struct nl_msg *msg, void *arg)
 {
 	int bands_remain, freqs_remain, i = 0, b = 0;
