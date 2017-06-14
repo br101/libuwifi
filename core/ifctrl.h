@@ -58,6 +58,7 @@ bool ifctrl_is_monitor(struct uwifi_interface* intf);
 struct sta_info {
 	unsigned char mac[6];
 	int8_t rssi;
+	int8_t rssi_avg;
 	uint32_t last;
 };
 

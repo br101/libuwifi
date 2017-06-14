@@ -248,6 +248,7 @@ static int nl80211_get_station_cb(struct nl_msg *msg, void *arg)
 		[NL80211_STA_INFO_RX_PACKETS] = { .type = NLA_U32 },
 		[NL80211_STA_INFO_TX_PACKETS] = { .type = NLA_U32 },
 		[NL80211_STA_INFO_SIGNAL] = { .type = NLA_U8 },
+		[NL80211_STA_INFO_SIGNAL_AVG] = { .type = NLA_U8 },
 		[NL80211_STA_INFO_T_OFFSET] = { .type = NLA_U64 },
 		[NL80211_STA_INFO_TX_BITRATE] = { .type = NLA_NESTED },
 		[NL80211_STA_INFO_RX_BITRATE] = { .type = NLA_NESTED },
@@ -287,6 +288,9 @@ static int nl80211_get_station_cb(struct nl_msg *msg, void *arg)
 
 	if (sinfo[NL80211_STA_INFO_SIGNAL])
 		stas[sta_idx].rssi = (int8_t)nla_get_u8(sinfo[NL80211_STA_INFO_SIGNAL]);
+
+	if (sinfo[NL80211_STA_INFO_SIGNAL_AVG])
+		stas[sta_idx].rssi_avg = (int8_t)nla_get_u8(sinfo[NL80211_STA_INFO_SIGNAL_AVG]);
 
 	sta_idx++;
 	return NL_SKIP;
