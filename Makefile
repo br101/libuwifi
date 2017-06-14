@@ -28,7 +28,7 @@ include $(PLATFORM)/platform.mk
 .PHONY: all check clean force
 
 .objdeps.mk: $(OBJS:%.o=%.c)
-	gcc -MM $(INCLUDES) $^ >$@
+	gcc -MM $(CFLAGS) $^ >$@
 
 -include .objdeps.mk
 
