@@ -13,6 +13,7 @@
 #include "channel.h"
 #include "wlan_util.h"
 #include "conf.h"
+#include "log.h"
 
 uint32_t uwifi_channel_get_remaining_dwell_time(struct uwifi_interface* intf)
 {
@@ -85,10 +86,10 @@ static int get_center_freq_vht(unsigned int freq, enum uwifi_chan_width width)
 				center1 = 5570;
 			break;
 		case CHAN_WIDTH_8080:
-			printlog(LOG_ERR, "VHT80+80 not supported");
+			LOG_ERR("VHT80+80 not supported");
 			break;
 		default:
-			printlog(LOG_ERR, "%s is not VHT", uwifi_channel_width_string(width, -1));
+			LOG_ERR("%s is not VHT", uwifi_channel_width_string(width, -1));
 	}
 	return center1;
 }
@@ -150,20 +151,20 @@ bool uwifi_channel_change(struct uwifi_interface* intf, struct uwifi_chan_spec* 
 	/* only 20 MHz channels don't need additional center freq, otherwise warn
 	 * if someone tries invalid HT40+/- channels */
 	if (spec->center_freq == 0 && !(spec->width == CHAN_WIDTH_20_NOHT || spec->width == CHAN_WIDTH_20)) {
-		printlog(LOG_ERR, "CH %s not valid", uwifi_channel_get_string(spec));
+		LOG_ERR("CH %s not valid", uwifi_channel_get_string(spec));
 		return false;
 	}
 
 	uint32_t the_time = plat_time_usec();
 
 	if (!ifctrl_iwset_freq(intf->ifname, spec->freq, spec->width, spec->center_freq)) {
-		printlog(LOG_ERR, "Failed to set %s center %d after %dms",
+		LOG_ERR("Failed to set %s center %d after %dms",
 			uwifi_channel_get_string(spec), spec->center_freq,
 			(the_time - intf->last_channelchange) / 1000);
 		return false;
 	}
 
-	printlog(LOG_DEBUG, "Set %s center %d after %dms",
+	LOG_DBG("Set %s center %d after %dms",
 		uwifi_channel_get_string(spec), spec->center_freq,
 		(the_time - intf->last_channelchange) / 1000);
 
@@ -249,7 +250,7 @@ int uwifi_channel_auto_change(struct uwifi_interface* intf)
 				new_chan.center_freq = get_center_freq_vht(intf->channels.chan[new_idx].freq, new_chan.width);
 				break;
 			default:
-				printlog(LOG_ERR, "%s not implemented", uwifi_channel_width_string(new_chan.width, -1));
+				LOG_ERR("%s not implemented", uwifi_channel_width_string(new_chan.width, -1));
 				break;
 		}
 
@@ -280,23 +281,23 @@ bool uwifi_channel_init(struct uwifi_interface* intf)
 	ifctrl_iwget_freqlist(intf);
 	intf->channel_initialized = 1;
 
-	printlog(LOG_INFO, "Got %d Bands, %d Channels:", intf->channels.num_bands, intf->channels.num_channels);
+	LOG_INF("Got %d Bands, %d Channels:", intf->channels.num_bands, intf->channels.num_channels);
 	for (int i = 0; i < intf->channels.num_channels && i < MAX_CHANNELS; i++)
-		printlog(LOG_INFO, "%s", uwifi_channel_list_string(&intf->channels, i));
+		LOG_INF("%s", uwifi_channel_list_string(&intf->channels, i));
 
 	if (intf->channels.num_bands <= 0 || intf->channels.num_channels <= 0)
 		return false;
 
 	if (intf->channel_set.freq > 0) {
 		/* configured values */
-		printlog(LOG_INFO, "Setting configured channel %s",
+		LOG_INF("Setting configured channel %s",
 			 uwifi_channel_get_string(&intf->channel_set));
 		if (!uwifi_channel_change(intf, &intf->channel_set))
 			return false;
 	} else {
 		if (intf->channel.freq <= 0) {
 			/* this happens when we are on secondary monitor interface */
-			printlog(LOG_ERR, "Could not get current channel");
+			LOG_ERR("Could not get current channel");
 			intf->max_phy_rate = wlan_max_phy_rate(intf->channels.band[0].max_chan_width,
 							       intf->channels.band[0].streams_rx);
 			intf->channel_idx = -1;
@@ -305,12 +306,12 @@ bool uwifi_channel_init(struct uwifi_interface* intf)
 		}
 		intf->channel_idx = uwifi_channel_idx_from_freq(&intf->channels, intf->channel.freq);
 		intf->channel_set = intf->channel;
-		printlog(LOG_INFO, "Current channel: %s", uwifi_channel_get_string(&intf->channel));
+		LOG_INF("Current channel: %s", uwifi_channel_get_string(&intf->channel));
 
 		/* try to set max width */
 		struct uwifi_band b = channel_get_band_from_idx(&intf->channels, intf->channel_idx);
 		if (intf->channel.width != b.max_chan_width) {
-			printlog(LOG_INFO, "Try to set max channel width %s",
+			LOG_INF("Try to set max channel width %s",
 				uwifi_channel_width_string(b.max_chan_width, -1));
 			intf->channel_set.width = b.max_chan_width;
 			if (b.max_chan_width == CHAN_WIDTH_40) {

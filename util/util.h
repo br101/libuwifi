@@ -67,19 +67,6 @@ int is_power_of_2(unsigned long n)
 	return (n != 0 && ((n & (n - 1)) == 0));
 }
 
-/* these coincide with syslog levels */
-#define	LOG_CRIT	2	/* critical conditions */
-#define	LOG_ERR		3	/* error conditions */
-#define	LOG_WARNING	4	/* warning conditions */
-#define	LOG_INFO	6	/* informational */
-#define	LOG_DEBUG	7	/* debug-level messages */
-
-#ifndef DEBUG
-#define DEBUG 0
-#endif
-
-#define DBG_PRINT(...) do { if (DEBUG) printlog(LOG_DEBUG, __VA_ARGS__); } while (0)
-
 extern const char* UWIFI_VERSION;
 
 #endif

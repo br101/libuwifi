@@ -10,6 +10,7 @@
 #include "average.h"
 #include "platform.h"
 #include "util.h"
+#include "log.h"
 
 /**
  * DOC: Exponentially Weighted Moving Average (EWMA)
@@ -37,7 +38,7 @@
 void ewma_init(struct ewma *avg, unsigned long factor, unsigned long weight)
 {
 	if(!is_power_of_2(weight) || !is_power_of_2(factor))
-		printlog(LOG_ERR, "weight and factor have to be a power of two!");
+		LOG_ERR("weight and factor have to be a power of two!");
 
 	avg->weight = ilog2(weight);
 	avg->factor = ilog2(factor);

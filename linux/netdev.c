@@ -19,6 +19,7 @@
 #include "netdev.h"
 #include "platform.h"
 #include "util.h"
+#include "log.h"
 
 int netdev_get_hwinfo(char* ifname)
 {
@@ -31,13 +32,13 @@ int netdev_get_hwinfo(char* ifname)
 	strncpy(ifr.ifr_name, ifname, IF_NAMESIZE - 1);
 
 	if (ioctl(fd, SIOCGIFHWADDR, &ifr) < 0) {
-		printlog(LOG_ERR, "Could not get arptype for '%s'", ifname);
+		LOG_ERR("Could not get arptype for '%s'", ifname);
 		close(fd);
 		return -1;
 	}
 
 	close(fd);
-	DBG_PRINT("ARPTYPE %d\n", ifr.ifr_hwaddr.sa_family);
+	LOG_DBG("ARPTYPE %d\n", ifr.ifr_hwaddr.sa_family);
 	return ifr.ifr_hwaddr.sa_family;
 }
 
@@ -52,7 +53,7 @@ bool netdev_get_mac_address(const char* ifname, unsigned char* mac)
 	strncpy(ifr.ifr_name, ifname, IF_NAMESIZE - 1);
 
 	if (ioctl(fd, SIOCGIFHWADDR, &ifr) < 0) {
-		printlog(LOG_ERR, "MAC addr ioctl failed for '%s'", ifname);
+		LOG_ERR("MAC addr ioctl failed for '%s'", ifname);
 		close(fd);
 		return false;
 	}
@@ -73,7 +74,7 @@ bool netdev_get_ip_address(const char* ifname, uint32_t* ip) {
 	strncpy(ifr.ifr_name, ifname, IF_NAMESIZE - 1);
 
 	if (ioctl(fd, SIOCGIFADDR, &ifr) < 0) {
-		printlog(LOG_ERR, "IP addr ioctl failed for '%s'", ifname);
+		LOG_ERR("IP addr ioctl failed for '%s'", ifname);
 		close(fd);
 		return false;
 	}
@@ -101,7 +102,7 @@ bool netdev_set_ip_address(const char* ifname, uint32_t ip) {
 	sai->sin_addr.s_addr = ip;
 
 	if (ioctl(fd, SIOCSIFADDR, &ifr) < 0) {
-		printlog(LOG_ERR, "IP set addr ioctl failed for '%s'", ifname);
+		LOG_ERR("IP set addr ioctl failed for '%s'", ifname);
 		close(fd);
 		return false;
 	}
@@ -121,7 +122,7 @@ bool netdev_set_up_promisc(const char *const ifname, bool up, bool promisc)
 	strncpy(ifr.ifr_name, ifname, IF_NAMESIZE - 1);
 
 	if (ioctl(fd, SIOCGIFFLAGS, &ifr) < 0) {
-		printlog(LOG_ERR, "Could not get flags for %s", ifname);
+		LOG_ERR("Could not get flags for %s", ifname);
 		close(fd);
 		return false;
 	}
@@ -137,7 +138,7 @@ bool netdev_set_up_promisc(const char *const ifname, bool up, bool promisc)
 		ifr.ifr_flags &= ~IFF_PROMISC;
 
 	if (ioctl(fd, SIOCSIFFLAGS, &ifr) < 0) {
-		printlog(LOG_ERR, "Could not set flags for %s", ifname);
+		LOG_ERR("Could not set flags for %s", ifname);
 		close(fd);
 		return false;
 	}

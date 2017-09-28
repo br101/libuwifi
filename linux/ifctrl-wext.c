@@ -19,6 +19,7 @@
 #include "platform.h"
 #include "channel.h"
 #include "conf.h"
+#include "log.h"
 
 static int wext_fd;
 
@@ -34,7 +35,7 @@ static bool wext_set_freq(int fd, const char* devname, int freq)
 	iwr.u.freq.e = 1;
 
 	if (ioctl(fd, SIOCSIWFREQ, &iwr) < 0) {
-		printlog(LOG_ERR, "WEXT could not set channel");
+		LOG_ERR("WEXT could not set channel");
 		return false;
 	}
 	return true;
@@ -51,7 +52,7 @@ static int wext_get_freq(int fd, const char* devname)
 	if (ioctl(fd, SIOCGIWFREQ, &iwr) < 0)
 		return 0;
 
-	DBG_PRINT("FREQ %d %d\n", iwr.u.freq.m, iwr.u.freq.e);
+	LOG_DBG("FREQ %d %d\n", iwr.u.freq.m, iwr.u.freq.e);
 
 	return iwr.u.freq.m;
 }
@@ -75,18 +76,18 @@ static int wext_get_channels(int fd, const char* devname,
 	iwr.u.data.flags = 0;
 
 	if (ioctl(fd, SIOCGIWRANGE, &iwr) < 0) {
-		printlog(LOG_ERR, "WEXT get channel list");
+		LOG_ERR("WEXT get channel list");
 		return 0;
 	}
 
 	if (range.we_version_compiled < 16) {
-		printlog(LOG_ERR, "WEXT version %d too old to get channels",
+		LOG_ERR("WEXT version %d too old to get channels",
 			 range.we_version_compiled);
 		return 0;
 	}
 
 	for (i = 0; i < range.num_frequency && i < MAX_CHANNELS; i++) {
-		DBG_PRINT("  Channel %.2d: %dMHz\n", range.freq[i].i, range.freq[i].m);
+		LOG_DBG("  Channel %.2d: %dMHz\n", range.freq[i].i, range.freq[i].m);
 		channels->chan[i].chan = range.freq[i].i;
 		/* different drivers return different frequencies
 		 * (e.g. ipw2200 vs mac80211) try to fix them up here */
@@ -127,19 +128,19 @@ void ifctrl_finish(void)
 bool ifctrl_iwadd_monitor(__attribute__((unused)) const char *interface,
 			  __attribute__((unused)) const char *monitor_interface)
 {
-	printlog(LOG_ERR, "add monitor: not supported with WEXT");
+	LOG_ERR("add monitor: not supported with WEXT");
 	return false;
 }
 
 bool ifctrl_iwdel(__attribute__((unused)) const char *interface)
 {
-	printlog(LOG_ERR, "del: not supported with WEXT");
+	LOG_ERR("del: not supported with WEXT");
 	return false;
 }
 
 bool ifctrl_iwset_monitor(__attribute__((unused)) const char *interface)
 {
-	printlog(LOG_ERR, "set monitor: not supported with WEXT");
+	LOG_ERR("set monitor: not supported with WEXT");
 	return false;
 }
 

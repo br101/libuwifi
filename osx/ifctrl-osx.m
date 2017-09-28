@@ -35,7 +35,7 @@ bool osx_set_freq(const char *interface, unsigned int freq)
         NSError *err = nil;
         BOOL result = [currentInterface setWLANChannel:wlanChannel error:&err];
         if( !result ) {
-            printlog(LOG_INFO, "set channel %ld err: %s", (long)[wlanChannel channelNumber], [[err localizedDescription] UTF8String]);
+            LOG_INF("set channel %ld err: %s", (long)[wlanChannel channelNumber], [[err localizedDescription] UTF8String]);
             ret = false;
         }
     }
@@ -95,7 +95,7 @@ int osx_get_channels(const char* devname, struct channel_list* channels) {
         NSInteger num = [eachChannel channelNumber];
         CWChannelBand band = [eachChannel channelBand];
         CWChannelWidth width = [eachChannel channelWidth];
-        printlog(LOG_INFO, "num: %ld, band: %ld, width: %ld", num, (long)band, (long)width);
+        LOG_INF("num: %ld, band: %ld, width: %ld", num, (long)band, (long)width);
 
         if (lastNum != num ) {
             channel_list_add(ieee80211_channel2freq(num));
@@ -122,8 +122,8 @@ int osx_get_channels(const char* devname, struct channel_list* channels) {
         }
     }
 
-    printlog(LOG_INFO, "band 0 channels: %d", channels->band[0].num_channels);
-    printlog(LOG_INFO, "band 1 channels: %d", channels->band[1].num_channels);
+    LOG_INF("band 0 channels: %d", channels->band[0].num_channels);
+    LOG_INF("band 1 channels: %d", channels->band[1].num_channels);
 
     return i;
 }
@@ -149,17 +149,17 @@ void ifctrl_finish() {
 };
 
 bool ifctrl_iwadd_monitor(__attribute__((unused))const char *interface, __attribute__((unused))const char *monitor_interface) {
-    printlog(LOG_ERR, "add monitor: not implemented");
+    LOG_ERR("add monitor: not implemented");
     return false;
 };
 
 bool ifctrl_iwdel(__attribute__((unused))const char *interface) {
-    printlog(LOG_ERR, "iwdel: not implemented");
+    LOG_ERR("iwdel: not implemented");
     return false;
 };
 
 bool ifctrl_iwset_monitor(__attribute__((unused))const char *interface) {
-    printlog(LOG_ERR, "set monitor: not implemented");
+    LOG_ERR("set monitor: not implemented");
     return false;
 };
 
@@ -171,7 +171,7 @@ bool ifctrl_iwset_freq(__attribute__((unused))const char *interface, __attribute
 };
 
 bool ifctrl_iwget_interface_info(__attribute__((unused)) struct uwifi_interface* intf) {
-    printlog(LOG_ERR, "get interface info: not implemented");
+    LOG_ERR("get interface info: not implemented");
     return false;
 };
 

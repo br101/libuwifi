@@ -15,6 +15,7 @@
 #include "packet_sock.h"
 #include "util.h"
 #include "node.h"
+#include "log.h"
 
 bool uwifi_init(struct uwifi_interface* intf)
 {
@@ -24,12 +25,12 @@ bool uwifi_init(struct uwifi_interface* intf)
 	intf->sock = packet_socket_open(intf->ifname);
 
 	if (intf->sock < 0) {
-		printlog(LOG_ERR, "Could not open packet socket on '%s'", intf->ifname);
+		LOG_ERR("Could not open packet socket on '%s'", intf->ifname);
 		return false;
 	}
 
 	if (!netdev_set_up_promisc(intf->ifname, true, true)) {
-		printlog(LOG_ERR, "Failed to bring '%s' up", intf->ifname);
+		LOG_ERR("Failed to bring '%s' up", intf->ifname);
 		return false;
 	}
 
@@ -37,7 +38,7 @@ bool uwifi_init(struct uwifi_interface* intf)
 
 	if (intf->arphdr != ARPHRD_IEEE80211_RADIOTAP &&
 	    intf->arphdr != ARPHRD_IEEE80211_PRISM) {
-		printlog(LOG_ERR, "Interface '%s' not in monitor mode", intf->ifname);
+		LOG_ERR("Interface '%s' not in monitor mode", intf->ifname);
 		return false;
 	}
 
@@ -45,7 +46,7 @@ bool uwifi_init(struct uwifi_interface* intf)
 		return false;
 
 	if (!uwifi_channel_init(intf)) {
-		printlog(LOG_ERR, "Failed to initialize channels");
+		LOG_ERR("Failed to initialize channels");
 		return false;
 	}
 

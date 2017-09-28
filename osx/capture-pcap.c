@@ -14,6 +14,7 @@
 
 #include "capture.h"
 #include "util.h"
+#include "log.h"
 
 #define PCAP_TIMEOUT 200
 
@@ -25,7 +26,7 @@ static void handler(u_char *user, const struct pcap_pkthdr *h, const u_char *byt
 {
 	*((int *)user) = h->len;
 	if (pcap_bufsize < h->len) {
-		printlog("ERROR: Buffer(%d) too small for %d bytes",
+		LOG_ERR("ERROR: Buffer(%d) too small for %d bytes",
 			 (int)pcap_bufsize, h->len);
 		*((int *)user) = pcap_bufsize;
 	}

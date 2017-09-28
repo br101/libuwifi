@@ -26,8 +26,3 @@
 
 uint32_t plat_time_usec(void);	// return monotonic time in usec
 
-
-/* These are things the application needs to provide: */
-
-void __attribute__ ((format (printf, 2, 3)))
-printlog(int level, const char *fmt, ...);

@@ -12,6 +12,7 @@
 #include "node.h"
 #include "util.h"
 #include "essid.h"
+#include "log.h"
 
 struct essid_meta_info essids;
 
@@ -31,7 +32,7 @@ static void update_essid_split_status(struct essid_info* e)
 
 	/* check for split */
 	list_for_each(&e->nodes, n, essid_nodes) {
-		DBG_PRINT("SPLIT      node %p src " MAC_FMT " bssid " MAC_FMT "\n",
+		LOG_DBG("SPLIT      node %p src " MAC_FMT " bssid " MAC_FMT "\n",
 			n, MAC_PAR(n->wlan_src), MAC_PAR(n->wlan_bssid));
 
 		if (n->wlan_mode & WLAN_MODE_AP || n->wlan_mode & WLAN_MODE_PROBE)
@@ -39,19 +40,19 @@ static void update_essid_split_status(struct essid_info* e)
 
 		if (last_bssid && memcmp(last_bssid, n->wlan_bssid, WLAN_MAC_LEN) != 0) {
 			e->split = 1;
-			DBG_PRINT("SPLIT *** DETECTED!!!\n");
+			LOG_DBG("SPLIT *** DETECTED!!!\n");
 		}
 		last_bssid = n->wlan_bssid;
 	}
 
 	/* if a split occurred on this essid, record it */
 	if (e->split > 0) {
-		DBG_PRINT("SPLIT *** active\n");
+		LOG_DBG("SPLIT *** active\n");
 		essids.split_active = 1;
 		essids.split_essid = e;
 	}
 	else if (e == essids.split_essid) {
-		DBG_PRINT("SPLIT *** ok now\n");
+		LOG_DBG("SPLIT *** ok now\n");
 		essids.split_active = 0;
 		essids.split_essid = NULL;
 	}
@@ -59,7 +60,7 @@ static void update_essid_split_status(struct essid_info* e)
 
 static void remove_node_from_essid(struct uwifi_node* n)
 {
-	DBG_PRINT("SPLIT   remove node from old essid\n");
+	LOG_DBG("SPLIT   remove node from old essid\n");
 	list_del(&n->essid_nodes);
 	n->essid->num_nodes--;
 
@@ -67,7 +68,7 @@ static void remove_node_from_essid(struct uwifi_node* n)
 
 	/* delete essid if it has no more nodes */
 	if (n->essid->num_nodes == 0) {
-		DBG_PRINT("SPLIT   essid empty, delete\n");
+		LOG_DBG("SPLIT   essid empty, delete\n");
 		list_del(&n->essid->list);
 		free(n->essid);
 	}
@@ -87,20 +88,20 @@ void uwifi_essids_update(struct uwifi_packet* p, struct uwifi_node* n)
 	    p->wlan_type != WLAN_FRAME_PROBE_REQ)
 		return;
 
-	DBG_PRINT("SPLIT check ibss '%s' node " MAC_FMT "bssid " MAC_FMT "\n" , p->wlan_essid,
+	LOG_DBG("SPLIT check ibss '%s' node " MAC_FMT "bssid " MAC_FMT "\n" , p->wlan_essid,
 		MAC_PAR(n->wlan_src), MAC_PAR(p->wlan_bssid));
 
 	/* find essid if already recorded */
 	list_for_each(&essids.list, e, list) {
 		if (strncmp(e->essid, p->wlan_essid, WLAN_MAX_SSID_LEN) == 0) {
-			DBG_PRINT("SPLIT   essid found\n");
+			LOG_DBG("SPLIT   essid found\n");
 			break;
 		}
 	}
 
 	/* if not add new essid */
 	if (&e->list == &essids.list.n) {
-		DBG_PRINT("SPLIT   essid not found, adding new\n");
+		LOG_DBG("SPLIT   essid not found, adding new\n");
 		e = malloc(sizeof(struct essid_info));
 		strncpy(e->essid, p->wlan_essid, WLAN_MAX_SSID_LEN);
 		e->essid[WLAN_MAX_SSID_LEN-1] = '\0';
@@ -116,7 +117,7 @@ void uwifi_essids_update(struct uwifi_packet* p, struct uwifi_node* n)
 
 	/* new node */
 	if (n->essid == NULL) {
-		DBG_PRINT("SPLIT   node not found, adding new " MAC_FMT "\n",
+		LOG_DBG("SPLIT   node not found, adding new " MAC_FMT "\n",
 			MAC_PAR(n->wlan_src));
 		list_add_tail(&e->nodes, &n->essid_nodes);
 		e->num_nodes++;
@@ -139,7 +140,7 @@ void uwifi_essids_free(void) {
 	struct essid_info *e, *f;
 
 	list_for_each_safe(&essids.list, e, f, list) {
-		DBG_PRINT("free essid '%s'\n", e->essid);
+		LOG_DBG("free essid '%s'\n", e->essid);
 		list_del(&e->list);
 		free(e);
 	}

@@ -22,6 +22,7 @@
 #include "packet_sock.h"
 #include "util.h"
 #include "platform.h"
+#include "log.h"
 
 void socket_set_receive_buffer(int fd, int sockbufsize)
 {
@@ -42,7 +43,7 @@ void socket_set_receive_buffer(int fd, int sockbufsize)
 	ret = getsockopt(fd, SOL_SOCKET, SO_RCVBUF, &sockbufsize, &size);
 	if (ret != 0)
 		err(1, "getsockopt failed");
-	DBG_PRINT("socket receive buffer size %d\n", sockbufsize);
+	LOG_DBG("socket receive buffer size %d\n", sockbufsize);
 #endif
 }
 
@@ -52,7 +53,7 @@ int packet_socket_open(char* devname)
 
 	int fd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
 	if (fd < 0) {
-		printlog(LOG_ERR, "Could not create packet socket! Please run as root!");
+		LOG_ERR("Could not create packet socket! Please run as root!");
 		exit(1);
 	}
 
