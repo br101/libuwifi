@@ -5,51 +5,51 @@
 # This program is licensed under the GNU Lesser General Public License,
 # Version 3. See the file COPYING for more details.
 
-INST_PATH = /usr/local
+INST_PATH	= /usr/local
 
 # build options
-WEXT = 0
-LIBNL = 3.0
-BUILD_RADIOTAP = 1
-#PCAP = 0 #TODO revive
+WEXT		= 0
+LIBNL		= 3.0
+BUILD_RADIOTAP	= 1
+#PCAP		= 0 #TODO revive
 
-OBJS += linux/inject_rtap.o
-OBJS += linux/interface.o
-OBJS += linux/netdev.o
-OBJS += linux/netl80211.o
-OBJS += linux/packet_sock.o
-OBJS += linux/platform.o
-OBJS += linux/raw_parser.o
-OBJS += linux/wpa_ctrl.o
+SRC		+= linux/inject_rtap.c
+SRC		+= linux/interface.c
+SRC		+= linux/netdev.c
+SRC		+= linux/netl80211.c
+SRC		+= linux/packet_sock.c
+SRC		+= linux/platform.c
+SRC		+= linux/raw_parser.c
+SRC		+= linux/wpa_ctrl.c
 
-CFLAGS += -fPIC
+CFLAGS		+= -fPIC
 
 ifeq ($(BUILD_RADIOTAP),1)
-  INCLUDES += -I./radiotap
-  OBJS += radiotap/radiotap.o
+  INCLUDES	+= -I./radiotap
+  OBJS		+= radiotap/radiotap.o
 else
-  LIBS = -lradiotap
+  LIBS		= -lradiotap
 endif
 
 ifeq ($(WEXT),1)
-  OBJS += linux/ifctrl-wext.o
+  OBJS		+= linux/ifctrl-wext.o
 else
   ifeq ($(LIBNL),0)
-    OBJS += core/ifctrl-dummy.o
+    OBJS	+= core/ifctrl-dummy.o
   else
-    OBJS += linux/ifctrl-nl80211.o
+    OBJS	+= linux/ifctrl-nl80211.o
     CFLAGS += $(shell pkg-config --cflags libnl-$(LIBNL))
     ifeq ($(LIBNL),tiny)
-      LIBS += -lnl-tiny
+      LIBS	+= -lnl-tiny
     else
-      LIBS += -lnl-3 -lnl-genl-3
+      LIBS	+= -lnl-3 -lnl-genl-3
     endif
   endif
 endif
 
 all: $(NAME).so $(NAME).a
 
-$(NAME).so: $(OBJS)
+$(NAME).so: $(SRC:.c=.o)
 	$(CC) $(LDFLAGS) -shared -Wl,-soname,$(NAME).so.1 -o $(NAME).so $(OBJS) $(LIBS)
 	-ln -s $(NAME).so $(NAME).so.1
 

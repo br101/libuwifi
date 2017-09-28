@@ -5,29 +5,34 @@
 # This program is licensed under the GNU Lesser General Public License,
 # Version 3. See the file COPYING for more details.
 
-NAME = libuwifi
+NAME		= libuwifi
 
 # build options
-DEBUG = 0
-PLATFORM = linux
+DEBUG		= 0
+PLATFORM	= linux
 
-OBJS += core/channel.o
-OBJS += core/inject.o
-OBJS += core/node.o
-OBJS += core/wlan_parser.o
-OBJS += core/wlan_util.o
-OBJS += core/essid.o
-OBJS += util/average.o
-OBJS += util/util.o
+SRC		+= core/channel.c
+SRC		+= core/inject.c
+SRC		+= core/node.c
+SRC		+= core/wlan_parser.c
+SRC		+= core/wlan_util.c
+SRC		+= core/essid.c
+SRC		+= util/average.c
+SRC		+= util/util.c
 
-INCLUDES = -I. -I./core -I./util -I./$(PLATFORM)
-CFLAGS += -std=gnu99 -Wall -Wextra $(INCLUDES) -DDEBUG=$(DEBUG) -DUWIFI_VER=\"$(shell git describe --tags)\"
+INCLUDES	= -I. -I./core -I./util -I./$(PLATFORM)
+
+CFLAGS		+= -std=gnu99 -Wall -Wextra
+CFLAGS		+= $(INCLUDES)
+CFLAGS		+= -DDEBUG=$(DEBUG) -DUWIFI_VER=\"$(shell git describe --tags)\"
 
 include $(PLATFORM)/platform.mk
 
+OBJS		= $(SRC:%.c=%.o)
+
 .PHONY: all check clean force
 
-.objdeps.mk: $(OBJS:%.o=%.c)
+.objdeps.mk: $(SRC)
 	gcc -MM $(CFLAGS) $^ >$@
 
 -include .objdeps.mk
@@ -37,7 +42,7 @@ $(NAME).a: $(OBJS)
 
 $(OBJS): .buildflags
 
-check: $(OBJS:%.o=%.c)
+check: $(SRC)
 	sparse $(CFLAGS) -D__linux__ $^
 
 clean:

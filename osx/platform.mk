@@ -5,17 +5,18 @@
 # This program is licensed under the GNU Lesser General Public License,
 # Version 3. See the file COPYING for more details.
 
-INST_PATH = /usr/local
+INST_PATH	= /usr/local
 
-OBJS += linux/capture.o
-OBJS += linux/ifctrl-ioctl.o
-OBJS += linux/platform.o
-OBJS += linux/raw_parser.o
-OBJS += osx/capture-pcap.o
-OBJS += osx/ifctrl-osx.o
+OBJS		+= linux/capture.o
+OBJS		+= linux/ifctrl-ioctl.o
+OBJS		+= linux/platform.o
+OBJS		+= linux/raw_parser.o
+OBJS		+= osx/capture-pcap.o
+OBJS		+= osx/ifctrl-osx.o
 
-LIBS = -lpcap -framework CoreWLAN -framework CoreData -framework Foundation
-CFLAGS += -fPIC
+LIBS		= -lpcap -framework CoreWLAN -framework CoreData -framework Foundation
+
+CFLAGS		+= -fPIC
 
 all: $(NAME).so $(NAME).a
 
