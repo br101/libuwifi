@@ -48,12 +48,12 @@ else
   endif
 endif
 
-install: $(NAME).so $(NAME).a
+install: lib-static lib-dynamic
 	-mkdir -p $(INST_PATH)/include/uwifi
 	-mkdir -p $(INST_PATH)/lib
 	cp ./core/*.h $(INST_PATH)/include/uwifi
 	cp ./util/*.h $(INST_PATH)/include/uwifi
 	cp ./linux/*.h $(INST_PATH)/include/uwifi
 	cp -r ./ccan $(INST_PATH)/include/
-	cp ./libuwifi.a $(INST_PATH)/lib/
-	cp ./libuwifi.so* $(INST_PATH)/lib/
+	cp $(BUILD_DIR)/libuwifi.a $(INST_PATH)/lib/
+	cp $(BUILD_DIR)/libuwifi.so* $(INST_PATH)/lib/
