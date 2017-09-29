@@ -23,6 +23,7 @@ SRC		+= linux/raw_parser.c
 SRC		+= linux/wpa_ctrl.c
 
 CFLAGS		+= -fPIC
+CHECK_FLAGS	+= -D__linux__
 
 ifeq ($(BUILD_RADIOTAP),1)
   INCLUDES	+= -I./radiotap
@@ -46,12 +47,6 @@ else
     endif
   endif
 endif
-
-all: $(NAME).so $(NAME).a
-
-$(NAME).so: $(SRC:.c=.o)
-	$(CC) $(LDFLAGS) -shared -Wl,-soname,$(NAME).so.1 -o $(NAME).so $(OBJS) $(LIBS)
-	-ln -s $(NAME).so $(NAME).so.1
 
 install: $(NAME).so $(NAME).a
 	-mkdir -p $(INST_PATH)/include/uwifi

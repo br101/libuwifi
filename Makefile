@@ -20,38 +20,15 @@ SRC		+= core/essid.c
 SRC		+= util/average.c
 SRC		+= util/util.c
 
-INCLUDES	= -I. -I./core -I./util -I./$(PLATFORM)
-
+INCLUDES	+= -I. -I./core -I./util -I./$(PLATFORM)
 CFLAGS		+= -std=gnu99 -Wall -Wextra
-CFLAGS		+= $(INCLUDES)
-CFLAGS		+= -DDEBUG=$(DEBUG) -DUWIFI_VER=\"$(shell git describe --tags)\"
+DEFS		+= -DDEBUG=$(DEBUG)
+DEFS		+= -DUWIFI_VER=\"$(shell git describe --tags)\"
+CHECK_FLAGS	+= -D__linux__
+
+all: lib-static lib-dynamic
+check:
+clean:
 
 include $(PLATFORM)/platform.mk
-
-OBJS		= $(SRC:%.c=%.o)
-
-.PHONY: all check clean force
-
-.objdeps.mk: $(SRC)
-	gcc -MM $(CFLAGS) $^ >$@
-
--include .objdeps.mk
-
-$(NAME).a: $(OBJS)
-	$(AR) rcs $@ $(OBJS)
-
-$(OBJS): .buildflags
-
-check: $(SRC)
-	sparse $(CFLAGS) -D__linux__ $^
-
-clean:
-	-rm -f core/*.o util/*.o linux/*.o osx/*.o esp8266/*.o *~
-	-rm -f $(NAME).so*
-	-rm -f $(NAME).a*
-	-rm -f .buildflags
-	-rm -f .objdeps.mk
-	-rm -f radiotap/*.o
-
-.buildflags: force
-	echo '$(CFLAGS)' | cmp -s - $@ || echo '$(CFLAGS)' > $@
+include Makefile.default
