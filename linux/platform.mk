@@ -27,18 +27,18 @@ CHECK_FLAGS	+= -D__linux__
 
 ifeq ($(BUILD_RADIOTAP),1)
   INCLUDES	+= -I./radiotap
-  OBJS		+= radiotap/radiotap.o
+  SRC		+= radiotap/radiotap.c
 else
   LIBS		= -lradiotap
 endif
 
 ifeq ($(WEXT),1)
-  OBJS		+= linux/ifctrl-wext.o
+  SRC		+= linux/ifctrl-wext.c
 else
   ifeq ($(LIBNL),0)
-    OBJS	+= core/ifctrl-dummy.o
+    SRC		+= core/ifctrl-dummy.c
   else
-    OBJS	+= linux/ifctrl-nl80211.o
+    SRC		+= linux/ifctrl-nl80211.c
     CFLAGS += $(shell pkg-config --cflags libnl-$(LIBNL))
     ifeq ($(LIBNL),tiny)
       LIBS	+= -lnl-tiny
