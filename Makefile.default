@@ -55,8 +55,8 @@ $(BUILD_DIR)/$(NAME).a: $(OBJS)
 # dynamic library
 $(BUILD_DIR)/$(NAME).so: $(OBJS)
 	@printf "  LD      $@\n"
-	$(Q)$(CC) $(LDFLAGS) -shared -Wl,-soname,$(NAME).so.1 -o $@ $(OBJS) $(LIBS)
-	$(Q)-ln -sfn $(NAME).so $@.1
+	$(Q)$(CC) $(LDFLAGS) -shared -Wl,-soname,$(NAME).so.1 -o $@.1 $(OBJS) $(LIBS)
+	$(Q)-ln -sfn $(NAME).so.1 $@
 
 $(BUILD_DIR)/%.o: %.c
 	@printf "  CC      $(*).c\n"
