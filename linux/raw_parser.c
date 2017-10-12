@@ -22,28 +22,20 @@
 
 int uwifi_parse_prism_header(unsigned char* buf, int len, struct uwifi_packet* p)
 {
-	wlan_ng_prism2_header* ph;
+	wlan_ng_prism2_header* ph = (wlan_ng_prism2_header*)buf;
 
 	if (len > 0 && (size_t)len < sizeof(wlan_ng_prism2_header))
 		return -1;
 
-	ph = (wlan_ng_prism2_header*)buf;
-
 	/*
 	 * different drivers report S/N and rssi values differently
 	*/
-	if (((int)ph->noise.data) < 0) {
-		/* new madwifi */
+	if (((int)ph->noise.data) < 0) /* new madwifi */
 		p->phy_signal = ph->signal.data;
-	}
-	else if (((int)ph->rssi.data) < 0) {
-		/* broadcom hack */
+	else if (((int)ph->rssi.data) < 0) /* broadcom hack */
 		p->phy_signal = ph->rssi.data;
-	}
-	else {
-		/* assume hostap */
+	else /* assume hostap */
 		p->phy_signal = ph->signal.data;
-	}
 
 	p->phy_rate = ph->rate.data * 10;
 
@@ -189,17 +181,14 @@ static void get_radiotap_info(struct ieee80211_radiotap_iterator *iter, struct u
 
 int uwifi_parse_radiotap(unsigned char* buf, size_t len, struct uwifi_packet* p)
 {
-	struct ieee80211_radiotap_header* rh;
+	struct ieee80211_radiotap_header* rh = (struct ieee80211_radiotap_header*)buf;
 	struct ieee80211_radiotap_iterator iter;
-	int err, rt_len;
+	int rt_len = le16toh(rh->it_len);
 
 	if (len < sizeof(struct ieee80211_radiotap_header))
 		return -1;
 
-	rh = (struct ieee80211_radiotap_header*)buf;
-	rt_len = le16toh(rh->it_len);
-
-	err = ieee80211_radiotap_iterator_init(&iter, rh, rt_len, NULL);
+	int err = ieee80211_radiotap_iterator_init(&iter, rh, rt_len, NULL);
 	if (err) {
 		LOG_DBG("Radiotap: MALFORMED HEADER (err %d)", err);
 		return -1;
@@ -265,9 +254,8 @@ void uwifi_fixup_packet_channel(struct uwifi_packet* p, struct uwifi_interface* 
 	int i = -1;
 
 	/* get channel index for packet */
-	if (p->phy_freq) {
+	if (p->phy_freq)
 		i = uwifi_channel_idx_from_freq(&intf->channels, p->phy_freq);
-	}
 
 	/* if not found from pkt, best guess from config but it might be
 	 * unknown (-1) too */

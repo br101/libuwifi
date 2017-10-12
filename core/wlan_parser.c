@@ -96,18 +96,17 @@ void uwifi_parse_information_elements(unsigned char* buf, size_t bufLen, struct 
 int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet* p)
 {
 	struct wlan_frame* wh = (struct wlan_frame*)buf;
+	uint16_t fc = le16toh(wh->fc);
 	size_t hdrlen;
 	uint8_t* ra = NULL;
 	uint8_t* ta = NULL;
 	uint8_t* bssid = NULL;
-	uint16_t fc, cap_i;
 
 	LOG_DBG("WLAN: LEN %zd", len);
 
 	if (len < 10) /* minimum frame size (CTS/ACK) */
 		return -1;
 
-	fc = le16toh(wh->fc);
 	p->wlan_mode = WLAN_MODE_UNKNOWN;
 	p->wlan_type = (fc & WLAN_FRAME_FC_MASK);
 
@@ -275,7 +274,7 @@ int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet
 				len - hdrlen - sizeof(struct wlan_frame_beacon) - 4 /* FCS */, p);
 			LOG_DBG("WLAN: ESSID %s", p->wlan_essid );
 			LOG_DBG("WLAN: CHAN %d", p->wlan_channel );
-			cap_i = le16toh(bc->capab);
+			uint16_t cap_i = le16toh(bc->capab);
 			if (cap_i & WLAN_CAPAB_IBSS)
 				p->wlan_mode = WLAN_MODE_IBSS;
 			else if (cap_i & WLAN_CAPAB_ESS)
