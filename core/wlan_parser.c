@@ -119,7 +119,6 @@ int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet
 	LOG_DBG("%s", wlan_get_packet_type_name(fc));
 
 	if (WLAN_FRAME_IS_DATA(fc)) {
-
 		hdrlen = 24;
 		if (WLAN_FRAME_IS_QOS(fc)) {
 			hdrlen += 2;
@@ -131,8 +130,8 @@ int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet
 		if ((fc & WLAN_FRAME_FC_FROM_DS) == 0 &&
 		    (fc & WLAN_FRAME_FC_TO_DS) == 0) {
 			p->wlan_mode = WLAN_MODE_IBSS;
-			ra = wh->addr1;
-			ta = wh->addr2;
+			ra = wh->addr1; // = DA
+			ta = wh->addr2; // = SA
 			bssid = wh->addr3;
 		} else if ((fc & WLAN_FRAME_FC_FROM_DS) &&
 			   (fc & WLAN_FRAME_FC_TO_DS)) {
@@ -143,20 +142,21 @@ int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet
 				LOG_DBG("4ADDR A-MSDU %x", qos & WLAN_FRAME_QOS_AMSDU_PRESENT);
 				if (qos & WLAN_FRAME_QOS_AMSDU_PRESENT)
 					bssid = wh->addr3;
-				// in the MSDU case BSSID is unknown
+				// in the MSDU case BSSID is unknown and
+				// addr3 = DA and addr4 = SA
 			}
 			ra = wh->addr1;
 			ta = wh->addr2;
 		} else if (fc & WLAN_FRAME_FC_FROM_DS) {
 			p->wlan_mode = WLAN_MODE_AP;
-			ra = wh->addr1;
-			bssid = wh->addr2;
-			ta = wh->addr3;
+			ra = wh->addr1; // = DA
+			ta = bssid = wh->addr2;
+			//wh->addr3 = SA (MSDU) or BSSID (A-MSDU)
 		} else if (fc & WLAN_FRAME_FC_TO_DS) {
 			p->wlan_mode = WLAN_MODE_STA;
-			bssid = wh->addr1;
-			ta = wh->addr2;
-			ra = wh->addr3;
+			ra = bssid = wh->addr1;
+			ta = wh->addr2; // = SA
+			//wh->addr3 = DA (MSDU) or BSSID (A-MSDU)
 		}
 
 		if (len < hdrlen)
@@ -173,7 +173,9 @@ int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet
 		if (p->wlan_mode == WLAN_MODE_4ADDR) {
 			LOG_DBG("A4 " MAC_FMT, MAC_PAR(wh->u.addr4));
 		}
-		LOG_DBG("ToDS %d FromDS %d", (fc & WLAN_FRAME_FC_FROM_DS) != 0, (fc & WLAN_FRAME_FC_TO_DS) != 0);
+		LOG_DBG("FromDS %d ToDS %d",
+			(fc & WLAN_FRAME_FC_FROM_DS) != 0,
+			(fc & WLAN_FRAME_FC_TO_DS) != 0);
 
 		/* WEP */
 		if (fc & WLAN_FRAME_FC_PROTECTED)
