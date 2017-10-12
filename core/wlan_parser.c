@@ -20,7 +20,7 @@ void uwifi_parse_information_elements(unsigned char* buf, size_t bufLen, struct 
 	int len = bufLen;
 	while (len > 2) {
 		struct information_element* ie = (struct information_element*)buf;
-		LOG_DBG("------ IE %d len %d t len %d", ie->id, ie->len, len);
+		//LOG_DBG("WLAN: IE: %d len %d t len %d", ie->id, ie->len, len);
 
 		switch (ie->id) {
 		case WLAN_IE_ID_SSID:
@@ -42,7 +42,6 @@ void uwifi_parse_information_elements(unsigned char* buf, size_t bufLen, struct 
 			break;
 
 		case WLAN_IE_ID_HT_CAPAB:
-			LOG_DBG("HT %d %x", ie->len, ie->var[0]);
 			if (ie->var[0] & WLAN_IE_HT_CAPAB_INFO_CHAN_WIDTH_40)
 				p->wlan_chan_width = CHAN_WIDTH_40;
 			else
@@ -50,34 +49,31 @@ void uwifi_parse_information_elements(unsigned char* buf, size_t bufLen, struct 
 
 			if (ie->len >= 26) {
 				wlan_ht_streams_from_mcs(&ie->var[3], &p->wlan_rx_streams, &p->wlan_tx_streams);
-				LOG_DBG("STREAMS %dx%d", p->wlan_tx_streams, p->wlan_rx_streams);
+				LOG_DBG("WLAN: IE: STREAMS %dx%d", p->wlan_tx_streams, p->wlan_rx_streams);
 			}
 			break;
 
 		case WLAN_IE_ID_HT_OPER:
-			LOG_DBG("HT OPER %d %x", ie->len, ie->var[0]);
 			if (ie->len > 1) {
 				switch (ie->var[1] & WLAN_IE_HT_OPER_INFO_CHAN_OFFSET) {
 					case 0: p->wlan_chan_width = CHAN_WIDTH_20; break;
 					case 1: p->wlan_ht40plus = true; break;
 					case 3: p->wlan_ht40plus = false; break;
-					default: LOG_DBG("HT OPER wrong?"); break;
+					default: LOG_DBG("WLAN: IE: HT OPER wrong?"); break;
 				}
 			}
 			break;
 
 		case WLAN_IE_ID_VHT_OPER:
 		case WLAN_IE_ID_VHT_OMN:
-			LOG_DBG("VHT OPER %d %x", ie->len, ie->var[0]);
 			p->wlan_chan_width = CHAN_WIDTH_80; /* minimum, otherwise not AC */
 			break;
 
 		case WLAN_IE_ID_VHT_CAPAB:
-			LOG_DBG("VHT %d %x", ie->len, ie->var[0]);
 			if (ie->len >= 12) {
 				p->wlan_chan_width = wlan_chan_width_from_vht_capab(ie->var[0]);
 				wlan_vht_streams_from_mcs(&ie->var[4], &p->wlan_rx_streams, &p->wlan_tx_streams);
-				LOG_DBG("VHT STREAMS %dx%d", p->wlan_tx_streams, p->wlan_rx_streams);
+				LOG_DBG("WLAN: IE: VHT STREAMS %dx%d", p->wlan_tx_streams, p->wlan_rx_streams);
 			}
 			break;
 
@@ -99,26 +95,31 @@ void uwifi_parse_information_elements(unsigned char* buf, size_t bufLen, struct 
 /* return consumed length, 0 for stop parsing, or -1 on error */
 int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet* p)
 {
-	struct wlan_frame* wh;
+	struct wlan_frame* wh = (struct wlan_frame*)buf;
 	size_t hdrlen;
 	uint8_t* ra = NULL;
 	uint8_t* ta = NULL;
 	uint8_t* bssid = NULL;
 	uint16_t fc, cap_i;
 
+	LOG_DBG("WLAN: LEN %zd", len);
+
 	if (len < 10) /* minimum frame size (CTS/ACK) */
 		return -1;
 
-	p->wlan_mode = WLAN_MODE_UNKNOWN;
-
-	wh = (struct wlan_frame*)buf;
-
 	fc = le16toh(wh->fc);
+	p->wlan_mode = WLAN_MODE_UNKNOWN;
 	p->wlan_type = (fc & WLAN_FRAME_FC_MASK);
-	LOG_DBG("wlan_type %x - type %x - stype %x", fc, fc & WLAN_FRAME_FC_TYPE_MASK, fc & WLAN_FRAME_FC_STYPE_MASK);
-	LOG_DBG("%s", wlan_get_packet_type_name(fc));
+
+	LOG_DBG("WLAN: %s FC %x type %x stype %x",
+		wlan_get_packet_type_name(fc), fc,
+		fc & WLAN_FRAME_FC_TYPE_MASK, fc & WLAN_FRAME_FC_STYPE_MASK);
 
 	if (WLAN_FRAME_IS_DATA(fc)) {
+		LOG_DBG("WLAN: DATA FromDS %d ToDS %d",
+			(fc & WLAN_FRAME_FC_FROM_DS) != 0,
+			(fc & WLAN_FRAME_FC_TO_DS) != 0);
+
 		hdrlen = 24;
 		if (WLAN_FRAME_IS_QOS(fc)) {
 			hdrlen += 2;
@@ -139,7 +140,8 @@ int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet
 			hdrlen += 6;
 			if (WLAN_FRAME_IS_QOS(fc)) {
 				uint16_t qos = le16toh(wh->u.addr4_qos_ht.qos);
-				LOG_DBG("4ADDR A-MSDU %x", qos & WLAN_FRAME_QOS_AMSDU_PRESENT);
+				LOG_DBG("WLAN: DATA 4ADDR A-MSDU %x",
+					qos & WLAN_FRAME_QOS_AMSDU_PRESENT);
 				if (qos & WLAN_FRAME_QOS_AMSDU_PRESENT)
 					bssid = wh->addr3;
 				// in the MSDU case BSSID is unknown and
@@ -163,19 +165,15 @@ int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet
 			return -1;
 
 		p->wlan_nav = le16toh(wh->duration);
-		LOG_DBG("DATA NAV %d", p->wlan_nav);
+		LOG_DBG("WLAN: DATA NAV %d", p->wlan_nav);
 		p->wlan_seqno = (le16toh(wh->seq) & WLAN_FRAME_SEQ_MASK) >> 4;
-		LOG_DBG("DATA SEQ %d", p->wlan_seqno);
+		LOG_DBG("WLAN: DATA SEQ %d", p->wlan_seqno);
 
-		LOG_DBG("A1 " MAC_FMT, MAC_PAR(wh->addr1));
-		LOG_DBG("A2 " MAC_FMT, MAC_PAR(wh->addr2));
-		LOG_DBG("A3 " MAC_FMT, MAC_PAR(wh->addr3));
-		if (p->wlan_mode == WLAN_MODE_4ADDR) {
-			LOG_DBG("A4 " MAC_FMT, MAC_PAR(wh->u.addr4));
-		}
-		LOG_DBG("FromDS %d ToDS %d",
-			(fc & WLAN_FRAME_FC_FROM_DS) != 0,
-			(fc & WLAN_FRAME_FC_TO_DS) != 0);
+		LOG_DBG("WLAN: DATA A1 " MAC_FMT, MAC_PAR(wh->addr1));
+		LOG_DBG("WLAN: DATA A2 " MAC_FMT, MAC_PAR(wh->addr2));
+		LOG_DBG("WLAN: DATA A3 " MAC_FMT, MAC_PAR(wh->addr3));
+		if (p->wlan_mode == WLAN_MODE_4ADDR)
+			LOG_DBG("WLAN: DATA A4 " MAC_FMT, MAC_PAR(wh->u.addr4));
 
 		/* WEP */
 		if (fc & WLAN_FRAME_FC_PROTECTED)
@@ -206,12 +204,12 @@ int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet
 		ta = wh->addr2;
 		bssid = wh->addr3;
 		p->wlan_seqno = (le16toh(wh->seq) & WLAN_FRAME_SEQ_MASK) >> 4;
-		LOG_DBG("MGMT SEQ %d", p->wlan_seqno);
+		LOG_DBG("WLAN: MGMT SEQ %d", p->wlan_seqno);
 
 		if (fc & WLAN_FRAME_FC_RETRY)
 			p->wlan_retry = 1;
 	} else {
-		LOG_DBG("!!!UNKNOWN FRAME!!!");
+		LOG_DBG("WLAN: !!!UNKNOWN FRAME!!!");
 		return -1;
 	}
 
@@ -223,25 +221,25 @@ int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet
 
 		case WLAN_FRAME_QDATA:
 			p->wlan_qos_class = le16toh(wh->u.qos) & WLAN_FRAME_QOS_TID_MASK;
-			LOG_DBG("***QDATA %x", p->wlan_qos_class);
+			LOG_DBG("WLAN: QDATA %x", p->wlan_qos_class);
 			break;
 
 		case WLAN_FRAME_RTS:
 			p->wlan_nav = le16toh(wh->duration);
-			LOG_DBG("RTS NAV %d", p->wlan_nav);
+			LOG_DBG("WLAN: RTS NAV %d", p->wlan_nav);
 			ra = wh->addr1;
 			ta = wh->addr2;
 			break;
 
 		case WLAN_FRAME_CTS:
 			p->wlan_nav = le16toh(wh->duration);
-			LOG_DBG("CTS NAV %d", p->wlan_nav);
+			LOG_DBG("WLAN: CTS NAV %d", p->wlan_nav);
 			ra = wh->addr1;
 			break;
 
 		case WLAN_FRAME_ACK:
 			p->wlan_nav = le16toh(wh->duration);
-			LOG_DBG("ACK NAV %d", p->wlan_nav);
+			LOG_DBG("WLAN: ACK NAV %d", p->wlan_nav);
 			ra = wh->addr1;
 			break;
 
@@ -271,12 +269,12 @@ int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet
 			struct wlan_frame_beacon* bc = (struct wlan_frame_beacon*)(buf + hdrlen);
 			p->wlan_tsf = le64toh(bc->tsf);
 			p->wlan_bintval = le16toh(bc->bintval);
-			//LOG_DBG("TSF %u BINTVAL %u", p->wlan_tsf, p->wlan_bintval);
+			//LOG_DBG("WLAN: TSF %u BINTVAL %u", p->wlan_tsf, p->wlan_bintval);
 
 			uwifi_parse_information_elements(bc->ie,
 				len - hdrlen - sizeof(struct wlan_frame_beacon) - 4 /* FCS */, p);
-			LOG_DBG("ESSID %s", p->wlan_essid );
-			LOG_DBG("CHAN %d", p->wlan_channel );
+			LOG_DBG("WLAN: ESSID %s", p->wlan_essid );
+			LOG_DBG("WLAN: CHAN %d", p->wlan_channel );
 			cap_i = le16toh(bc->capab);
 			if (cap_i & WLAN_CAPAB_IBSS)
 				p->wlan_mode = WLAN_MODE_IBSS;
@@ -310,22 +308,22 @@ int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet
 			break;
 	}
 
-	if (ta != NULL) {
+	if (ta != NULL)
 		memcpy(p->wlan_src, ta, WLAN_MAC_LEN);
-		LOG_DBG("TA    " MAC_FMT, MAC_PAR(ta));
-	}
-	if (ra != NULL) {
-		memcpy(p->wlan_dst, ra, WLAN_MAC_LEN);
-		LOG_DBG("RA    " MAC_FMT, MAC_PAR(ra));
-	}
-	if (bssid != NULL) {
-		memcpy(p->wlan_bssid, bssid, WLAN_MAC_LEN);
-		LOG_DBG("BSSID " MAC_FMT, MAC_PAR(bssid));
-	}
 
-	/* only data frames contain more info, otherwise stop parsing */
-	if (WLAN_FRAME_IS_DATA(p->wlan_type) && p->wlan_wep != 1) {
+	if (ra != NULL)
+		memcpy(p->wlan_dst, ra, WLAN_MAC_LEN);
+
+	if (bssid != NULL)
+		memcpy(p->wlan_bssid, bssid, WLAN_MAC_LEN);
+
+	LOG_DBG("WLAN: TA    " MAC_FMT, MAC_PAR(p->wlan_src));
+	LOG_DBG("WLAN: RA    " MAC_FMT, MAC_PAR(p->wlan_dst));
+	LOG_DBG("WLAN: BSSID " MAC_FMT, MAC_PAR(p->wlan_bssid));
+
+	/* only unencrypted data frames contain more info */
+	if (WLAN_FRAME_IS_DATA(p->wlan_type) && p->wlan_wep != 1)
 		return hdrlen;
-	}
+
 	return 0;
 }
