@@ -24,7 +24,7 @@ int uwifi_parse_prism_header(unsigned char* buf, int len, struct uwifi_packet* p
 {
 	wlan_ng_prism2_header* ph;
 
-	LOG_DBG("PRISM2 HEADER\n");
+	LOG_DBG("PRISM2 HEADER");
 
 	if (len > 0 && (size_t)len < sizeof(wlan_ng_prism2_header))
 		return -1;
@@ -52,7 +52,7 @@ int uwifi_parse_prism_header(unsigned char* buf, int len, struct uwifi_packet* p
 	/* just in case...*/
 	if (p->phy_rate == 0 || p->phy_rate > 1080) {
 		/* assume min rate, guess mode from channel */
-		LOG_DBG("*** fixing wrong rate\n");
+		LOG_DBG("*** fixing wrong rate");
 		if (ph->channel.data > 14)
 			p->phy_rate = 120; /* 6 * 2 */
 		else
@@ -69,10 +69,10 @@ int uwifi_parse_prism_header(unsigned char* buf, int len, struct uwifi_packet* p
 	/* always assume shortpre */
 	p->phy_flags |= PHY_FLAG_SHORTPRE;
 
-	LOG_DBG("devname: %s\n", ph->devname);
-	LOG_DBG("signal: %d -> %d\n", ph->signal.data, p->phy_signal);
-	LOG_DBG("rate: %d\n", ph->rate.data);
-	LOG_DBG("rssi: %d\n", ph->rssi.data);
+	LOG_DBG("devname: %s", ph->devname);
+	LOG_DBG("signal: %d -> %d", ph->signal.data, p->phy_signal);
+	LOG_DBG("rate: %d", ph->rate.data);
+	LOG_DBG("rssi: %d", ph->rssi.data);
 
 	return sizeof(wlan_ng_prism2_header);
 }
@@ -212,7 +212,7 @@ int uwifi_parse_radiotap(unsigned char* buf, size_t len, struct uwifi_packet* p)
 
 	err = ieee80211_radiotap_iterator_init(&iter, rh, rt_len, NULL);
 	if (err) {
-		LOG_DBG("malformed radiotap header (init returns %d)\n", err);
+		LOG_DBG("malformed radiotap header (init returns %d)", err);
 		return -1;
 	}
 
@@ -223,12 +223,12 @@ int uwifi_parse_radiotap(unsigned char* buf, size_t len, struct uwifi_packet* p)
 		}
 	}
 
-	LOG_DBG("\nSIG %d", p->phy_signal);
+	LOG_DBG("SIG %d", p->phy_signal);
 
 	/* sanitize */
 	if (p->phy_rate == 0 || p->phy_rate > 6000) {
 		/* assume min rate for mode */
-		LOG_DBG("*** fixing wrong rate\n");
+		LOG_DBG("*** fixing wrong rate");
 		if (p->phy_flags & PHY_FLAG_A)
 			p->phy_rate = 120; /* 6 * 2 */
 		else if (p->phy_flags & PHY_FLAG_B)
@@ -239,12 +239,12 @@ int uwifi_parse_radiotap(unsigned char* buf, size_t len, struct uwifi_packet* p)
 			p->phy_rate = 20;
 	}
 
-	LOG_DBG("\nrate: %.2f = idx %d\n", (float)p->phy_rate/10, p->phy_rate_idx);
-	LOG_DBG("signal: %d\n", p->phy_signal);
+	LOG_DBG("rate: %.2f = idx %d", (float)p->phy_rate/10, p->phy_rate_idx);
+	LOG_DBG("signal: %d", p->phy_signal);
 
 	if (p->phy_flags & PHY_FLAG_BADFCS) {
 		/* we can't trust frames with a bad FCS - stop parsing */
-		LOG_DBG("=== bad FCS, stop ===\n");
+		LOG_DBG("=== bad FCS, stop ===");
 		return 0;
 	} else {
 		return rt_len;
@@ -271,7 +271,7 @@ int uwifi_parse_raw(unsigned char* buf, size_t len, struct uwifi_packet* p, int 
 		return -1;
 	}
 
-	LOG_DBG("before parse 80211 len: %zd\n", len - ret);
+	LOG_DBG("before parse 80211 len: %zd", len - ret);
 	return uwifi_parse_80211_header(buf + ret, len - ret, p);
 }
 

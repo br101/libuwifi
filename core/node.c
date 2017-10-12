@@ -51,8 +51,8 @@ static void copy_nodeinfo(struct uwifi_node* n, struct uwifi_packet* p, struct l
 			/* find AP node for this BSSID */
 			list_for_each(nodes, ap, list) {
 				if (memcmp(p->wlan_bssid, ap->wlan_src, WLAN_MAC_LEN) == 0) {
-					LOG_DBG("AP node found %p\n", ap);
-					//LOG_DBG("AP node ESSID %s\n",
+					LOG_DBG("AP node found %p", ap);
+					//LOG_DBG("AP node ESSID %s",
 					//      ap->essid != NULL ? ap->essid->essid : "unknown");
 					n->wlan_ap_node = ap;
 					break;
@@ -131,14 +131,14 @@ struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct list_head* n
 	/* find node by wlan source address */
 	list_for_each(nodes, n, list) {
 		if (memcmp(p->wlan_src, n->wlan_src, WLAN_MAC_LEN) == 0) {
-			LOG_DBG("node found %p\n", n);
+			LOG_DBG("node found %p", n);
 			break;
 		}
 	}
 
 	/* not found */
 	if (&n->list == &nodes->n) {
-		LOG_DBG("node adding\n");
+		LOG_DBG("node adding");
 		n = (struct uwifi_node*)malloc(sizeof(struct uwifi_node));
 		memset(n, 0, sizeof(struct uwifi_node));
 		n->essid = NULL;
@@ -175,7 +175,7 @@ void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec, uint
 			/* remove AP pointers to this node */
 			list_for_each_safe(nodes, n2, m2, list) {
 				if (n2->wlan_ap_node == n) {
-					LOG_DBG("remove AP ref\n");
+					LOG_DBG("remove AP ref");
 					n->wlan_ap_node = NULL;
 				}
 			}

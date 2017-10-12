@@ -38,7 +38,7 @@ int netdev_get_hwinfo(char* ifname)
 	}
 
 	close(fd);
-	LOG_DBG("ARPTYPE %d\n", ifr.ifr_hwaddr.sa_family);
+	LOG_DBG("ARPTYPE %d", ifr.ifr_hwaddr.sa_family);
 	return ifr.ifr_hwaddr.sa_family;
 }
 

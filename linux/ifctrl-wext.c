@@ -52,7 +52,7 @@ static int wext_get_freq(int fd, const char* devname)
 	if (ioctl(fd, SIOCGIWFREQ, &iwr) < 0)
 		return 0;
 
-	LOG_DBG("FREQ %d %d\n", iwr.u.freq.m, iwr.u.freq.e);
+	LOG_DBG("FREQ %d %d", iwr.u.freq.m, iwr.u.freq.e);
 
 	return iwr.u.freq.m;
 }
@@ -87,7 +87,7 @@ static int wext_get_channels(int fd, const char* devname,
 	}
 
 	for (i = 0; i < range.num_frequency && i < MAX_CHANNELS; i++) {
-		LOG_DBG("  Channel %.2d: %dMHz\n", range.freq[i].i, range.freq[i].m);
+		LOG_DBG("  Channel %.2d: %dMHz", range.freq[i].i, range.freq[i].m);
 		channels->chan[i].chan = range.freq[i].i;
 		/* different drivers return different frequencies
 		 * (e.g. ipw2200 vs mac80211) try to fix them up here */

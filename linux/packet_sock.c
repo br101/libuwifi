@@ -43,7 +43,7 @@ void socket_set_receive_buffer(int fd, int sockbufsize)
 	ret = getsockopt(fd, SOL_SOCKET, SO_RCVBUF, &sockbufsize, &size);
 	if (ret != 0)
 		err(1, "getsockopt failed");
-	LOG_DBG("socket receive buffer size %d\n", sockbufsize);
+	LOG_DBG("socket receive buffer size %d", sockbufsize);
 #endif
 }
 
