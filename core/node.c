@@ -11,6 +11,7 @@
 #include "util.h"
 #include "wlan80211.h"
 #include "node.h"
+#include "essid.h"
 #include "log.h"
 
 static void copy_nodeinfo(struct uwifi_node* n, struct uwifi_packet* p, struct list_head* nodes)
@@ -152,7 +153,8 @@ struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct list_head* n
 	return n;
 }
 
-void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec, uint32_t* last_nodetimeout)
+void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec,
+			 uint32_t* last_nodetimeout)
 {
 	struct uwifi_node *n, *m, *n2, *m2;
 //	struct chan_node *cn, *cn2;
@@ -160,12 +162,14 @@ void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec, uint
 
 	if ((the_time - *last_nodetimeout) < timeout_sec * 1000000)
 		return;
+	LOG_DBG("NODE timeout %d", timeout_sec);
 
 	list_for_each_safe(nodes, n, m, list) {
 		if (the_time - n->last_seen > timeout_sec * 1000000) {
+			LOG_DBG("NODE timeout " MAC_FMT, MAC_PAR(n->wlan_src));
 			list_del(&n->list);
-//			if (n->essid != NULL)
-//				remove_node_from_essid(n);
+			if (n->essid != NULL)
+				uwifi_essids_remove_node(n);
 //			list_for_each_safe(&n->on_channels, cn, cn2, node_list) {
 //				list_del(&cn->node_list);
 //				list_del(&cn->chan_list);

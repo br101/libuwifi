@@ -10,6 +10,7 @@
 #ifndef UWIFI_ESSID_H_
 #define UWIFI_ESSID_H_
 
+#include "ccan/list/list.h"
 #include "wlan80211.h"
 
 struct essid_info {
@@ -20,21 +21,12 @@ struct essid_info {
 	int			split;
 };
 
-struct essid_meta_info {
-	struct list_head	list;
-	struct essid_info*	split_essid;
-	int			split_active;
-};
-
-extern struct essid_meta_info essids;
-
 struct uwifi_node;
 struct uwifi_packet;
 
-void uwifi_essids_init();
+void uwifi_essids_update(struct list_head* essids, struct uwifi_packet* p,
+			 struct uwifi_node* n);
 void uwifi_essids_remove_node(struct uwifi_node* n);
-void uwifi_essids_update(struct uwifi_packet* p, struct uwifi_node* n);
-void uwifi_essids_reset();
-void uwifi_essids_free();
+void uwifi_essids_free(struct list_head* essids);
 
 #endif
