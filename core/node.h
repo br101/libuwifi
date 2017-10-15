@@ -22,6 +22,9 @@ struct uwifi_node {
 	struct list_node	list;								// X
 	struct list_node	essid_nodes;
 	struct list_head	on_channels;	/* channels this node was seen on */
+	struct list_head	ap_nodes;	/* stations associated to AP */
+	struct list_node	ap_list;
+	struct uwifi_node*	ap_node;
 	unsigned int		num_on_channels;
 	uint32_t		last_seen;	/* timestamp */					// X uint32
 
@@ -48,7 +51,6 @@ struct uwifi_node {
 	unsigned int		wlan_retries_last;
 	unsigned int		wlan_seqno;
 	struct essid_info*	essid;
-	struct uwifi_node*	wlan_ap_node;							// X
 	enum uwifi_chan_width	wlan_chan_width;
 	unsigned char		wlan_tx_streams;
 	unsigned char		wlan_rx_streams;

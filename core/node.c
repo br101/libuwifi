@@ -14,11 +14,12 @@
 #include "essid.h"
 #include "log.h"
 
-static void copy_nodeinfo(struct uwifi_node* n, struct uwifi_packet* p, struct list_head* nodes)
+static void copy_nodeinfo(struct uwifi_node* n, struct uwifi_packet* p)
 {
-	struct uwifi_node* ap;
-
 	memcpy(n->wlan_src, p->wlan_src, WLAN_MAC_LEN);
+
+	if (MAC_NOT_EMPTY(p->wlan_bssid))
+		memcpy(n->wlan_bssid, p->wlan_bssid, WLAN_MAC_LEN);
 
 	n->last_seen = plat_time_usec();
 	n->pkt_count++;
@@ -42,27 +43,6 @@ static void copy_nodeinfo(struct uwifi_node* n, struct uwifi_packet* p, struct l
 	if (p->wlan_rx_streams)
 		n->wlan_rx_streams = p->wlan_rx_streams;
 
-	if (p->wlan_bssid[0] != 0xff &&
-	    !(p->wlan_bssid[0] == 0 && p->wlan_bssid[1] == 0 &&
-	      p->wlan_bssid[2] == 0 && p->wlan_bssid[3] == 0 &&
-	      p->wlan_bssid[4] == 0 && p->wlan_bssid[5] == 0)) {
-		memcpy(n->wlan_bssid, p->wlan_bssid, WLAN_MAC_LEN);
-
-		if ((n->wlan_mode & WLAN_MODE_STA) && n->wlan_ap_node == NULL) {
-			/* find AP node for this BSSID */
-			list_for_each(nodes, ap, list) {
-				if (memcmp(p->wlan_bssid, ap->wlan_src, WLAN_MAC_LEN) == 0) {
-					LOG_DBG("AP node found %p", ap);
-					//LOG_DBG("AP node ESSID %s",
-					//      ap->essid != NULL ? ap->essid->essid : "unknown");
-					n->wlan_ap_node = ap;
-					break;
-				}
-			}
-			n->wlan_rsn = ap->wlan_rsn;
-			n->wlan_wpa = ap->wlan_wpa;
-		}
-	}
 	if ((p->wlan_type == WLAN_FRAME_BEACON) ||
 	    (p->wlan_type == WLAN_FRAME_PROBE_RESP)) {
 		n->wlan_tsf = p->wlan_tsf;
@@ -71,9 +51,9 @@ static void copy_nodeinfo(struct uwifi_node* n, struct uwifi_packet* p, struct l
 		n->wlan_rsn = p->wlan_rsn;
 		// Channel is only really known for Beacon and Probe response
 		n->wlan_channel = p->wlan_channel;
-	} else if ((n->wlan_mode & WLAN_MODE_STA) && n->wlan_ap_node != NULL) {
+	} else if ((n->wlan_mode & WLAN_MODE_STA) && n->ap_node != NULL) {
 		// for STA we can use the channel from the AP
-		n->wlan_channel = n->wlan_ap_node->wlan_channel;
+		n->wlan_channel = n->ap_node->wlan_channel;
 	} else if (n->wlan_channel == 0 && p->wlan_channel != 0) {
 		// otherwise only override if channel was unknown
 		n->wlan_channel = p->wlan_channel;
@@ -120,6 +100,7 @@ static void copy_nodeinfo(struct uwifi_node* n, struct uwifi_packet* p, struct l
 struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct list_head* nodes)
 {
 	struct uwifi_node* n;
+	struct uwifi_node* ap;
 
 	if (p->phy_flags & PHY_FLAG_BADFCS)
 		return NULL;
@@ -145,10 +126,34 @@ struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct list_head* n
 		n->essid = NULL;
 		ewma_init(&n->phy_sig_avg, 1024, 8);
 		list_head_init(&n->on_channels);
+		list_head_init(&n->ap_nodes);
 		list_add_tail(nodes, &n->list);
 	}
 
-	copy_nodeinfo(n, p, nodes);
+	copy_nodeinfo(n, p);
+
+	/* in station mode, when BSSID is valid and different than current AP */
+	if (p->wlan_mode & WLAN_MODE_STA &&
+	    p->wlan_bssid[0] != 0xff &&
+	    MAC_NOT_EMPTY(p->wlan_bssid) &&
+	    (n->ap_node == NULL ||
+	     memcmp(p->wlan_bssid, n->ap_node->wlan_src, WLAN_MAC_LEN) != 0)) {
+		/* first remove from old AP if there was any */
+		if (n->ap_list.next)
+			list_del(&n->ap_list);
+		n->ap_node = NULL;
+		/* find AP node and add to his list of stations */
+		list_for_each(nodes, ap, list) {
+			if (memcmp(p->wlan_bssid, ap->wlan_src, WLAN_MAC_LEN) == 0) {
+				LOG_DBG("AP node " MAC_FMT " found %p",
+					MAC_PAR(p->wlan_bssid), ap);
+				list_add_tail(&ap->ap_nodes, &n->ap_list);
+				n->ap_node = ap;
+				break;
+			}
+		}
+		/* TODO: what if AP is unknown? */
+	}
 
 	return n;
 }
@@ -168,6 +173,8 @@ void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec,
 		if (the_time - n->last_seen > timeout_sec * 1000000) {
 			LOG_DBG("NODE timeout " MAC_FMT, MAC_PAR(n->wlan_src));
 			list_del(&n->list);
+			if (n->ap_list.next)
+				list_del(&n->ap_list);
 			if (n->essid != NULL)
 				uwifi_essids_remove_node(n);
 //			list_for_each_safe(&n->on_channels, cn, cn2, node_list) {
@@ -176,12 +183,10 @@ void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec,
 //				cn->chan->num_nodes--;
 //				free(cn);
 //			}
-			/* remove AP pointers to this node */
-			list_for_each_safe(nodes, n2, m2, list) {
-				if (n2->wlan_ap_node == n) {
-					LOG_DBG("remove AP ref");
-					n->wlan_ap_node = NULL;
-				}
+			/* clear AP list */
+			list_for_each_safe(&n->ap_nodes, n2, m2, ap_list) {
+				list_del(&n2->ap_list);
+				n2->ap_node = NULL;
 			}
 			free(n);
 		}
