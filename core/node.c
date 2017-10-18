@@ -51,7 +51,7 @@ static void copy_nodeinfo(struct uwifi_node* n, struct uwifi_packet* p)
 		n->wlan_rsn = p->wlan_rsn;
 		// Channel is only really known for Beacon and Probe response
 		n->wlan_channel = p->wlan_channel;
-	} else if ((n->wlan_mode & WLAN_MODE_STA) && n->ap_node != NULL) {
+	} else if ((n->wlan_mode & WLAN_MODE_STA) && n->ap_node) {
 		// for STA we can use the channel from the AP
 		n->wlan_channel = n->ap_node->wlan_channel;
 	} else if (n->wlan_channel == 0 && p->wlan_channel != 0) {
@@ -138,9 +138,10 @@ struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct list_head* n
 	    (n->ap_node == NULL ||
 	     memcmp(p->wlan_bssid, n->ap_node->wlan_src, WLAN_MAC_LEN) != 0)) {
 		/* first remove from old AP if there was any */
-		if (n->ap_list.next && n->ap_node)
+		if (n->ap_node) {
 			list_del_from(&n->ap_node->ap_nodes, &n->ap_list);
-		n->ap_node = NULL;
+			n->ap_node = NULL;
+		}
 		/* find AP node and add to his list of stations */
 		list_for_each(nodes, ap, list) {
 			if (memcmp(p->wlan_bssid, ap->wlan_src, WLAN_MAC_LEN) == 0) {
@@ -173,8 +174,10 @@ void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec,
 			LOG_DBG("NODE timeout %p " MAC_FMT, n,
 				MAC_PAR(n->wlan_src));
 			list_del_from(nodes, &n->list);
-			if (n->ap_list.next && n->ap_node != NULL)
+			if (n->ap_node) {
 				list_del_from(&n->ap_node->ap_nodes, &n->ap_list);
+				n->ap_node = NULL;
+			}
 			if (n->essid != NULL)
 				uwifi_essids_remove_node(n);
 //			list_for_each_safe(&n->on_channels, cn, cn2, node_list) {
