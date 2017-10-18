@@ -50,7 +50,7 @@ void uwifi_essids_remove_node(struct uwifi_node* n)
 
 	/* first remove ESSID from node */
 	LOG_DBG("ESSID remove node " MAC_FMT, MAC_PAR(n->wlan_src));
-	list_del(&n->essid_nodes);
+	list_del_from(&e->nodes, &n->essid_nodes);
 	n->essid = NULL;
 
 	/* then deal with ESSID itself */
@@ -128,7 +128,7 @@ void uwifi_essids_free(struct list_head* essids) {
 
 	list_for_each_safe(essids, e, f, list) {
 		LOG_DBG("ESSID free '%s'", e->essid);
-		list_del(&e->list);
+		list_del_from(essids, &e->list);
 		free(e);
 	}
 }
