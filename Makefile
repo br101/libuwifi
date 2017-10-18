@@ -20,8 +20,12 @@ SRC		+= core/essid.c
 SRC		+= util/average.c
 SRC		+= util/util.c
 
+ifeq ($(DEBUG),1)
+  SRC		+= ccan/list/list.c
+endif
+
 INCLUDES	+= -I. -I./core -I./util -I./$(PLATFORM)
-CFLAGS		+= -std=gnu99 -Wall -Wextra
+CFLAGS		+= -std=gnu99 -Wall -Wextra -g
 DEFS		+= -DDEBUG=$(DEBUG)
 DEFS		+= -DUWIFI_VER=\"$(shell git describe --tags)\"
 CHECK_FLAGS	+= -D__linux__

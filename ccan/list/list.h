@@ -1,7 +1,9 @@
 /* Licensed under BSD-MIT - see LICENSE file for details */
 #ifndef CCAN_LIST_H
 #define CCAN_LIST_H
-//#define CCAN_LIST_DEBUG 1
+#if DEBUG
+#define CCAN_LIST_DEBUG 1
+#endif
 #include <stdbool.h>
 #include <assert.h>
 #include <ccan/str/str.h>
