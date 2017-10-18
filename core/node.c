@@ -113,21 +113,20 @@ struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct list_head* n
 	/* find node by wlan source address */
 	list_for_each(nodes, n, list) {
 		if (memcmp(p->wlan_src, n->wlan_src, WLAN_MAC_LEN) == 0) {
-			LOG_DBG("node found %p", n);
+			LOG_DBG("NODE found %p " MAC_FMT, n, MAC_PAR(p->wlan_src));
 			break;
 		}
 	}
 
 	/* not found */
 	if (&n->list == &nodes->n) {
-		LOG_DBG("node adding");
 		n = (struct uwifi_node*)malloc(sizeof(struct uwifi_node));
 		memset(n, 0, sizeof(struct uwifi_node));
-		n->essid = NULL;
 		ewma_init(&n->phy_sig_avg, 1024, 8);
 		list_head_init(&n->on_channels);
 		list_head_init(&n->ap_nodes);
 		list_add_tail(nodes, &n->list);
+		LOG_DBG("NODE adding %p " MAC_FMT, n, MAC_PAR(p->wlan_src));
 	}
 
 	copy_nodeinfo(n, p);
@@ -145,8 +144,8 @@ struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct list_head* n
 		/* find AP node and add to his list of stations */
 		list_for_each(nodes, ap, list) {
 			if (memcmp(p->wlan_bssid, ap->wlan_src, WLAN_MAC_LEN) == 0) {
-				LOG_DBG("AP node " MAC_FMT " found %p",
-					MAC_PAR(p->wlan_bssid), ap);
+				LOG_DBG("AP node found %p " MAC_FMT,
+					ap, MAC_PAR(p->wlan_bssid));
 				list_add_tail(&ap->ap_nodes, &n->ap_list);
 				n->ap_node = ap;
 				break;
@@ -171,7 +170,8 @@ void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec,
 
 	list_for_each_safe(nodes, n, m, list) {
 		if (the_time - n->last_seen > timeout_sec * 1000000) {
-			LOG_DBG("NODE timeout " MAC_FMT, MAC_PAR(n->wlan_src));
+			LOG_DBG("NODE timeout %p " MAC_FMT, n,
+				MAC_PAR(n->wlan_src));
 			list_del(&n->list);
 			if (n->ap_list.next)
 				list_del(&n->ap_list);
@@ -203,7 +203,7 @@ void uwifi_nodes_free(struct list_head* nodes)
 		return;
 
 	list_for_each_safe(nodes, ni, mi, list) {
-		LOG_DBG("free node " MAC_FMT, MAC_PAR(ni->wlan_src));
+		LOG_DBG("NODE free %p " MAC_FMT, ni, MAC_PAR(ni->wlan_src));
 		list_del(&ni->list);
 		free(ni);
 	}
