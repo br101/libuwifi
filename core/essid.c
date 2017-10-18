@@ -46,10 +46,12 @@ void uwifi_essids_remove_node(struct uwifi_node* n)
 {
 	LOG_DBG("ESSID remove node " MAC_FMT, MAC_PAR(n->wlan_src));
 	list_del(&n->essid_nodes);
+	LOG_DBG("ESSID remove mark 1");
 
 	if (n->essid == NULL)
 		return;
 
+	LOG_DBG("ESSID remove mark 2");
 	n->essid->num_nodes--;
 
 	/* delete essid if it has no more nodes */
@@ -59,6 +61,7 @@ void uwifi_essids_remove_node(struct uwifi_node* n)
 		free(n->essid);
 		n->essid = NULL;
 	} else {
+		LOG_DBG("ESSID remove mark 1");
 		update_essid_split_status(n->essid);
 	}
 }
@@ -103,8 +106,10 @@ void uwifi_essids_update(struct list_head* essids, struct uwifi_packet* p,
 	}
 
 	/* if node had another essid before, remove it there */
-	if (n->essid != NULL && n->essid != e)
+	if (n->essid != NULL && n->essid != e) {
+		LOG_DBG("ESSID remove old");
 		uwifi_essids_remove_node(n);
+	}
 
 	/* new node */
 	if (n->essid == NULL) {
