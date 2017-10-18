@@ -44,25 +44,27 @@ static void update_essid_split_status(struct essid_info* e)
 
 void uwifi_essids_remove_node(struct uwifi_node* n)
 {
-	LOG_DBG("ESSID remove node " MAC_FMT, MAC_PAR(n->wlan_src));
-	list_del(&n->essid_nodes);
-	LOG_DBG("ESSID remove mark 1");
-
-	if (n->essid == NULL)
+	struct essid_info* e = n->essid;
+	if (e == NULL)
 		return;
 
+	/* first remove ESSID from node */
+	LOG_DBG("ESSID remove node " MAC_FMT, MAC_PAR(n->wlan_src));
+	list_del(&n->essid_nodes);
+	n->essid = NULL;
+
+	/* then deal with ESSID itself */
 	LOG_DBG("ESSID remove mark 2");
-	n->essid->num_nodes--;
+	e->num_nodes--;
 
 	/* delete essid if it has no more nodes */
-	if (n->essid->num_nodes == 0) {
+	if (e->num_nodes == 0) {
 		LOG_DBG("ESSID empty, delete");
-		list_del(&n->essid->list);
-		free(n->essid);
-		n->essid = NULL;
+		list_del(&e->list);
+		free(e);
 	} else {
 		LOG_DBG("ESSID remove mark 1");
-		update_essid_split_status(n->essid);
+		update_essid_split_status(e);
 	}
 }
 
@@ -99,22 +101,20 @@ void uwifi_essids_update(struct list_head* essids, struct uwifi_packet* p,
 		memset(e, 0, sizeof(struct essid_info));
 		strncpy(e->essid, p->wlan_essid, WLAN_MAX_SSID_LEN);
 		e->essid[WLAN_MAX_SSID_LEN-1] = '\0';
-		e->num_nodes = 0;
-		e->split = 0;
 		list_head_init(&e->nodes);
 		list_add_tail(essids, &e->list);
 	}
 
 	/* if node had another essid before, remove it there */
 	if (n->essid != NULL && n->essid != e) {
-		LOG_DBG("ESSID remove old");
+		LOG_DBG("ESSID remove old '%s'", n->essid->essid);
 		uwifi_essids_remove_node(n);
 	}
 
 	/* new node */
 	if (n->essid == NULL) {
-		LOG_DBG("ESSID node not found, adding new " MAC_FMT,
-			MAC_PAR(n->wlan_src));
+		LOG_DBG("ESSID adding " MAC_FMT " to '%s'",
+			MAC_PAR(n->wlan_src), e->essid);
 		list_add_tail(&e->nodes, &n->essid_nodes);
 		e->num_nodes++;
 		n->essid = e;
