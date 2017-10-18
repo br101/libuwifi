@@ -11,7 +11,6 @@
 #include "util.h"
 #include <stdio.h>
 
-#if DO_DEBUG
 void dump_hex(const unsigned char* data, int len, const char* txt)
 {
 	int i;
@@ -27,14 +26,6 @@ void dump_hex(const unsigned char* data, int len, const char* txt)
 	}
 	printf("\n");
 }
-#else
-void
-dump_hex(__attribute__((unused)) const unsigned char* data,
-	 __attribute__((unused)) int len,
-	 __attribute__((unused)) const char* txt)
-{
-}
-#endif
 
 const char* mac_sprint(const unsigned char *mac)
 {
