@@ -68,7 +68,8 @@ void uwifi_essids_update(struct list_head* essids, struct uwifi_packet* p,
 {
 	struct essid_info* e;
 
-	if (n == NULL || p == NULL || p->phy_flags & PHY_FLAG_BADFCS)
+	if (n == NULL || p == NULL || p->phy_flags & PHY_FLAG_BADFCS ||
+	    p->wlan_essid[0] == '\0')
 		return; /* ignore */
 
 	/* only check beacons and probe response frames */
@@ -92,6 +93,7 @@ void uwifi_essids_update(struct list_head* essids, struct uwifi_packet* p,
 	if (&e->list == &essids->n) {
 		LOG_DBG("ESSID not found, adding new");
 		e = malloc(sizeof(struct essid_info));
+		memset(e, 0, sizeof(struct essid_info));
 		strncpy(e->essid, p->wlan_essid, WLAN_MAX_SSID_LEN);
 		e->essid[WLAN_MAX_SSID_LEN-1] = '\0';
 		e->num_nodes = 0;
