@@ -79,8 +79,7 @@ void uwifi_essids_update(struct list_head* essids, struct uwifi_packet* p,
 
 	/* only check beacons and probe response frames */
 	if (p->wlan_type != WLAN_FRAME_BEACON &&
-	    p->wlan_type != WLAN_FRAME_PROBE_RESP &&
-	    p->wlan_type != WLAN_FRAME_PROBE_REQ)
+	    p->wlan_type != WLAN_FRAME_PROBE_RESP)
 		return;
 
 	LOG_DBG("ESSID check '%s' node " MAC_FMT " bssid " MAC_FMT,
