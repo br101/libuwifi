@@ -93,6 +93,14 @@ static void copy_nodeinfo(struct uwifi_node* n, struct uwifi_packet* p)
 	if (p->wlan_chan_width > n->wlan_chan_width)
 		n->wlan_chan_width = p->wlan_chan_width;
 
+	/* guess IEEE802.11 Standard from channel width, packet type and rate */
+	enum uwifi_80211_std chstd = wlan_80211std_from_chan(p->wlan_chan_width, p->wlan_channel);
+	enum uwifi_80211_std rstd = wlan_80211std_from_rate(p->phy_rate_idx, p->wlan_channel);
+	enum uwifi_80211_std ptstd = wlan_80211std_from_type(p->wlan_type);
+	enum uwifi_80211_std mstd = MAX(chstd, rstd);
+	mstd = MAX(mstd, ptstd);
+	n->wlan_std = MAX(n->wlan_std, mstd);
+
 	/* set packet retries from node sum */
 	p->wlan_retries = n->wlan_retries_last;
 }

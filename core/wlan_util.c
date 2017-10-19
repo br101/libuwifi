@@ -287,22 +287,73 @@ void wlan_vht_streams_from_mcs(unsigned char* mcs, unsigned char* rx, unsigned c
 	*tx = i;
 }
 
-const char* wlan_80211std_string(enum uwifi_chan_width width, int chan)
+enum uwifi_80211_std wlan_80211std_from_chan(enum uwifi_chan_width width, int chan)
 {
 	switch (width) {
 		case CHAN_WIDTH_UNSPEC:
 		case CHAN_WIDTH_20_NOHT:
-			return chan > 14 ? "a" : "bg";
+			return chan > 14 ? IEEE80211_A : IEEE80211_B;
 		case CHAN_WIDTH_20:
 		case CHAN_WIDTH_40:
-			return "n";
+			return IEEE80211_N;
 		case CHAN_WIDTH_80:
 		case CHAN_WIDTH_160:
 		case CHAN_WIDTH_8080:
-			return "ac";
+			return IEEE80211_AC;
 		default:
-			return "?";
+			return IEEE80211_;
 	}
+}
+
+enum uwifi_80211_std wlan_80211std_from_rate(int rate_idx, int chan)
+{
+	if (rate_idx <= 6)
+		return IEEE80211_B;
+	else if (rate_idx <= 12)
+		return chan > 14 ? IEEE80211_A : IEEE80211_G;
+	else
+		return IEEE80211_N;
+}
+
+enum uwifi_80211_std wlan_80211std_from_type(uint16_t fc)
+{
+	switch (fc) {
+		case WLAN_FRAME_BEAM_REP:
+		case WLAN_FRAME_VHT_NDP:
+			return IEEE80211_AC;
+		/* these frames are not strictly N but included in 802.11-2012
+		 * (roundup before AC) so I use them to assume N */
+		case WLAN_FRAME_TIMING:
+		case WLAN_FRAME_ACTION_NOACK:
+			return IEEE80211_N;
+		/* these frames are  not stricty G but included in 802.11-2007
+		 * (roundup before N) so I use them to assume G */
+		case WLAN_FRAME_ACTION:	/* 802.11h (spectrum mgmt) */
+		/* 802.11e (QoS) */
+		case WLAN_FRAME_BLKACK_REQ:
+		case WLAN_FRAME_BLKACK:
+		case WLAN_FRAME_QDATA:
+		case WLAN_FRAME_QDATA_CF_ACK:
+		case WLAN_FRAME_QDATA_CF_POLL:
+		case WLAN_FRAME_QDATA_CF_ACKPOLL:
+		case WLAN_FRAME_QOS_NULL:
+			return IEEE80211_G;
+		default:
+			return IEEE80211_;
+	}
+}
+
+const char* wlan_80211std_str(enum uwifi_80211_std std)
+{
+	switch (std) {
+		case IEEE80211_: return "?";
+		case IEEE80211_B: return "B";
+		case IEEE80211_G: return "G";
+		case IEEE80211_A: return "A";
+		case IEEE80211_N: return "N";
+		case IEEE80211_AC: return "AC";
+	}
+	return "?";
 }
 
 /** this does not handle combined modes */

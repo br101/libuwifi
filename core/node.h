@@ -16,6 +16,7 @@
 #include "average.h"
 #include "conf.h"
 #include "essid.h"
+#include "wlan_util.h"
 
 struct uwifi_node {
 	/* housekeeping */
@@ -54,7 +55,7 @@ struct uwifi_node {
 	enum uwifi_chan_width	wlan_chan_width;
 	unsigned char		wlan_tx_streams;
 	unsigned char		wlan_rx_streams;
-
+	enum uwifi_80211_std	wlan_std;
 
 	unsigned int		wlan_wep:1,	/* WEP active? */
 				wlan_wpa:1,

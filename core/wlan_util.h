@@ -17,6 +17,15 @@
 
 enum uwifi_chan_width;
 
+enum uwifi_80211_std {
+	IEEE80211_, // UNKNOWN
+	IEEE80211_B,
+	IEEE80211_G,
+	IEEE80211_A,
+	IEEE80211_N,
+	IEEE80211_AC,
+};
+
 struct pkt_name {
 	const char c;
 	const char* name;
@@ -40,7 +49,10 @@ int wlan_vht_mcs_to_rate(enum uwifi_chan_width width, int streams, int mcs, bool
 enum uwifi_chan_width wlan_chan_width_from_vht_capab(uint32_t vht);
 void wlan_ht_streams_from_mcs(unsigned char* mcs, unsigned char* rx, unsigned char* tx);
 void wlan_vht_streams_from_mcs(unsigned char* mcs, unsigned char* rx, unsigned char* tx);
-const char* wlan_80211std_string(enum uwifi_chan_width width, int chan);
+enum uwifi_80211_std wlan_80211std_from_chan(enum uwifi_chan_width width, int chan);
+enum uwifi_80211_std wlan_80211std_from_rate(int rate_idx, int chan);
+enum uwifi_80211_std wlan_80211std_from_type(uint16_t fc);
+const char* wlan_80211std_str(enum uwifi_80211_std std);
 const char* wlan_mode_string(int mode);
 int wlan_max_phy_rate(enum uwifi_chan_width width, unsigned char streams_rx);
 int wlan_freq2chan(int freq);
