@@ -108,7 +108,6 @@ static void copy_nodeinfo(struct uwifi_node* n, struct uwifi_packet* p)
 struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct list_head* nodes)
 {
 	struct uwifi_node* n;
-	struct uwifi_node* ap;
 
 	if (p->phy_flags & PHY_FLAG_BADFCS)
 		return NULL;
@@ -138,6 +137,13 @@ struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct list_head* n
 	}
 
 	copy_nodeinfo(n, p);
+	return n;
+}
+
+void uwifi_nodes_find_ap(struct uwifi_node* n, struct uwifi_packet* p,
+			 struct list_head* nodes)
+{
+	struct uwifi_node* ap;
 
 	/* in station mode, when BSSID is valid and different than current AP */
 	if (p->wlan_mode & WLAN_MODE_STA &&
@@ -162,8 +168,6 @@ struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct list_head* n
 		}
 		/* TODO: what if AP is unknown? */
 	}
-
-	return n;
 }
 
 void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec,

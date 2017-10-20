@@ -73,8 +73,12 @@ struct uwifi_node {
 	unsigned int		olsr_tc;	/* unused */
 };
 
-struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct list_head* nodes);
-void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec, uint32_t* last_nodetimeout);
+struct uwifi_node* uwifi_node_update(struct uwifi_packet* p,
+				     struct list_head* nodes);
+void uwifi_nodes_find_ap(struct uwifi_node* n, struct uwifi_packet* p,
+			 struct list_head* nodes);
+void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec,
+			 uint32_t* last_nodetimeout);
 void uwifi_nodes_free(struct list_head* nodes);
 
 #endif
