@@ -55,8 +55,9 @@ struct wlan_frame {
 #define WLAN_FRAME_TYPE_MGMT		0x0
 #define WLAN_FRAME_TYPE_CTRL		0x1
 #define WLAN_FRAME_TYPE_DATA		0x2
+#define WLAN_FRAME_TYPE_EXTE		0x3
 
-#define WLAN_NUM_TYPES			3
+#define WLAN_NUM_TYPES			3	/* not using EXTE */
 #define WLAN_NUM_STYPES			16
 
 #define WLAN_FRAME_IS_MGMT(_fc)		(WLAN_FRAME_TYPE(_fc) == WLAN_FRAME_TYPE_MGMT)
@@ -86,7 +87,7 @@ struct wlan_frame {
 /* (reserved)								    0-3 */
 #define WLAN_FRAME_BEAM_REP		WLAN_FRAME_FC(WLAN_FRAME_TYPE_CTRL, 0x4)
 #define WLAN_FRAME_VHT_NDP		WLAN_FRAME_FC(WLAN_FRAME_TYPE_CTRL, 0x5)
-/* (reserved)								    0x6 */
+#define WLAN_FRAME_CTRL_EXT		WLAN_FRAME_FC(WLAN_FRAME_TYPE_CTRL, 0x6)
 #define WLAN_FRAME_CTRL_WRAP		WLAN_FRAME_FC(WLAN_FRAME_TYPE_CTRL, 0x7)
 #define WLAN_FRAME_BLKACK_REQ		WLAN_FRAME_FC(WLAN_FRAME_TYPE_CTRL, 0x8)
 #define WLAN_FRAME_BLKACK		WLAN_FRAME_FC(WLAN_FRAME_TYPE_CTRL, 0x9)
@@ -114,6 +115,10 @@ struct wlan_frame {
 /* (reserved)								    0xd */
 #define WLAN_FRAME_QOS_CF_POLL		WLAN_FRAME_FC(WLAN_FRAME_TYPE_DATA, 0xe)
 #define WLAN_FRAME_QOS_CF_ACKPOLL	WLAN_FRAME_FC(WLAN_FRAME_TYPE_DATA, 0xf)
+
+/*** extension ***/
+#define WLAN_FRAME_DMG_BEACON		WLAN_FRAME_FC(WLAN_FRAME_TYPE_EXTE, 0x0)
+/* (reserved)								    1-f */
 
 #define WLAN_FRAME_QOS_TID_MASK		0x7
 #define WLAN_FRAME_QOS_AMSDU_PRESENT	0x80
