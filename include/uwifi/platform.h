@@ -7,10 +7,8 @@
  * Version 3. See the file COPYING for more details.
  */
 
-#ifndef __linux__
-#error "platform is not Linux"
-#endif
-
 #include <stdint.h>
+
+/* functions all platforms must provide */
 
 uint32_t plat_time_usec(void);	// return monotonic time in usec
