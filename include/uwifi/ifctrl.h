@@ -12,6 +12,7 @@
 #define _UWIFI_IFCTRL_H
 
 #include <stdbool.h>
+#include <stddef.h>
 
 #include "channel.h"
 
