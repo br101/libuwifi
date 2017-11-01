@@ -24,7 +24,7 @@ ifeq ($(DEBUG),1)
   SRC		+= ccan/list/list.c
 endif
 
-INCLUDES	+= -I. -I./core -I./util -I./$(PLATFORM)
+INCLUDES	+= -I. -I./include/uwifi -I./$(PLATFORM)
 CFLAGS		+= -std=gnu99 -Wall -Wextra -g
 DEFS		+= -DDEBUG=$(DEBUG)
 DEFS		+= -DUWIFI_VER=\"$(shell git describe --tags)\"

@@ -51,8 +51,7 @@ endif
 install: lib-static lib-dynamic
 	-mkdir -p $(INST_PATH)/include/uwifi
 	-mkdir -p $(INST_PATH)/lib
-	cp ./core/*.h $(INST_PATH)/include/uwifi
-	cp ./util/*.h $(INST_PATH)/include/uwifi
+	cp -r ./include/uwifi $(INST_PATH)/include/
 	cp ./linux/*.h $(INST_PATH)/include/uwifi
 	cp -r ./ccan $(INST_PATH)/include/
 	cp $(BUILD_DIR)/libuwifi.a $(INST_PATH)/lib/
