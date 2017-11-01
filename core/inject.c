@@ -1,7 +1,8 @@
 #include <stdbool.h>
 #include <inttypes.h>
 #include <string.h>
-#include <err.h>
+#include <endian.h>
+//#include <err.h>
 
 #include "platform.h"
 #include "inject.h"

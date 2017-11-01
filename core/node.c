@@ -7,6 +7,8 @@
  * Version 3. See the file COPYING for more details.
  */
 
+#include <stdlib.h>
+
 #include "platform.h"
 #include "util.h"
 #include "wlan80211.h"

@@ -7,6 +7,10 @@
  * Version 3. See the file COPYING for more details.
  */
 
+#include <string.h>
+#include <stdint.h>
+#include <endian.h>
+
 #include "platform.h"
 #include "wlan80211.h"
 #include "util.h"

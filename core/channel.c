@@ -7,6 +7,8 @@
  * Version 3. See the file COPYING for more details.
  */
 
+#include <stdio.h>
+
 #include "platform.h"
 #include "util.h"
 #include "ifctrl.h"
