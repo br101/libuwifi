@@ -32,6 +32,8 @@ struct uwifi_node {
 	/* general packet info */
 	unsigned int		pkt_types;	/* bitmask of packet types we've seen */
 	unsigned int		pkt_count;	/* nr of packets seen */
+	unsigned int		rx_pkt_count;   /* nr of packets seen */
+	int			rx_only;
 
 	/* wlan phy (from radiotap) */
 	unsigned int		phy_rate_last;
@@ -75,8 +77,9 @@ struct uwifi_node {
 
 struct uwifi_node* uwifi_node_update(struct uwifi_packet* p,
 				     struct list_head* nodes);
-void uwifi_nodes_find_ap(struct uwifi_node* n, struct uwifi_packet* p,
-			 struct list_head* nodes);
+struct uwifi_node* uwifi_node_update_receiver(struct uwifi_packet* p,
+					      struct list_head* nodes);
+void uwifi_nodes_find_ap(struct uwifi_node* n, struct list_head* nodes);
 void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec,
 			 uint32_t* last_nodetimeout);
 void uwifi_nodes_free(struct list_head* nodes);

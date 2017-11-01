@@ -18,6 +18,9 @@
 
 #define MAC_EMPTY(_mac) (!_mac[0] && !_mac[1] && !_mac[2] && !_mac[3] && !_mac[4] && !_mac[5])
 
+#define MAC_BCAST(_mac) (_mac[0] == 0xff && _mac[1] == 0xff && _mac[2] == 0xff \
+			 && _mac[3] == 0xff && _mac[4] == 0xff && _mac[5] == 0xff)
+
 #ifndef BIT
 #define BIT(nr) (1 << (nr))
 #endif

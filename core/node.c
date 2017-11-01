@@ -17,6 +17,7 @@
 static void copy_nodeinfo(struct uwifi_node* n, struct uwifi_packet* p)
 {
 	memcpy(n->wlan_src, p->wlan_src, WLAN_MAC_LEN);
+	n->rx_only = false;
 
 	if (MAC_NOT_EMPTY(p->wlan_bssid))
 		memcpy(n->wlan_bssid, p->wlan_bssid, WLAN_MAC_LEN);
@@ -140,17 +141,91 @@ struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct list_head* n
 	return n;
 }
 
-void uwifi_nodes_find_ap(struct uwifi_node* n, struct uwifi_packet* p,
-			 struct list_head* nodes)
+static void copy_rx_nodeinfo(struct uwifi_node* n, struct uwifi_packet* p)
+{
+	memcpy(n->wlan_src, p->wlan_dst, WLAN_MAC_LEN);
+
+	if (MAC_NOT_EMPTY(p->wlan_bssid))
+		memcpy(n->wlan_bssid, p->wlan_bssid, WLAN_MAC_LEN);
+
+	n->last_seen = plat_time_usec();
+	n->rx_pkt_count++;
+	n->pkt_types |= p->pkt_types;
+
+	/* if packet sender was AP we know recipient is STA and vice versa */
+	if (p->wlan_mode == WLAN_MODE_AP)
+		n->wlan_mode = WLAN_MODE_STA;
+	else if (p->wlan_mode == WLAN_MODE_STA)
+		n->wlan_mode = WLAN_MODE_AP;
+	else if (p->wlan_mode == WLAN_MODE_IBSS)
+		n->wlan_mode = WLAN_MODE_IBSS;
+
+	if ((n->wlan_mode & WLAN_MODE_STA) && n->ap_node) {
+		// for STA we can use the channel from the AP
+		n->wlan_channel = n->ap_node->wlan_channel;
+	} else if (n->wlan_channel == 0 && p->wlan_channel != 0) {
+		// otherwise only override if channel was unknown
+		n->wlan_channel = p->wlan_channel;
+	}
+
+	if ((p->wlan_type == WLAN_FRAME_DATA) ||
+	    (p->wlan_type == WLAN_FRAME_QDATA) ||
+	    (p->wlan_type == WLAN_FRAME_AUTH) ||
+	    (p->wlan_type == WLAN_FRAME_BEACON) ||
+	    (p->wlan_type == WLAN_FRAME_PROBE_RESP) ||
+	    (p->wlan_type == WLAN_FRAME_DATA_CF_ACK) ||
+	    (p->wlan_type == WLAN_FRAME_DATA_CF_POLL) ||
+	    (p->wlan_type == WLAN_FRAME_DATA_CF_ACKPOLL) ||
+	    (p->wlan_type == WLAN_FRAME_QDATA_CF_ACK) ||
+	    (p->wlan_type == WLAN_FRAME_QDATA_CF_POLL) ||
+	    (p->wlan_type == WLAN_FRAME_QDATA_CF_ACKPOLL))
+		n->wlan_wep = p->wlan_wep;
+}
+
+struct uwifi_node* uwifi_node_update_receiver(struct uwifi_packet* p, struct list_head* nodes)
+{
+	struct uwifi_node* n;
+
+	if (p->phy_flags & PHY_FLAG_BADFCS)
+		return NULL;
+
+	if (MAC_EMPTY(p->wlan_dst) || MAC_BCAST(p->wlan_dst))
+		return NULL;
+
+	/* find node by wlan source address */
+	list_for_each(nodes, n, list) {
+		if (memcmp(p->wlan_dst, n->wlan_src, WLAN_MAC_LEN) == 0) {
+			LOG_DBG("RX NODE found %p " MAC_FMT, n, MAC_PAR(p->wlan_dst));
+			break;
+		}
+	}
+
+	/* not found */
+	if (&n->list == &nodes->n) {
+		n = (struct uwifi_node*)malloc(sizeof(struct uwifi_node));
+		memset(n, 0, sizeof(struct uwifi_node));
+		ewma_init(&n->phy_sig_avg, 1024, 8);
+		list_head_init(&n->on_channels);
+		list_head_init(&n->ap_nodes);
+		list_add_tail(nodes, &n->list);
+		LOG_DBG("RX NODE adding %p " MAC_FMT, n, MAC_PAR(p->wlan_dst));
+		n->rx_only = true;
+	}
+
+	copy_rx_nodeinfo(n, p);
+	return n;
+}
+
+void uwifi_nodes_find_ap(struct uwifi_node* n, struct list_head* nodes)
 {
 	struct uwifi_node* ap;
 
 	/* in station mode, when BSSID is valid and different than current AP */
-	if (p->wlan_mode & WLAN_MODE_STA &&
-	    p->wlan_bssid[0] != 0xff &&
-	    MAC_NOT_EMPTY(p->wlan_bssid) &&
+	if (n->wlan_mode & WLAN_MODE_STA &&
+	    n->wlan_bssid[0] != 0xff &&
+	    MAC_NOT_EMPTY(n->wlan_bssid) &&
 	    (n->ap_node == NULL ||
-	     memcmp(p->wlan_bssid, n->ap_node->wlan_src, WLAN_MAC_LEN) != 0)) {
+	     memcmp(n->wlan_bssid, n->ap_node->wlan_src, WLAN_MAC_LEN) != 0)) {
 		/* first remove from old AP if there was any */
 		if (n->ap_node) {
 			list_del_from(&n->ap_node->ap_nodes, &n->ap_list);
@@ -158,9 +233,9 @@ void uwifi_nodes_find_ap(struct uwifi_node* n, struct uwifi_packet* p,
 		}
 		/* find AP node and add to his list of stations */
 		list_for_each(nodes, ap, list) {
-			if (memcmp(p->wlan_bssid, ap->wlan_src, WLAN_MAC_LEN) == 0) {
+			if (memcmp(n->wlan_bssid, ap->wlan_src, WLAN_MAC_LEN) == 0) {
 				LOG_DBG("AP node found %p " MAC_FMT,
-					ap, MAC_PAR(p->wlan_bssid));
+					ap, MAC_PAR(n->wlan_bssid));
 				list_add_tail(&ap->ap_nodes, &n->ap_list);
 				n->ap_node = ap;
 				break;
