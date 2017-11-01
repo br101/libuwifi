@@ -286,6 +286,7 @@ int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet
 		case WLAN_FRAME_PROBE_REQ:
 			uwifi_parse_information_elements(buf + hdrlen,
 				len - hdrlen - 4 /* FCS */, p);
+			p->wlan_mode = WLAN_MODE_PROBE;
 			break;
 
 		case WLAN_FRAME_ASSOC_REQ:

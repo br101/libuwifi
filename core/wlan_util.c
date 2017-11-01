@@ -364,6 +364,8 @@ const char* wlan_mode_string(int mode) {
 		return "IBSS";
 	else if (mode & WLAN_MODE_STA)
 		return "STA";
+	else if (mode & WLAN_MODE_PROBE)
+		return "PRB";
 	return "UNK";
 }
 

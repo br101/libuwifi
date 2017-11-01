@@ -29,7 +29,7 @@ static void update_essid_split_status(struct essid_info* e)
 		LOG_DBG("ESSID SPLIT check node %p src " MAC_FMT " bssid " MAC_FMT,
 			n, MAC_PAR(n->wlan_src), MAC_PAR(n->wlan_bssid));
 
-		if (!(n->wlan_mode & WLAN_MODE_IBSS))
+		if (n->wlan_mode & WLAN_MODE_AP || n->wlan_mode & WLAN_MODE_PROBE)
 			continue;
 
 		if (last_bssid && memcmp(last_bssid, n->wlan_bssid, WLAN_MAC_LEN) != 0)
