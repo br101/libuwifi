@@ -6,7 +6,7 @@ enum loglevel { LL_CRIT = 2, LL_ERR, LL_WARN, LL_NOTICE, LL_INFO, LL_DEBUG };
 
 /* application needs to provide */
 void __attribute__ ((format (printf, 2, 3)))
-log_out(enum loglevel, const char *fmt, ...);
+log_out(enum loglevel ll, const char *fmt, ...);
 
 void log_open(const char *name);
 void log_close(void);
