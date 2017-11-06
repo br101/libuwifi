@@ -7,6 +7,9 @@
  * Version 3. See the file COPYING for more details.
  */
 
+#include <stdint.h>
+#include <endian.h>
+
 #include "prism_header.h"
 #include "radiotap.h"
 #include "radiotap_iter.h"
