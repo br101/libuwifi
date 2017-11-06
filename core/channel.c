@@ -153,7 +153,7 @@ bool uwifi_channel_change(struct uwifi_interface* intf, struct uwifi_chan_spec* 
 	/* only 20 MHz channels don't need additional center freq, otherwise warn
 	 * if someone tries invalid HT40+/- channels */
 	if (spec->center_freq == 0 && !(spec->width == CHAN_WIDTH_20_NOHT || spec->width == CHAN_WIDTH_20)) {
-		LOG_ERR("CH %s not valid", uwifi_channel_get_string(spec));
+		LOG_ERR("%s not valid", uwifi_channel_get_string(spec));
 		return false;
 	}
 
