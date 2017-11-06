@@ -282,6 +282,8 @@ bool uwifi_channel_init(struct uwifi_interface* intf)
 	/* get available channels */
 	ifctrl_iwget_freqlist(intf);
 	intf->channel_initialized = 1;
+	intf->channel_idx = -1;
+	intf->last_channelchange = plat_time_usec();
 
 	LOG_INF("Got %d Bands, %d Channels:", intf->channels.num_bands, intf->channels.num_channels);
 	for (int i = 0; i < intf->channels.num_channels && i < MAX_CHANNELS; i++)
