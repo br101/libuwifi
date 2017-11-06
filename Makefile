@@ -27,7 +27,6 @@ endif
 INCLUDES	+= -I. -I./include/uwifi -I./$(PLATFORM)
 CFLAGS		+= -std=gnu99 -Wall -Wextra -g
 DEFS		+= -DDEBUG=$(DEBUG)
-DEFS		+= -DUWIFI_VER=\"$(shell git describe --tags)\"
 CHECK_FLAGS	+= -D__linux__
 
 all: lib-static lib-dynamic
