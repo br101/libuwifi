@@ -76,5 +76,6 @@ const struct uwifi_band* uwifi_channel_get_band(struct uwifi_channels* channels,
 bool uwifi_channel_band_add(struct uwifi_channels* channels, int num_channels, enum uwifi_chan_width max_chan_width,
 		      unsigned char streams_rx, unsigned char streams_tx);
 bool uwifi_channel_is_ht40plus(const struct uwifi_chan_spec* spec);
+void uwifi_channel_fix_center_freq(struct uwifi_chan_spec* chan, bool ht40plus);
 
 #endif

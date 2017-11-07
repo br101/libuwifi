@@ -97,6 +97,28 @@ static int get_center_freq_vht(unsigned int freq, enum uwifi_chan_width width)
 }
 
 
+/* upper only used if HT40 */
+void uwifi_channel_fix_center_freq(struct uwifi_chan_spec* chan, bool ht40plus)
+{
+	/* set center freq from width or HT40+/- */
+	switch (chan->width) {
+		case CHAN_WIDTH_20_NOHT:
+		case CHAN_WIDTH_20:
+			break;
+		case CHAN_WIDTH_40:
+			/* this may select a channel out of range */
+			chan->center_freq = chan->freq + (ht40plus ? 10 : -10);
+			break;
+		case CHAN_WIDTH_80:
+		case CHAN_WIDTH_160:
+			chan->center_freq = get_center_freq_vht(chan->freq, chan->width);
+			break;
+		default:
+			LOG_ERR("%s not implemented", uwifi_channel_width_string(chan->width, -1));
+			break;
+	}
+}
+
 const char* uwifi_channel_width_string(enum uwifi_chan_width w, int ht40p)
 {
 	switch (w) {
