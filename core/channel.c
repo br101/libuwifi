@@ -158,6 +158,24 @@ enum uwifi_chan_width uwifi_channel_width_from_mhz(int width)
 	return CHAN_WIDTH_UNSPEC;
 }
 
+bool uwifi_channel_verify(struct uwifi_chan_spec* ch, struct uwifi_channels* channels)
+{
+	bool found;
+	unsigned int min = 999999;
+	unsigned int max = 0;
+	for (int i = 0; i < channels->num_channels && i < MAX_CHANNELS; i++) {
+		if (channels->chan[i].freq == ch->freq)
+			found = true;
+		if (channels->chan[i].freq < min)
+			min = channels->chan[i].freq;
+		if (channels->chan[i].freq > max)
+			max = channels->chan[i].freq;
+	}
+
+	return (found && ch->center_freq > min && ch->center_freq < max &&
+		ch->width != CHAN_WIDTH_UNSPEC);
+}
+
 char* uwifi_channel_list_string(struct uwifi_channels* channels, int idx)
 {
 	static char buf[32];
@@ -165,6 +183,15 @@ char* uwifi_channel_list_string(struct uwifi_channels* channels, int idx)
 	sprintf(buf, "%-3d: %d HT40%s%s", c->chan, c->freq,
 			get_center_freq_ht40(channels, c->freq, true) ? "+" : "",
 			get_center_freq_ht40(channels, c->freq, false) ? "-" : "");
+#if 0
+	int pos=0;
+	int cent = get_center_freq_ht40(channels, c->freq, false);
+	if (cent)
+		pos = sprintf(buf, "%d\t%d\t%d\n", c->freq, 40, cent);
+	cent = get_center_freq_ht40(channels, c->freq, true);
+	if (cent)
+		sprintf(buf+pos, "%d\t%d\t%d", c->freq, 40, cent);
+#endif
 	return buf;
 }
 
