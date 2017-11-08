@@ -147,6 +147,17 @@ const char* uwifi_channel_width_string_short(enum uwifi_chan_width w, int ht40p)
 	return "";
 }
 
+enum uwifi_chan_width uwifi_channel_width_from_mhz(int width)
+{
+	switch (width) {
+		case 20: return CHAN_WIDTH_20;
+		case 40: return CHAN_WIDTH_40;
+		case 80: return CHAN_WIDTH_80;
+		case 160: return CHAN_WIDTH_160;
+	}
+	return CHAN_WIDTH_UNSPEC;
+}
+
 char* uwifi_channel_list_string(struct uwifi_channels* channels, int idx)
 {
 	static char buf[32];

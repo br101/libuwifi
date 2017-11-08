@@ -69,6 +69,7 @@ char* uwifi_channel_list_string(struct uwifi_channels* channels, int idx);
 const char* uwifi_channel_width_string(enum uwifi_chan_width w, int ht40p);
 /* Note: ht40p is used only for HT40 channels. If it should not be shown use -1 */
 const char* uwifi_channel_width_string_short(enum uwifi_chan_width w, int ht40p);
+enum uwifi_chan_width uwifi_channel_width_from_mhz(int width);
 char* uwifi_channel_get_string(const struct uwifi_chan_spec* spec);
 int uwifi_channel_get_num_bands(struct uwifi_channels* channels);
 int uwifi_channel_idx_from_band_idx(struct uwifi_channels* channels, int band, int idx);
