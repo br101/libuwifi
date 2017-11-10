@@ -16,12 +16,6 @@
 #define MAX_BANDS		2
 #define MAX_CHANNELS		64
 
-/* channel to frequency mapping */
-struct uwifi_chan_freq {
-	int chan;
-	unsigned int freq;
-};
-
 enum uwifi_chan_width {
 	CHAN_WIDTH_UNSPEC,
 	CHAN_WIDTH_20_NOHT,
@@ -30,6 +24,15 @@ enum uwifi_chan_width {
 	CHAN_WIDTH_80,
 	CHAN_WIDTH_160,
 	CHAN_WIDTH_8080,
+};
+
+/* channel to frequency mapping */
+struct uwifi_chan_freq {
+	int chan;
+	unsigned int freq;
+	enum uwifi_chan_width max_width;
+	bool ht40plus;
+	bool ht40minus;
 };
 
 struct uwifi_band {
@@ -56,6 +59,7 @@ struct uwifi_interface;
 
 bool uwifi_channel_change(struct uwifi_interface* intf, struct uwifi_chan_spec* spec);
 int uwifi_channel_auto_change(struct uwifi_interface* intf);
+void uwifi_channel_get_next(struct uwifi_interface* intf, struct uwifi_chan_spec* new_chan);
 int uwifi_channel_idx_from_chan(struct uwifi_channels* channels, int c);
 int uwifi_channel_idx_from_freq(struct uwifi_channels* channels, unsigned int f);
 int uwifi_channel_get_chan(struct uwifi_channels* channels, int idx);
