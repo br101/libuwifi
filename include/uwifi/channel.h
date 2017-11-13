@@ -69,8 +69,7 @@ bool uwifi_channel_init(struct uwifi_interface* intf);
 bool uwifi_channel_list_add(struct uwifi_channels* channels, int freq);
 uint32_t uwifi_channel_get_remaining_dwell_time(struct uwifi_interface* intf);
 char* uwifi_channel_list_string(struct uwifi_channels* channels, int idx);
-/* Note: ht40p is used only for HT40 channels. If it should not be shown use -1 */
-const char* uwifi_channel_width_string(enum uwifi_chan_width w, int ht40p);
+const char* uwifi_channel_width_string(enum uwifi_chan_width w);
 /* Note: ht40p is used only for HT40 channels. If it should not be shown use -1 */
 const char* uwifi_channel_width_string_short(enum uwifi_chan_width w, int ht40p);
 enum uwifi_chan_width uwifi_channel_width_from_mhz(int width);

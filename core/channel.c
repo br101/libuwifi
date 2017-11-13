@@ -91,7 +91,7 @@ static int get_center_freq_vht(unsigned int freq, enum uwifi_chan_width width)
 			LOG_ERR("VHT80+80 not supported");
 			break;
 		default:
-			LOG_ERR("%s is not VHT", uwifi_channel_width_string(width, -1));
+			LOG_ERR("%s is not VHT", uwifi_channel_width_string(width));
 	}
 	return center1;
 }
@@ -114,18 +114,19 @@ void uwifi_channel_fix_center_freq(struct uwifi_chan_spec* chan, bool ht40plus)
 			chan->center_freq = get_center_freq_vht(chan->freq, chan->width);
 			break;
 		default:
-			LOG_ERR("%s not implemented", uwifi_channel_width_string(chan->width, -1));
+			LOG_ERR("%s not implemented",
+				uwifi_channel_width_string(chan->width));
 			break;
 	}
 }
 
-const char* uwifi_channel_width_string(enum uwifi_chan_width w, int ht40p)
+const char* uwifi_channel_width_string(enum uwifi_chan_width w)
 {
 	switch (w) {
 		case CHAN_WIDTH_UNSPEC: return "?";
 		case CHAN_WIDTH_20_NOHT: return "20 (no HT)";
 		case CHAN_WIDTH_20: return "HT20";
-		case CHAN_WIDTH_40: return ht40p < 0 ? "HT40" : ht40p ? "HT40+" : "HT40-";
+		case CHAN_WIDTH_40: return "HT40";
 		case CHAN_WIDTH_80: return "VHT80";
 		case CHAN_WIDTH_160: return "VHT160";
 		case CHAN_WIDTH_8080: return "VHT80+80";
@@ -191,9 +192,12 @@ char* uwifi_channel_list_string(struct uwifi_channels* channels, int idx)
 {
 	static char buf[32];
 	struct uwifi_chan_freq* c = &channels->chan[idx];
-	sprintf(buf, "%-3d: %d %s%s", c->chan, c->freq,
-			uwifi_channel_width_string(c->max_width, c->ht40plus),
-			c->ht40plus && c->ht40minus ? "-" : "");
+	int pos = sprintf(buf, "%-3d: %d %s", c->chan, c->freq,
+			uwifi_channel_width_string(c->max_width));
+
+	if (c->max_width >= CHAN_WIDTH_40)
+		pos += sprintf(buf+pos, "%s%s", c->ht40plus ? "+" : "",
+						c->ht40minus ? "-" : "");
 #if 0
 	int pos=0;
 	int cent = get_center_freq_ht40(channels, c->freq, false);
@@ -209,8 +213,14 @@ char* uwifi_channel_list_string(struct uwifi_channels* channels, int idx)
 char* uwifi_channel_get_string(const struct uwifi_chan_spec* spec)
 {
 	static char buf[32];
-	sprintf(buf, "CH %d (%d MHz) %s", wlan_freq2chan(spec->freq), spec->freq,
-		uwifi_channel_width_string(spec->width, uwifi_channel_is_ht40plus(spec)));
+	int pos = sprintf(buf, "CH %d (%d MHz) %s",
+			  wlan_freq2chan(spec->freq), spec->freq,
+			  uwifi_channel_width_string(spec->width));
+	if (spec->width == CHAN_WIDTH_40)
+		sprintf(buf+pos, "%c",
+			spec->center_freq < spec->freq ? '-' : '+');
+	else if (spec->width >= CHAN_WIDTH_80)
+		sprintf(buf+pos, " (center %d)", spec->center_freq);
 	return buf;
 }
 
@@ -409,7 +419,7 @@ bool uwifi_channel_init(struct uwifi_interface* intf)
 		struct uwifi_band b = channel_get_band_from_idx(&intf->channels, intf->channel_idx);
 		if (intf->channel.width != b.max_chan_width) {
 			LOG_INF("Try to set max channel width %s",
-				uwifi_channel_width_string(b.max_chan_width, -1));
+				uwifi_channel_width_string(b.max_chan_width));
 			intf->channel_set.width = b.max_chan_width;
 			if (b.max_chan_width == CHAN_WIDTH_40) {
 				// try both HT40+ and HT40- if necessary
