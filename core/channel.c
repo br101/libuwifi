@@ -415,26 +415,25 @@ bool uwifi_channel_init(struct uwifi_interface* intf)
 			return true; // not failure
 
 		}
+
 		intf->channel_idx = uwifi_channel_idx_from_freq(&intf->channels, intf->channel.freq);
 		intf->channel_set = intf->channel;
 		LOG_INF("Current channel: %s", uwifi_channel_get_string(&intf->channel));
 
-		/* try to set max width */
+		/* get max rate from band */
 		struct uwifi_band b = channel_get_band_from_idx(&intf->channels, intf->channel_idx);
-		if (intf->channel.width != b.max_chan_width) {
-			LOG_INF("Try to set max channel width %s",
-				uwifi_channel_width_string(b.max_chan_width));
-			intf->channel_set.width = b.max_chan_width;
-			if (b.max_chan_width == CHAN_WIDTH_40) {
-				// try both HT40+ and HT40- if necessary
-				intf->channel_set.center_freq = get_center_freq_ht40(&intf->channels, intf->channel_set.freq, true);
-				if (!intf->channel_set.center_freq)
-					get_center_freq_ht40(&intf->channels, intf->channel_set.freq, false);
-				if (!uwifi_channel_change(intf, &intf->channel_set))
-					return false;
-				}
-		} else {
-			intf->max_phy_rate = wlan_max_phy_rate(intf->channel.width, b.streams_rx);
+		intf->max_phy_rate = wlan_max_phy_rate(b.max_chan_width, b.streams_rx);
+
+		/* set max width for this channel */
+		struct uwifi_chan_freq* ch = &intf->channels.chan[intf->channel_idx];
+		if (intf->channel.width != ch->max_width) {
+			intf->channel_set.width = ch->max_width;
+			bool ht40plus = (ch->max_width == CHAN_WIDTH_40 && !ch->ht40minus);
+			uwifi_channel_fix_center_freq(&intf->channel_set, ht40plus);
+			LOG_INF("Set max channel width %s",
+				uwifi_channel_get_string(&intf->channel_set));
+			if (!uwifi_channel_change(intf, &intf->channel_set))
+				return false;
 		}
 	}
 	return true;
