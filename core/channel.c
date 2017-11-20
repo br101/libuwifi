@@ -354,6 +354,10 @@ static void chan_check_capab(int idx, struct uwifi_channels* channels)
 	/* we can always do 20 MHz */
 	channels->chan[idx].max_width = CHAN_WIDTH_20;
 
+	/* special case: CH 14 is only allowed for 20 Mhz operation in Japan */
+	if (uwifi_channel_get_freq(channels, idx) == 2484)
+		return;
+
 	/* HT40 is easier to check directly */
 	if (max_width >= CHAN_WIDTH_40) {
 		channels->chan[idx].ht40minus = uwifi_channel_idx_from_chan(channels, ch - 4) != -1;
