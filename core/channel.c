@@ -418,7 +418,7 @@ bool uwifi_channel_init(struct uwifi_interface* intf)
 			LOG_INF("Set max channel width %s",
 				uwifi_channel_get_string(&intf->channel_set));
 			if (!uwifi_channel_change(intf, &intf->channel_set))
-				return false;
+				return true; // not failure
 		}
 	}
 	return true;
