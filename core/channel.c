@@ -140,16 +140,10 @@ enum uwifi_chan_width uwifi_channel_width_from_mhz(int width)
 	return CHAN_WIDTH_UNSPEC;
 }
 
-bool uwifi_channel_verify(struct uwifi_chan_spec* ch, struct uwifi_channels* channels)
+/* internal version does not check primary channel and width */
+static bool uwifi_channel_verify_ch(struct uwifi_chan_spec* ch, struct uwifi_channels* channels)
 {
-	/* primary channel exists */
-	int idx = uwifi_channel_idx_from_freq(channels, ch->freq);
-	if (idx == -1)
-		return false;
-
-	/* width is ok */
-	if (ch->width > channels->chan[idx].max_width)
-		return false;
+	int idx;
 
 	if (ch->width == CHAN_WIDTH_40) {
 		/* center freq difference */
@@ -171,6 +165,20 @@ bool uwifi_channel_verify(struct uwifi_chan_spec* ch, struct uwifi_channels* cha
 	}
 
 	return true;
+}
+
+bool uwifi_channel_verify(struct uwifi_chan_spec* ch, struct uwifi_channels* channels)
+{
+	/* primary channel exists */
+	int idx = uwifi_channel_idx_from_freq(channels, ch->freq);
+	if (idx == -1)
+		return false;
+
+	/* width is ok */
+	if (ch->width > channels->chan[idx].max_width)
+		return false;
+
+	return uwifi_channel_verify_ch(ch, channels);
 }
 
 char* uwifi_channel_list_string(struct uwifi_channels* channels, int idx)
@@ -360,7 +368,7 @@ static void chan_check_capab(int idx, struct uwifi_channels* channels)
 
 	while (new_chan.width <= max_width) {
 		uwifi_channel_fix_center_freq(&new_chan, false);
-		if (!uwifi_channel_verify(&new_chan, channels))
+		if (!uwifi_channel_verify_ch(&new_chan, channels))
 			return;
 		channels->chan[idx].max_width = new_chan.width;
 		new_chan.width++;
