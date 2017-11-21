@@ -32,29 +32,11 @@ uint32_t uwifi_channel_get_remaining_dwell_time(struct uwifi_interface* intf)
 		return ret;
 }
 
-
 static struct uwifi_band channel_get_band_from_idx(struct uwifi_channels* channels, int idx)
 {
 	int b = idx - channels->band[0].num_channels < 0 ? 0 : 1;
 	return channels->band[b];
 }
-
-
-static int get_center_freq_ht40(struct uwifi_channels* channels, unsigned int freq, bool upper)
-{
-	unsigned int center = 0;
-	/*
-	 * For HT40 we have a channel offset of 20 MHz, and the
-	 * center frequency is in the middle: +/- 10 MHz, depending
-	 * on HT40+ or HT40- and whether the channel exists
-	 */
-	if (upper && uwifi_channel_idx_from_freq(channels, freq + 20) != -1)
-		center = freq + 10;
-	else if (!upper && uwifi_channel_idx_from_freq(channels, freq - 20) != -1)
-		center = freq - 10;
-	return center;
-}
-
 
 static int get_center_freq_vht(unsigned int freq, enum uwifi_chan_width width)
 {
@@ -95,7 +77,6 @@ static int get_center_freq_vht(unsigned int freq, enum uwifi_chan_width width)
 	}
 	return center1;
 }
-
 
 /* upper only used if HT40 */
 void uwifi_channel_fix_center_freq(struct uwifi_chan_spec* chan, bool ht40plus)
@@ -164,6 +145,10 @@ bool uwifi_channel_verify(struct uwifi_chan_spec* ch, struct uwifi_channels* cha
 	/* primary channel exists */
 	int idx = uwifi_channel_idx_from_freq(channels, ch->freq);
 	if (idx == -1)
+		return false;
+
+	/* width is ok */
+	if (ch->width > channels->chan[idx].max_width)
 		return false;
 
 	if (ch->width == CHAN_WIDTH_40) {
