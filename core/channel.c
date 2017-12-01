@@ -209,10 +209,12 @@ char* uwifi_channel_get_string(const struct uwifi_chan_spec* spec)
 	int pos = sprintf(buf, "CH %d (%d MHz) %s",
 			  wlan_freq2chan(spec->freq), spec->freq,
 			  uwifi_channel_width_string(spec->width));
-	if (spec->width == CHAN_WIDTH_40)
+	if (spec->width == CHAN_WIDTH_40) {
 		sprintf(buf+pos, "%c",
 			spec->center_freq < spec->freq ? '-' : '+');
-	else if (spec->width >= CHAN_WIDTH_80)
+		pos++;
+	}
+	if (spec->width >= CHAN_WIDTH_40)
 		sprintf(buf+pos, " (center %d)", spec->center_freq);
 	return buf;
 }
@@ -234,14 +236,12 @@ bool uwifi_channel_change(struct uwifi_interface* intf, struct uwifi_chan_spec* 
 	uint32_t the_time = plat_time_usec();
 
 	if (!ifctrl_iwset_freq(intf->ifname, spec->freq, spec->width, spec->center_freq)) {
-		LOG_ERR("Failed to set %s center %d after %dms",
-			uwifi_channel_get_string(spec), spec->center_freq,
+		LOG_ERR("Failed to set %s after %dms", uwifi_channel_get_string(spec),
 			(the_time - intf->last_channelchange) / 1000);
 		return false;
 	}
 
-	LOG_DBG("Set %s center %d after %dms",
-		uwifi_channel_get_string(spec), spec->center_freq,
+	LOG_DBG("Set %s after %dms", uwifi_channel_get_string(spec),
 		(the_time - intf->last_channelchange) / 1000);
 
 	intf->channel_idx = uwifi_channel_idx_from_freq(&intf->channels, spec->freq);
