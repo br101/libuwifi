@@ -185,12 +185,17 @@ char* uwifi_channel_list_string(struct uwifi_channels* channels, int idx)
 {
 	static char buf[32];
 	struct uwifi_chan_freq* c = &channels->chan[idx];
-	int pos = sprintf(buf, "%-3d: %d %s", c->chan, c->freq,
+	int pos = snprintf(buf, sizeof(buf), "%-3d: %d %s", c->chan, c->freq,
 			uwifi_channel_width_string(c->max_width));
 
-	if (c->max_width >= CHAN_WIDTH_40)
-		pos += sprintf(buf+pos, "%s%s", c->ht40plus ? "+" : "",
-						c->ht40minus ? "-" : "");
+	if (c->max_width >= CHAN_WIDTH_40 && pos > 0 && (size_t)pos < sizeof(buf)-3) {
+		if ( c->ht40plus)
+			buf[pos++] = '+';
+		if ( c->ht40minus)
+			buf[pos++] = '-';
+		buf[pos] = '\0';
+	}
+
 #if 0
 	int pos=0;
 	int cent = get_center_freq_ht40(channels, c->freq, false);
@@ -205,17 +210,16 @@ char* uwifi_channel_list_string(struct uwifi_channels* channels, int idx)
 
 char* uwifi_channel_get_string(const struct uwifi_chan_spec* spec)
 {
-	static char buf[32];
-	int pos = sprintf(buf, "CH %d (%d MHz) %s",
+	static char buf[64];
+	int pos = snprintf(buf, sizeof(buf), "CH %d (%d MHz) %s",
 			  wlan_freq2chan(spec->freq), spec->freq,
 			  uwifi_channel_width_string(spec->width));
-	if (spec->width == CHAN_WIDTH_40) {
-		sprintf(buf+pos, "%c",
-			spec->center_freq < spec->freq ? '-' : '+');
-		pos++;
+	if (spec->width == CHAN_WIDTH_40 && pos > 0 && (size_t)pos < sizeof(buf)-2) {
+		buf[pos++] = spec->center_freq < spec->freq ? '-' : '+';
+		buf[pos] = '\0';
 	}
-	if (spec->width >= CHAN_WIDTH_40)
-		sprintf(buf+pos, " (center %d)", spec->center_freq);
+	if (spec->width >= CHAN_WIDTH_40 && pos > 0 && (size_t)pos < sizeof(buf)-15)
+		snprintf(buf + pos, sizeof(buf) - pos, " (center %d)", spec->center_freq);
 	return buf;
 }
 
