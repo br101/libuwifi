@@ -49,6 +49,8 @@ struct uwifi_packet {
 
 	/* wlan mac */
 	unsigned int		wlan_len;	/* packet length */
+	bool			wlan_fromds;	/* From DS */
+	bool			wlan_tods;	/* To DS */
 	uint16_t		wlan_type;	/* frame control field */			// X
 	unsigned char		wlan_src[WLAN_MAC_LEN]; /* transmitter (TA) */			// X
 	unsigned char		wlan_dst[WLAN_MAC_LEN]; /* receiver (RA) */

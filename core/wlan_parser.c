@@ -123,6 +123,9 @@ int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet
 			(fc & WLAN_FRAME_FC_FROM_DS) != 0,
 			(fc & WLAN_FRAME_FC_TO_DS) != 0);
 
+		p->wlan_fromds = fc & WLAN_FRAME_FC_FROM_DS;
+		p->wlan_tods = fc & WLAN_FRAME_FC_TO_DS;
+
 		hdrlen = 24;
 		if (WLAN_FRAME_IS_QOS(fc)) {
 			hdrlen += 2;
@@ -202,6 +205,9 @@ int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet
 
 		if (len < hdrlen)
 			return -1;
+
+		p->wlan_fromds = fc & WLAN_FRAME_FC_FROM_DS;
+		p->wlan_tods = fc & WLAN_FRAME_FC_TO_DS;
 
 		ra = wh->addr1;
 		ta = wh->addr2;
