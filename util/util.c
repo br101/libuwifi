@@ -10,6 +10,7 @@
 #include "platform.h"
 #include "util.h"
 #include <stdio.h>
+#include <string.h>
 
 void dump_hex(const unsigned char* data, int len, const char* txt)
 {
@@ -32,6 +33,20 @@ const char* mac_sprint(const unsigned char *mac)
 	static char buf[18];
 	sprintf(buf, MAC_FMT, MAC_PAR(mac));
 	return buf;
+}
+
+void string_to_mac(const char* string, unsigned char* mac)
+{
+	int c;
+	for(c = 0; c < 6 && string; c++) {
+		int x = 0;
+		if (string)
+			sscanf(string, "%x", &x);
+		mac[c] = x;
+		string = strchr(string, ':');
+		if (string)
+			string++;
+	}
 }
 
 /* simple ilog2 implementation */

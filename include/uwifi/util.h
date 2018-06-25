@@ -62,6 +62,8 @@ void dump_hex(const unsigned char* data, int len, const char* txt);
 
 const char* mac_sprint(const unsigned char *mac);
 
+void string_to_mac(const char* string, unsigned char* mac);
+
 int ilog2(int x);
 
 static inline __attribute__((const))
