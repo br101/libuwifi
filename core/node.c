@@ -18,7 +18,7 @@
 
 static void copy_nodeinfo(struct uwifi_node* n, struct uwifi_packet* p)
 {
-	memcpy(n->wlan_src, p->wlan_src, WLAN_MAC_LEN);
+	memcpy(n->wlan_src, p->wlan_ta, WLAN_MAC_LEN);
 	n->rx_only = false;
 
 	if (MAC_NOT_EMPTY(p->wlan_bssid))
@@ -115,15 +115,15 @@ struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct list_head* n
 	if (p->phy_flags & PHY_FLAG_BADFCS)
 		return NULL;
 
-	if (p->wlan_src[0] == 0 && p->wlan_src[1] == 0 &&
-	    p->wlan_src[2] == 0 && p->wlan_src[3] == 0 &&
-	    p->wlan_src[4] == 0 && p->wlan_src[5] == 0)
+	if (p->wlan_ta[0] == 0 && p->wlan_ta[1] == 0 &&
+	    p->wlan_ta[2] == 0 && p->wlan_ta[3] == 0 &&
+	    p->wlan_ta[4] == 0 && p->wlan_ta[5] == 0)
 		return NULL;
 
 	/* find node by wlan source address */
 	list_for_each(nodes, n, list) {
-		if (memcmp(p->wlan_src, n->wlan_src, WLAN_MAC_LEN) == 0) {
-			LOG_DBG("NODE found %p " MAC_FMT, n, MAC_PAR(p->wlan_src));
+		if (memcmp(p->wlan_ta, n->wlan_src, WLAN_MAC_LEN) == 0) {
+			LOG_DBG("NODE found %p " MAC_FMT, n, MAC_PAR(p->wlan_ta));
 			break;
 		}
 	}
@@ -136,7 +136,7 @@ struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct list_head* n
 		list_head_init(&n->on_channels);
 		list_head_init(&n->ap_nodes);
 		list_add_tail(nodes, &n->list);
-		LOG_DBG("NODE adding %p " MAC_FMT, n, MAC_PAR(p->wlan_src));
+		LOG_DBG("NODE adding %p " MAC_FMT, n, MAC_PAR(p->wlan_ta));
 	}
 
 	copy_nodeinfo(n, p);
@@ -145,7 +145,7 @@ struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct list_head* n
 
 static void copy_rx_nodeinfo(struct uwifi_node* n, struct uwifi_packet* p)
 {
-	memcpy(n->wlan_src, p->wlan_dst, WLAN_MAC_LEN);
+	memcpy(n->wlan_src, p->wlan_ra, WLAN_MAC_LEN);
 
 	if (MAC_NOT_EMPTY(p->wlan_bssid))
 		memcpy(n->wlan_bssid, p->wlan_bssid, WLAN_MAC_LEN);
@@ -191,13 +191,13 @@ struct uwifi_node* uwifi_node_update_receiver(struct uwifi_packet* p, struct lis
 	if (p->phy_flags & PHY_FLAG_BADFCS)
 		return NULL;
 
-	if (MAC_EMPTY(p->wlan_dst) || MAC_BCAST(p->wlan_dst))
+	if (MAC_EMPTY(p->wlan_ra) || MAC_BCAST(p->wlan_ra))
 		return NULL;
 
 	/* find node by wlan source address */
 	list_for_each(nodes, n, list) {
-		if (memcmp(p->wlan_dst, n->wlan_src, WLAN_MAC_LEN) == 0) {
-			LOG_DBG("RX NODE found %p " MAC_FMT, n, MAC_PAR(p->wlan_dst));
+		if (memcmp(p->wlan_ra, n->wlan_src, WLAN_MAC_LEN) == 0) {
+			LOG_DBG("RX NODE found %p " MAC_FMT, n, MAC_PAR(p->wlan_ra));
 			break;
 		}
 	}
@@ -210,7 +210,7 @@ struct uwifi_node* uwifi_node_update_receiver(struct uwifi_packet* p, struct lis
 		list_head_init(&n->on_channels);
 		list_head_init(&n->ap_nodes);
 		list_add_tail(nodes, &n->list);
-		LOG_DBG("RX NODE adding %p " MAC_FMT, n, MAC_PAR(p->wlan_dst));
+		LOG_DBG("RX NODE adding %p " MAC_FMT, n, MAC_PAR(p->wlan_ra));
 		n->rx_only = true;
 	}
 

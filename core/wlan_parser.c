@@ -318,16 +318,16 @@ int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet
 	}
 
 	if (ta != NULL)
-		memcpy(p->wlan_src, ta, WLAN_MAC_LEN);
+		memcpy(p->wlan_ta, ta, WLAN_MAC_LEN);
 
 	if (ra != NULL)
-		memcpy(p->wlan_dst, ra, WLAN_MAC_LEN);
+		memcpy(p->wlan_ra, ra, WLAN_MAC_LEN);
 
 	if (bssid != NULL)
 		memcpy(p->wlan_bssid, bssid, WLAN_MAC_LEN);
 
-	LOG_DBG("WLAN: TA    " MAC_FMT, MAC_PAR(p->wlan_src));
-	LOG_DBG("WLAN: RA    " MAC_FMT, MAC_PAR(p->wlan_dst));
+	LOG_DBG("WLAN: TA    " MAC_FMT, MAC_PAR(p->wlan_ta));
+	LOG_DBG("WLAN: RA    " MAC_FMT, MAC_PAR(p->wlan_ra));
 	LOG_DBG("WLAN: BSSID " MAC_FMT, MAC_PAR(p->wlan_bssid));
 
 	/* only unencrypted data frames contain more info */

@@ -52,8 +52,8 @@ struct uwifi_packet {
 	bool			wlan_fromds;	/* From DS */
 	bool			wlan_tods;	/* To DS */
 	uint16_t		wlan_type;	/* frame control field */			// X
-	unsigned char		wlan_src[WLAN_MAC_LEN]; /* transmitter (TA) */			// X
-	unsigned char		wlan_dst[WLAN_MAC_LEN]; /* receiver (RA) */
+	unsigned char		wlan_ta[WLAN_MAC_LEN]; /* transmitter (TA) */			// X
+	unsigned char		wlan_ra[WLAN_MAC_LEN]; /* receiver (RA) */
 	unsigned char		wlan_bssid[WLAN_MAC_LEN];						// X?
 	char			wlan_essid[WLAN_MAX_SSID_LEN];
 	uint64_t		wlan_tsf;	/* timestamp from beacon */
