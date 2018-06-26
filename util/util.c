@@ -35,18 +35,14 @@ const char* mac_sprint(const unsigned char *mac)
 	return buf;
 }
 
-void string_to_mac(const char* string, unsigned char* mac)
+bool string_to_mac(const char* str, unsigned char* mac)
 {
-	int c;
-	for(c = 0; c < 6 && string; c++) {
-		int x = 0;
-		if (string)
-			sscanf(string, "%x", &x);
-		mac[c] = x;
-		string = strchr(string, ':');
-		if (string)
-			string++;
-	}
+	if (str == NULL || mac == NULL)
+		return false;
+
+	int n = sscanf(str, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
+			mac, mac+1, mac+2, mac+3, mac+4, mac+5);
+	return (n == 6);
 }
 
 /* simple ilog2 implementation */

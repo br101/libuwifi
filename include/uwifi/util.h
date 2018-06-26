@@ -10,6 +10,8 @@
 #ifndef _UWIFI_UTIL_H_
 #define _UWIFI_UTIL_H_
 
+#include <stdbool.h>
+
 /* for use in printf-like functions */
 #define MAC_FMT "%02x:%02x:%02x:%02x:%02x:%02x"
 #define MAC_PAR(x) x[0], x[1], x[2], x[3], x[4], x[5]
@@ -62,7 +64,7 @@ void dump_hex(const unsigned char* data, int len, const char* txt);
 
 const char* mac_sprint(const unsigned char *mac);
 
-void string_to_mac(const char* string, unsigned char* mac);
+bool string_to_mac(const char* string, unsigned char* mac);
 
 int ilog2(int x);
 
