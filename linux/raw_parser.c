@@ -23,6 +23,7 @@
 #include "netdev.h"
 #include "log.h"
 
+/** return -1 on error, size of prism header otherwise */
 int uwifi_parse_prism_header(unsigned char* buf, int len, struct uwifi_packet* p)
 {
 	wlan_ng_prism2_header* ph = (wlan_ng_prism2_header*)buf;
@@ -182,6 +183,7 @@ static void get_radiotap_info(struct ieee80211_radiotap_iterator *iter, struct u
 	}
 }
 
+/* return -1 on error, 0 on bad FCS, size of radiotap header otherwise */
 int uwifi_parse_radiotap(unsigned char* buf, size_t len, struct uwifi_packet* p)
 {
 	struct ieee80211_radiotap_header* rh = (struct ieee80211_radiotap_header*)buf;
@@ -229,27 +231,31 @@ int uwifi_parse_radiotap(unsigned char* buf, size_t len, struct uwifi_packet* p)
 	}
 }
 
+/* return -1 on error, 0 on bad FCS, size of parsed headers otherwise */
 int uwifi_parse_raw(unsigned char* buf, size_t len, struct uwifi_packet* p, int arphdr)
 {
 	int ret;
 	if (arphdr == ARPHRD_IEEE80211_PRISM) {
 		ret = uwifi_parse_prism_header(buf, len, p);
-		if (ret <= 0)
-			return -1;
 	} else if (arphdr == ARPHRD_IEEE80211_RADIOTAP) {
 		ret = uwifi_parse_radiotap(buf, len, p);
-		if (ret <= 0) /* 0: Bad FCS, allow packet but stop parsing */
-			return 0;
 	} else {
 		return -1;
 	}
+
+	if (ret <= 0) /* 0: Bad FCS, allow packet but stop parsing */
+		return ret;
 
 	if ((size_t)ret >= len) {
 		LOG_DBG("impossible len");
 		return -1;
 	}
 
-	return uwifi_parse_80211_header(buf + ret, len - ret, p);
+	int hlen = ret;
+	ret = uwifi_parse_80211_header(buf + ret, len - ret, p);
+	if (ret <= 0)
+		return ret;
+	return hlen + ret;
 }
 
 void uwifi_fixup_packet_channel(struct uwifi_packet* p, struct uwifi_interface* intf)
