@@ -295,7 +295,7 @@ void uwifi_channel_get_next(struct uwifi_interface* intf,
 int uwifi_channel_auto_change(struct uwifi_interface* intf)
 {
 	int ret = 0;
-	int tries;
+	int tries = -1;
 
 	if (!intf->channel_scan)
 		return 0;
@@ -315,7 +315,7 @@ int uwifi_channel_auto_change(struct uwifi_interface* intf)
 	 * does not matter as long as we try every channel */
 	if (intf->channel_max)
 		tries = uwifi_channel_idx_from_chan(&intf->channels, intf->channel_max) * 2;
-	else
+	if (tries < 0)
 		tries = intf->channels.num_channels * 2;
 
 	struct uwifi_chan_spec new_chan = { 0 };
