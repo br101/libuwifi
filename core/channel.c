@@ -198,6 +198,16 @@ int uwifi_channel_auto_change(struct uwifi_interface* intf)
 	ht40plus = uwifi_channel_is_ht40plus(&intf->channel);
 	new_idx = intf->channel_idx;
 
+	if (intf->channel_min && uwifi_channel_get_chan(&intf->channels, new_idx) < intf->channel_min) {
+		new_idx = uwifi_channel_idx_from_chan(&intf->channels, intf->channel_min);
+		ht40plus = true;
+		if (new_idx < 0) {
+			LOG_ERR("channel_min is invalid");
+			intf->channel_min = 0;
+			new_idx = intf->channel_idx;
+		}
+	}
+
 	/* maximum number of tries until we give up. we use the number of allowed
 	 * channels multiplied by two because we likely try HT40+ and HT40- on
 	 * each channel, even though it may fail. Also the exact number of tries
@@ -229,7 +239,10 @@ int uwifi_channel_auto_change(struct uwifi_interface* intf)
 		    new_idx >= MAX_CHANNELS ||
 		    (intf->channel_max &&
 		     uwifi_channel_get_chan(&intf->channels, new_idx) > intf->channel_max)) {
-			new_idx = 0;
+			if (intf->channel_min)
+				new_idx = uwifi_channel_idx_from_chan(&intf->channels, intf->channel_min);
+			else
+				new_idx = 0;
 			ht40plus = true;
 			new_chan.width = channel_get_band_from_idx(&intf->channels, new_idx).max_chan_width;
 		}
