@@ -20,6 +20,7 @@
 struct uwifi_interface {
 	char			ifname[IF_NAMESIZE + 1];
 	int			channel_time;		/* dwell time in usec */
+	int			channel_min;
 	int			channel_max;
 	bool			channel_scan;
 	int			channel_scan_rounds;

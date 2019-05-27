@@ -261,6 +261,17 @@ void uwifi_channel_get_next(struct uwifi_interface* intf,
 	int new_idx = intf->channel_idx;
 	bool ht40plus = uwifi_channel_is_ht40plus(&intf->channel);
 
+	if (intf->channel_min &&
+	    uwifi_channel_get_chan(&intf->channels, new_idx) < intf->channel_min) {
+		new_idx = uwifi_channel_idx_from_chan(&intf->channels, intf->channel_min);
+		ht40plus = true;
+		if (new_idx < 0) {
+			LOG_ERR("channel_min is invalid");
+			intf->channel_min = 0;
+			new_idx = intf->channel_idx;
+		}
+	}
+
 	struct uwifi_chan_freq* ch = &intf->channels.chan[new_idx];
 
 	/* increment channel, but for HT40 visit the same channel twice,
@@ -274,7 +285,12 @@ void uwifi_channel_get_next(struct uwifi_interface* intf,
 		    new_idx >= MAX_CHANNELS ||
 		    (intf->channel_max &&
 		     uwifi_channel_get_chan(&intf->channels, new_idx) > intf->channel_max)) {
-			new_idx = 0;
+			if (intf->channel_min) {
+				new_idx = uwifi_channel_idx_from_chan(&intf->channels,
+								      intf->channel_min);
+			} else {
+				new_idx = 0;
+			}
 		}
 		ch = &intf->channels.chan[new_idx];
 		/* new channel might not be able to do HT- */
