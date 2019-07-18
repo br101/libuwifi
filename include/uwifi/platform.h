@@ -11,4 +11,12 @@
 
 /* functions all platforms must provide */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 uint32_t plat_time_usec(void);	// return monotonic time in usec
+
+#ifdef __cplusplus
+}
+#endif

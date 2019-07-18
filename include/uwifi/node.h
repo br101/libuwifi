@@ -18,6 +18,10 @@
 #include "essid.h"
 #include "wlan_util.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct uwifi_node {
 	/* housekeeping */
 	struct list_node	list;								// X
@@ -83,5 +87,9 @@ void uwifi_nodes_find_ap(struct uwifi_node* n, struct list_head* nodes);
 void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec,
 			 uint32_t* last_nodetimeout);
 void uwifi_nodes_free(struct list_head* nodes);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

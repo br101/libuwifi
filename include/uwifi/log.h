@@ -1,6 +1,10 @@
 #ifndef _UWIFI_LOG_H
 #define _UWIFI_LOG_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* these conincide with syslog levels for convenience */
 enum loglevel { LL_CRIT = 2, LL_ERR, LL_WARN, LL_NOTICE, LL_INFO, LL_DEBUG };
 
@@ -21,5 +25,9 @@ void log_close(void);
 #define LOG_NOTI(...) log_out(LL_NOTICE, __VA_ARGS__)
 #define LOG_INF(...) log_out(LL_INFO, __VA_ARGS__)
 #define LOG_DBG(...) do { if (DEBUG) log_out(LL_DEBUG, __VA_ARGS__); } while (0)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

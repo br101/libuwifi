@@ -12,6 +12,10 @@
 
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* for use in printf-like functions */
 #define MAC_FMT "%02x:%02x:%02x:%02x:%02x:%02x"
 #define MAC_PAR(x) x[0], x[1], x[2], x[3], x[4], x[5]
@@ -75,5 +79,9 @@ int is_power_of_2(unsigned long n)
 }
 
 extern const char* UWIFI_VERSION;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

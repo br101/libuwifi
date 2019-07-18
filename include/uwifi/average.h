@@ -14,6 +14,10 @@
 
 /* For more documentation see average.c */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct ewma {
 	unsigned long internal;
 	unsigned long factor;
@@ -35,5 +39,9 @@ static inline unsigned long ewma_read(const struct ewma *avg)
 {
 	return avg->internal >> avg->factor;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _LINUX_AVERAGE_H */

@@ -15,6 +15,10 @@
 
 #include "wlan80211.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum uwifi_chan_width;
 
 enum uwifi_80211_std {
@@ -58,5 +62,9 @@ int wlan_max_phy_rate(enum uwifi_chan_width width, unsigned char streams_rx);
 int wlan_freq2chan(int freq);
 /* limited version as ambiguous without band */
 int wlan_chan2freq(int channel);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
