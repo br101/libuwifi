@@ -12,10 +12,18 @@
 
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int packet_socket_open(char* devname);
 
 ssize_t packet_socket_recv(int fd, unsigned char* buffer, size_t bufsize);
 
 void socket_set_receive_buffer(int fd, int sockbufsize);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // _UWIFI_PKT_SOCKET_H_

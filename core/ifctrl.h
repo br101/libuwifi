@@ -15,6 +15,10 @@
 
 #include "channel.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 bool ifctrl_init();
 void ifctrl_finish();
 
@@ -87,5 +91,9 @@ typedef void (*iw_event_cb_t)(int evt, int phy, int ifindex, const unsigned char
 int ifctrl_iw_event_init_socket(iw_event_cb_t);
 void ifctrl_iw_event_receive();
 bool ifctrl_iwadd_sta(int phyidx, const char *const new_interface);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

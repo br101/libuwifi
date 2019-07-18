@@ -13,6 +13,10 @@
 #include <stddef.h>
 #include "wlan_parser.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* return rest of packet length (may be 0) or negative value on error */
 int uwifi_parse_raw(unsigned char* buf, size_t len, struct uwifi_packet* p, int arphdr);
 
@@ -23,5 +27,9 @@ int uwifi_parse_radiotap(unsigned char* buf, size_t len, struct uwifi_packet* p)
 int uwifi_parse_prism_header(unsigned char* buf, int len, struct uwifi_packet* p);
 
 void uwifi_fixup_packet_channel(struct uwifi_packet* p, struct uwifi_interface* intf);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

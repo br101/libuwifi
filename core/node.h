@@ -17,6 +17,10 @@
 #include "conf.h"
 #include "essid.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct uwifi_node {
 	/* housekeeping */
 	struct list_node	list;								// X
@@ -73,5 +77,9 @@ struct uwifi_node {
 struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct list_head* nodes);
 void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec, uint32_t* last_nodetimeout);
 void uwifi_nodes_free(struct list_head* nodes);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

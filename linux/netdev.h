@@ -13,6 +13,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef ARPHRD_IEEE80211_RADIOTAP
 #define ARPHRD_IEEE80211_RADIOTAP 803    /* IEEE 802.11 + radiotap header */
 #endif
@@ -31,5 +35,9 @@ bool netdev_get_ip_address(const char* ifname, uint32_t* ip);
 bool netdev_set_ip_address(const char* ifname, uint32_t ip);
 
 bool netdev_set_up_promisc(const char *const ifname, bool up, bool promisc);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

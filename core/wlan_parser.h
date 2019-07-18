@@ -18,6 +18,10 @@
 #include "channel.h"
 #include "util.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define PHY_FLAG_SHORTPRE	BIT(0)
 #define PHY_FLAG_BADFCS		BIT(1)
 #define PHY_FLAG_A		BIT(2)
@@ -93,5 +97,9 @@ struct uwifi_packet {
 
 int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet* p);
 void uwifi_parse_information_elements(unsigned char* buf, size_t bufLen, struct uwifi_packet *p);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

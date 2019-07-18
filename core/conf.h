@@ -15,6 +15,10 @@
 #include "channel.h"
 #include "platform.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define IF_NAMESIZE		16
 
 struct uwifi_interface {
@@ -48,5 +52,9 @@ struct uwifi_interface {
 
 bool uwifi_init(struct uwifi_interface* intf);
 void uwifi_fini(struct uwifi_interface* intf);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

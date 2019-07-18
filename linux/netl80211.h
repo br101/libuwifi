@@ -15,6 +15,10 @@
 #include <netlink/handlers.h>
 #include <linux/nl80211.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern struct nl_sock *nl_sock;
 extern struct nl_sock *nl_event;
 
@@ -34,5 +38,9 @@ bool nl80211_send(struct nl_sock *const sock, struct nl_msg *const msg);
 struct nlattr** nl80211_parse(struct nl_msg *msg);
 
 int nl_get_multicast_id(struct nl_sock *sock, const char *family, const char *group);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

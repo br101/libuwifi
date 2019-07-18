@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int uwifi_create_beacon_probe_response(unsigned char* buf, bool probe_response,
 				       unsigned char* sa, unsigned char* da,
 				       unsigned char* bssid, char* essid,
@@ -15,6 +19,10 @@ int uwifi_create_nulldata(unsigned char* buf, unsigned char* sa, unsigned char* 
 
 #ifdef __linux__
 int uwifi_create_radiotap_header(unsigned char* buf, int freq, bool ack);
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

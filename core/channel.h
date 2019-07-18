@@ -13,6 +13,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MAX_BANDS		2
 #define MAX_CHANNELS		64
 
@@ -76,5 +80,9 @@ const struct uwifi_band* uwifi_channel_get_band(struct uwifi_channels* channels,
 bool uwifi_channel_band_add(struct uwifi_channels* channels, int num_channels, enum uwifi_chan_width max_chan_width,
 		      unsigned char streams_rx, unsigned char streams_tx);
 bool uwifi_channel_is_ht40plus(const struct uwifi_chan_spec* spec);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
