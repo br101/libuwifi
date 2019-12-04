@@ -108,7 +108,7 @@ static void copy_nodeinfo(struct uwifi_node* n, struct uwifi_packet* p)
 	p->wlan_retries = n->wlan_retries_last;
 }
 
-struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct list_head* nodes)
+struct uwifi_node* uwifi_node_update(struct uwifi_packet* p, struct cc_list_head* nodes)
 {
 	struct uwifi_node* n;
 
@@ -184,7 +184,7 @@ static void copy_rx_nodeinfo(struct uwifi_node* n, struct uwifi_packet* p)
 		n->wlan_wep = p->wlan_wep;
 }
 
-struct uwifi_node* uwifi_node_update_receiver(struct uwifi_packet* p, struct list_head* nodes)
+struct uwifi_node* uwifi_node_update_receiver(struct uwifi_packet* p, struct cc_list_head* nodes)
 {
 	struct uwifi_node* n;
 
@@ -218,7 +218,7 @@ struct uwifi_node* uwifi_node_update_receiver(struct uwifi_packet* p, struct lis
 	return n;
 }
 
-void uwifi_nodes_find_ap(struct uwifi_node* n, struct list_head* nodes)
+void uwifi_nodes_find_ap(struct uwifi_node* n, struct cc_list_head* nodes)
 {
 	struct uwifi_node* ap;
 
@@ -247,7 +247,7 @@ void uwifi_nodes_find_ap(struct uwifi_node* n, struct list_head* nodes)
 	}
 }
 
-void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec,
+void uwifi_nodes_timeout(struct cc_list_head* nodes, unsigned int timeout_sec,
 			 uint32_t* last_nodetimeout)
 {
 	struct uwifi_node *n, *m, *n2, *m2;
@@ -286,7 +286,7 @@ void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec,
 	*last_nodetimeout = the_time;
 }
 
-void uwifi_nodes_free(struct list_head* nodes)
+void uwifi_nodes_free(struct cc_list_head* nodes)
 {
 	struct uwifi_node *ni, *mi;
 

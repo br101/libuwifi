@@ -10,7 +10,7 @@
 #ifndef UWIFI_ESSID_H_
 #define UWIFI_ESSID_H_
 
-#include "ccan/list/list.h"
+#include "cc_list.h"
 #include "wlan80211.h"
 
 #ifdef __cplusplus
@@ -18,9 +18,9 @@ extern "C" {
 #endif
 
 struct essid_info {
-	struct list_node	list;
+	struct cc_list_node	list;
 	char			essid[WLAN_MAX_SSID_LEN];
-	struct list_head	nodes;
+	struct cc_list_head	nodes;
 	unsigned int		num_nodes;
 	int			split;
 };
@@ -28,10 +28,10 @@ struct essid_info {
 struct uwifi_node;
 struct uwifi_packet;
 
-void uwifi_essids_update(struct list_head* essids, struct uwifi_packet* p,
+void uwifi_essids_update(struct cc_list_head* essids, struct uwifi_packet* p,
 			 struct uwifi_node* n);
 void uwifi_essids_remove_node(struct uwifi_node* n);
-void uwifi_essids_free(struct list_head* essids);
+void uwifi_essids_free(struct cc_list_head* essids);
 
 #ifdef __cplusplus
 }

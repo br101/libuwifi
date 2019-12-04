@@ -12,7 +12,7 @@
 
 #include "platform.h"
 #include "wlan_parser.h"
-#include "ccan/list/list.h"
+#include "cc_list.h"
 #include "average.h"
 #include "conf.h"
 #include "essid.h"
@@ -24,11 +24,11 @@ extern "C" {
 
 struct uwifi_node {
 	/* housekeeping */
-	struct list_node	list;								// X
-	struct list_node	essid_nodes;
-	struct list_head	on_channels;	/* channels this node was seen on */
-	struct list_head	ap_nodes;	/* stations associated to AP */
-	struct list_node	ap_list;
+	struct cc_list_node	list;								// X
+	struct cc_list_node	essid_nodes;
+	struct cc_list_head	on_channels;	/* channels this node was seen on */
+	struct cc_list_head	ap_nodes;	/* stations associated to AP */
+	struct cc_list_node	ap_list;
 	struct uwifi_node*	ap_node;
 	unsigned int		num_on_channels;
 	uint32_t		last_seen;	/* timestamp */					// X uint32
@@ -80,13 +80,13 @@ struct uwifi_node {
 };
 
 struct uwifi_node* uwifi_node_update(struct uwifi_packet* p,
-				     struct list_head* nodes);
+				     struct cc_list_head* nodes);
 struct uwifi_node* uwifi_node_update_receiver(struct uwifi_packet* p,
-					      struct list_head* nodes);
-void uwifi_nodes_find_ap(struct uwifi_node* n, struct list_head* nodes);
-void uwifi_nodes_timeout(struct list_head* nodes, unsigned int timeout_sec,
+					      struct cc_list_head* nodes);
+void uwifi_nodes_find_ap(struct uwifi_node* n, struct cc_list_head* nodes);
+void uwifi_nodes_timeout(struct cc_list_head* nodes, unsigned int timeout_sec,
 			 uint32_t* last_nodetimeout);
-void uwifi_nodes_free(struct list_head* nodes);
+void uwifi_nodes_free(struct cc_list_head* nodes);
 
 #ifdef __cplusplus
 }

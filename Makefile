@@ -21,7 +21,7 @@ SRC		+= util/average.c
 SRC		+= util/util.c
 
 ifeq ($(DEBUG),1)
-  SRC		+= ccan/list/list.c
+  SRC		+= core/cc_list.c
 endif
 
 INCLUDES	+= -I. -I./include/uwifi -I./$(PLATFORM)

@@ -1,11 +1,11 @@
 /* Licensed under BSD-MIT - see LICENSE file for details */
 #include <stdio.h>
 #include <stdlib.h>
-#include "list.h"
+#include "cc_list.h"
 
 static void *corrupt(const char *abortstr,
-		     const struct list_node *head,
-		     const struct list_node *node,
+		     const struct cc_list_node *head,
+		     const struct cc_list_node *node,
 		     unsigned int count)
 {
 	if (abortstr) {
@@ -17,7 +17,7 @@ static void *corrupt(const char *abortstr,
 	return NULL;
 }
 
-struct list_node *list_check_node(const struct list_node *node,
+struct cc_list_node *list_check_node(const struct cc_list_node *node,
 				  const char *abortstr)
 {
 	const struct list_node *p, *n;
@@ -35,9 +35,9 @@ struct list_node *list_check_node(const struct list_node *node,
 	return (struct list_node *)node;
 }
 
-struct list_head *list_check(const struct list_head *h, const char *abortstr)
+struct cc_list_head *list_check(const struct cc_list_head *h, const char *abortstr)
 {
 	if (!list_check_node(&h->n, abortstr))
 		return NULL;
-	return (struct list_head *)h;
+	return (struct cc_list_head *)h;
 }

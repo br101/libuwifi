@@ -70,7 +70,7 @@ void uwifi_essids_remove_node(struct uwifi_node* n)
 	}
 }
 
-void uwifi_essids_update(struct list_head* essids, struct uwifi_packet* p,
+void uwifi_essids_update(struct cc_list_head* essids, struct uwifi_packet* p,
 			 struct uwifi_node* n)
 {
 	struct essid_info* e;
@@ -124,7 +124,7 @@ void uwifi_essids_update(struct list_head* essids, struct uwifi_packet* p,
 	update_essid_split_status(e);
 }
 
-void uwifi_essids_free(struct list_head* essids) {
+void uwifi_essids_free(struct cc_list_head* essids) {
 	struct essid_info *e, *f;
 
 	list_for_each_safe(essids, e, f, list) {

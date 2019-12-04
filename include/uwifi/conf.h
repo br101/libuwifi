@@ -10,7 +10,7 @@
 #ifndef _UWIFI_CONF_H_
 #define _UWIFI_CONF_H_
 
-#include "ccan/list/list.h"
+#include "cc_list.h"
 #include "wlan80211.h"
 #include "channel.h"
 #include "platform.h"
@@ -32,7 +32,7 @@ struct uwifi_interface {
 
 	/* not config but state */
 	int			sock;
-	struct list_head	wlan_nodes;
+	struct cc_list_head	wlan_nodes;
 	uint32_t		last_nodetimeout;
 	struct uwifi_channels	channels;
 	int			num_channels;
