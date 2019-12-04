@@ -3,8 +3,7 @@
 #define CCAN_CONTAINER_OF_H
 #include <stddef.h>
 
-#include "config.h"
-#include <ccan/check_type/check_type.h>
+#include <cc_check_type.h>
 
 /**
  * container_of - get pointer to enclosing structure
@@ -79,14 +78,8 @@
  *		return i;
  *	}
  */
-#if HAVE_TYPEOF
 #define container_of_var(member_ptr, container_var, member) \
 	container_of(member_ptr, typeof(*container_var), member)
-#else
-#define container_of_var(member_ptr, container_var, member)	\
-	((void *)((char *)(member_ptr)	-			\
-		  container_off_var(container_var, member)))
-#endif
 
 /**
  * container_off_var - get offset of a field in enclosing structure
@@ -98,12 +91,7 @@
  * structure memory layout.
  *
  */
-#if HAVE_TYPEOF
 #define container_off_var(var, member)		\
 	container_off(typeof(*var), member)
-#else
-#define container_off_var(var, member)			\
-	((const char *)&(var)->member - (const char *)(var))
-#endif
 
 #endif /* CCAN_CONTAINER_OF_H */

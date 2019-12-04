@@ -6,7 +6,6 @@
 #endif
 #include <stdbool.h>
 #include <assert.h>
-//#include <ccan/str/str.h>
 #include <cc_container_of.h>
 #include <cc_check_type.h>
 
