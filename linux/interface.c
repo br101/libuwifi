@@ -19,7 +19,7 @@
 
 bool uwifi_init(struct uwifi_interface* intf)
 {
-	list_head_init(&intf->wlan_nodes);
+	cc_list_head_init(&intf->wlan_nodes);
 	intf->channel_idx = -1;
 	intf->last_channelchange = plat_time_usec();
 	intf->sock = packet_socket_open(intf->ifname);

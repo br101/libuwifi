@@ -17,7 +17,7 @@ static void *corrupt(const char *abortstr,
 	return NULL;
 }
 
-struct cc_list_node *list_check_node(const struct cc_list_node *node,
+struct cc_list_node *cc_list_check_node(const struct cc_list_node *node,
 				  const char *abortstr)
 {
 	const struct list_node *p, *n;
@@ -32,12 +32,12 @@ struct cc_list_node *list_check_node(const struct cc_list_node *node,
 	if (node->prev != p)
 		return corrupt(abortstr, node, node, 0);
 
-	return (struct list_node *)node;
+	return (struct cc_list_node *)node;
 }
 
 struct cc_list_head *list_check(const struct cc_list_head *h, const char *abortstr)
 {
-	if (!list_check_node(&h->n, abortstr))
+	if (!cc_list_check_node(&h->n, abortstr))
 		return NULL;
 	return (struct cc_list_head *)h;
 }

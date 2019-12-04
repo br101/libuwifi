@@ -3,7 +3,7 @@
 #define CCAN_CONTAINER_OF_H
 #include <stddef.h>
 
-#include <cc_check_type.h>
+#include "cc_check_type.h"
 
 /**
  * container_of - get pointer to enclosing structure

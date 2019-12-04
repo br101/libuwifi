@@ -28,7 +28,7 @@ static void update_essid_split_status(struct essid_info* e)
 	if (e->num_nodes <= 1)
 		return;
 
-	list_for_each(&e->nodes, n, essid_nodes) {
+	cc_list_for_each(&e->nodes, n, essid_nodes) {
 		LOG_DBG("ESSID SPLIT check node %p src " MAC_FMT " bssid " MAC_FMT,
 			n, MAC_PAR(n->wlan_src), MAC_PAR(n->wlan_bssid));
 
@@ -53,7 +53,7 @@ void uwifi_essids_remove_node(struct uwifi_node* n)
 
 	/* first remove ESSID from node */
 	LOG_DBG("ESSID remove node " MAC_FMT, MAC_PAR(n->wlan_src));
-	list_del_from(&e->nodes, &n->essid_nodes);
+	cc_list_del_from(&e->nodes, &n->essid_nodes);
 	n->essid = NULL;
 
 	/* then deal with ESSID itself */
@@ -63,7 +63,7 @@ void uwifi_essids_remove_node(struct uwifi_node* n)
 	/* delete essid if it has no more nodes */
 	if (e->num_nodes == 0) {
 		LOG_DBG("ESSID empty, delete");
-		list_del(&e->list);
+		cc_list_del(&e->list);
 		free(e);
 	} else {
 		LOG_DBG("ESSID remove mark 1");
@@ -89,7 +89,7 @@ void uwifi_essids_update(struct cc_list_head* essids, struct uwifi_packet* p,
 		p->wlan_essid, MAC_PAR(n->wlan_src), MAC_PAR(p->wlan_bssid));
 
 	/* find essid if already recorded */
-	list_for_each(essids, e, list) {
+	cc_list_for_each(essids, e, list) {
 		if (strncmp(e->essid, p->wlan_essid, WLAN_MAX_SSID_LEN) == 0) {
 			LOG_DBG("ESSID found");
 			break;
@@ -103,8 +103,8 @@ void uwifi_essids_update(struct cc_list_head* essids, struct uwifi_packet* p,
 		memset(e, 0, sizeof(struct essid_info));
 		strncpy(e->essid, p->wlan_essid, WLAN_MAX_SSID_LEN);
 		e->essid[WLAN_MAX_SSID_LEN-1] = '\0';
-		list_head_init(&e->nodes);
-		list_add_tail(essids, &e->list);
+		      cc_list_head_init(&e->nodes);
+		cc_list_add_tail(essids, &e->list);
 	}
 
 	/* if node had another essid before, remove it there */
@@ -117,7 +117,7 @@ void uwifi_essids_update(struct cc_list_head* essids, struct uwifi_packet* p,
 	if (n->essid == NULL) {
 		LOG_DBG("ESSID adding " MAC_FMT " to '%s'",
 			MAC_PAR(n->wlan_src), e->essid);
-		list_add_tail(&e->nodes, &n->essid_nodes);
+		cc_list_add_tail(&e->nodes, &n->essid_nodes);
 		e->num_nodes++;
 		n->essid = e;
 	}
@@ -128,9 +128,9 @@ void uwifi_essids_update(struct cc_list_head* essids, struct uwifi_packet* p,
 void uwifi_essids_free(struct cc_list_head* essids) {
 	struct essid_info *e, *f;
 
-	list_for_each_safe(essids, e, f, list) {
+	cc_list_for_each_safe(essids, e, f, list) {
 		LOG_DBG("ESSID free '%s'", e->essid);
-		list_del_from(essids, &e->list);
+		cc_list_del_from(essids, &e->list);
 		free(e);
 	}
 }
