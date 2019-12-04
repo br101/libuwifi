@@ -236,7 +236,7 @@ static inline bool cc_list_empty_(const struct cc_list_head *h, __attribute__((u
 #ifndef CCAN_LIST_DEBUG
 #define cc_list_empty_nodebug(h) cc_list_empty(h)
 #else
-static inline bool cc_list_empty_nodebug(const struct list_head *h)
+static inline bool cc_list_empty_nodebug(const struct cc_list_head *h)
 {
 	return h->n.next == &h->n;
 }
@@ -287,7 +287,7 @@ static inline void cc_list_del_from(struct cc_list_head *h, struct cc_list_node 
 #ifdef CCAN_LIST_DEBUG
 	{
 		/* Thorough check: make sure it was in list! */
-		struct list_node *i;
+		struct cc_list_node *i;
 		for (i = h->n.next; i != n; i = i->next)
 			assert(i != &h->n);
 	}

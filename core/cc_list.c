@@ -20,7 +20,7 @@ static void *corrupt(const char *abortstr,
 struct cc_list_node *cc_list_check_node(const struct cc_list_node *node,
 				  const char *abortstr)
 {
-	const struct list_node *p, *n;
+	const struct cc_list_node *p, *n;
 	int count = 0;
 
 	for (p = node, n = node->next; n != node; p = n, n = n->next) {
