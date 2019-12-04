@@ -24,6 +24,5 @@ install: lib-static lib-dynamic
 	cp ./core/*.h $(INST_PATH)/include/uwifi
 	cp ./util/*.h $(INST_PATH)/include/uwifi
 	cp ./linux/*.h $(INST_PATH)/include/uwifi
-	cp -r ./ccan $(INST_PATH)/include/
 	cp $(BUILD_DIR)/libuwifi.a $(INST_PATH)/lib/
 	cp $(BUILD_DIR)/libuwifi.so* $(INST_PATH)/lib/
