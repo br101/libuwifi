@@ -7,8 +7,8 @@
 #include <stdbool.h>
 #include <assert.h>
 //#include <ccan/str/str.h>
-#include <ccan/container_of/container_of.h>
-#include <ccan/check_type/check_type.h>
+#include <cc_container_of.h>
+#include <cc_check_type.h>
 
 /**
  * stringify - Turn expression into a string literal
