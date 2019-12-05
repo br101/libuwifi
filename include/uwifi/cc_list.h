@@ -380,7 +380,7 @@ static inline const void *cc_list_pop_(const struct cc_list_head *h, size_t off)
  *		printf("Empty list!\n");
  */
 #define cc_list_tail(h, type, member) \
-	((type *)cc_list_tail_((h), list_off_(type, member)))
+	((type *)cc_list_tail_((h), cc_list_off_(type, member)))
 
 static inline const void *cc_list_tail_(const struct cc_list_head *h, size_t off)
 {
