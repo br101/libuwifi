@@ -339,7 +339,6 @@ int uwifi_channel_auto_change(struct uwifi_interface* intf)
 	do {
 		tries--;
 		uwifi_channel_get_next(intf, &new_chan);
-		LOG_INF("Set %s", uwifi_channel_get_string(&new_chan));
 		ret = uwifi_channel_change(intf, &new_chan);
 
 		/* try setting different channels in case we get errors only on
