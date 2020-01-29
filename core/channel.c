@@ -402,10 +402,10 @@ bool uwifi_channel_init(struct uwifi_interface* intf)
 	intf->channel_idx = -1;
 	intf->last_channelchange = plat_time_usec();
 
-	LOG_INF("Got %d Bands, %d Channels:", intf->channels.num_bands, intf->channels.num_channels);
+	//LOG_INF("Got %d Bands, %d Channels:", intf->channels.num_bands, intf->channels.num_channels);
 	for (int i = 0; i < intf->channels.num_channels && i < MAX_CHANNELS; i++) {
 		chan_check_capab(i, &intf->channels);
-		LOG_INF("%s", uwifi_channel_list_string(&intf->channels, i));
+		//LOG_INF("%s", uwifi_channel_list_string(&intf->channels, i));
 	}
 
 	if (intf->channels.num_bands <= 0 || intf->channels.num_channels <= 0)
