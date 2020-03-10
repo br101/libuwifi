@@ -243,8 +243,10 @@ int uwifi_parse_raw(unsigned char* buf, size_t len, struct uwifi_packet* p, int 
 		return -1;
 	}
 
-	if (ret <= 0) /* 0: Bad FCS, allow packet but stop parsing */
+	if (ret == 0) /* 0: Bad FCS, allow packet but stop parsing */
 		return ret;
+	else if (ret < 0) /* Malformed header, don't allow packet */
+		return -1;
 
 	if ((size_t)ret >= len) {
 		LOG_DBG("impossible len");
