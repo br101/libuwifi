@@ -21,3 +21,5 @@ It is used by the following projects:
 
  * https://github.com/br101/esp-monitor - Wifi Monitor on the ESP8266
  * https://github.com/br101/horst  - horst (new version in development)
+
+![C/C++ CI](https://github.com/br101/libuwifi/workflows/C/C++%20CI/badge.svg?branch=master)
