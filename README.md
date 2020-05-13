@@ -23,3 +23,5 @@ It is used by the following projects:
  * https://github.com/br101/horst  - horst (new version in development)
 
 ![C/C++ CI](https://github.com/br101/libuwifi/workflows/C/C++%20CI/badge.svg?branch=master)
+
+[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/br101/libuwifi)
