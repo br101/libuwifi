@@ -13,5 +13,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: sudo apt-get install libnl-3-dev libnl-genl-3-dev
     - name: make
       run: make
