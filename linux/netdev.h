@@ -36,6 +36,8 @@ bool netdev_set_ip_address(const char* ifname, uint32_t ip);
 
 bool netdev_set_up_promisc(const char *const ifname, bool up, bool promisc);
 
+bool netdev_check_if_exists(const char *const ifname);
+
 #ifdef __cplusplus
 }
 #endif
