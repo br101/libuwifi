@@ -17,8 +17,13 @@ extern "C" {
 #endif
 
 /* for use in printf-like functions */
+#ifndef MAC_FMT
 #define MAC_FMT "%02x:%02x:%02x:%02x:%02x:%02x"
+#endif
+
+#ifndef MAC_PAR
 #define MAC_PAR(x) x[0], x[1], x[2], x[3], x[4], x[5]
+#endif
 
 #define MAC_NOT_EMPTY(_mac) (_mac[0] || _mac[1] || _mac[2] || _mac[3] || _mac[4] || _mac[5])
 
