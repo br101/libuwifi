@@ -336,3 +336,50 @@ int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet
 
 	return 0;
 }
+
+/** return pointer to TA */
+uint8_t* uwifi_get_80211_header_ta(unsigned char* buf, size_t len)
+{
+	struct wlan_frame* wh = (struct wlan_frame*)buf;
+	uint16_t fc = le16toh(wh->fc);
+
+	if (len < 16) { /* minimum frame size with TA (not CTS/ACK) */
+		return NULL;
+	}
+
+	if (WLAN_FRAME_IS_DATA(fc)) {
+		return wh->addr2;
+	} else if (WLAN_FRAME_IS_MGMT(fc)) {
+		return wh->addr2;
+	} else if (WLAN_FRAME_IS_CTRL(fc)) {
+		switch (fc) {
+		case WLAN_FRAME_RTS:
+		// CTS doesn't have TA
+		// ACK doesn't have TA
+		case WLAN_FRAME_PSPOLL:
+		case WLAN_FRAME_CF_END:
+		case WLAN_FRAME_CF_END_ACK:
+		case WLAN_FRAME_BLKACK_REQ:
+		case WLAN_FRAME_BLKACK:
+		// wrapper not handled
+		case WLAN_FRAME_VHT_NDP:
+		case WLAN_FRAME_BEAM_REP:
+			return wh->addr2;
+		}
+	} else {
+		LOG_ERR("UNKNOWN FRAME!!!");
+	}
+
+	return NULL;
+}
+
+/** return FC */
+uint16_t uwifi_get_80211_header_fc(unsigned char* buf, size_t len)
+{
+	if (len < 2) {
+		return 0xFFFF;
+	}
+
+	struct wlan_frame* wh = (struct wlan_frame*)buf;
+	return le16toh(wh->fc);
+}

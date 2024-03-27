@@ -98,6 +98,8 @@ struct uwifi_packet {
 };
 
 int uwifi_parse_80211_header(unsigned char* buf, size_t len, struct uwifi_packet* p);
+uint8_t* uwifi_get_80211_header_ta(unsigned char* buf, size_t len);
+uint16_t uwifi_get_80211_header_fc(unsigned char* buf, size_t len);
 void uwifi_parse_information_elements(unsigned char* buf, size_t bufLen, struct uwifi_packet *p);
 
 #ifdef __cplusplus
