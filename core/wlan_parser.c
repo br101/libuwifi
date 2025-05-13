@@ -11,13 +11,20 @@
 #include <stdint.h>
 #include <endian.h>
 
+#include "log.h"
+
+#if defined(__ZEPHYR__)
+LOG_MODULE_REGISTER(UWIFI);
+#else
+static const char* LOG_TAG = "UWIFI";
+#endif
+
 #include "platform.h"
 #include "wlan80211.h"
-#include "util.h"
 #include "channel.h"
-#include "wlan_util.h"
 #include "wlan_parser.h"
-#include "log.h"
+#include "wlan_util.h"
+#include "util.h"
 
 void uwifi_parse_information_elements(unsigned char* buf, size_t bufLen, struct uwifi_packet *p)
 {
