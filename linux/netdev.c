@@ -15,6 +15,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <err.h>
+#include <ifaddrs.h>
 
 #include "netdev.h"
 #include "platform.h"
@@ -145,4 +146,23 @@ bool netdev_set_up_promisc(const char *const ifname, bool up, bool promisc)
 
 	close(fd);
 	return true;
+}
+
+bool netdev_check_if_exists(const char *const ifname)
+{
+	struct ifaddrs *ifaddr, *ifa;
+	bool found = false;
+
+	if (getifaddrs(&ifaddr) == -1) {
+		LOG_WARN("can not check interface names, continuing");
+		return true;
+	}
+	for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+		if (strcmp(ifa->ifa_name, ifname) == 0) {
+			found = true;
+			break;
+		}
+	}
+	freeifaddrs(ifaddr);
+	return found;
 }
